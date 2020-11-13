@@ -1,7 +1,7 @@
 What is rom-platform?
 
 It is web,mail hosting platform and more with minimal dependency.
-Can host multiple web domains.
+Can host multiple web-mail domains.
 Has web based web builder to generate web sites.
 Postgresql server embedded inside.
 
