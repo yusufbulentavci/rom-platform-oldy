@@ -12,7 +12,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<junitVersion>4.11</junitVersion>
+		<junitVersion>4.13.1</junitVersion>
 		<nettyVersion>4.1.32.Final</nettyVersion>
 		<commonsHttpClientVersion>3.1</commonsHttpClientVersion>
 		<commonsCodecVersion>1.10</commonsCodecVersion>
