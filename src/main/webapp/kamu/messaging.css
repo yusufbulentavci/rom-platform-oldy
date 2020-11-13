@@ -1,0 +1,153 @@
+.site-localvideo {
+	z-index: 1000001;
+}
+
+.site-chatpnl {
+/* 	position: absolute; */
+	background-color: white;
+	border: 1px solid #d2d2d2;
+	z-index: 1000000;
+}
+
+.site-chatdlg {
+	z-index: 1000002;
+}
+
+.site-chat-history {
+	overflow-y: scroll;
+	border: 1px outset #CCCCCC;
+	height: calc(100% - 123px);
+	min-height: 200px;
+}
+
+
+.site-chatpnl .title {
+	background-color: #DC5630;
+	font-weight: bold !important;
+	color: white;
+	position: relative;
+	padding: 3px 7px;
+	border-width: 3px 3px 0 3px;
+	border-color: #BCBCBC;
+	border-style: solid;
+}
+
+.site-chatpnl .gwt-Anchor {
+	float: right;
+}
+
+.site-dlgchat {
+
+}
+
+.site-dlgchat-video-messages {
+	position: absolute;
+	top: 37px;
+	bottom: 0;
+	right: 9px;
+}
+
+.site-dlgchat-video {
+	margin: 0 7px 0 0;
+
+}
+
+.site-chatdlg .Caption {
+	background-color: #2E2F2E !important;
+}
+
+.site-captionfocused {
+	background-color: green;
+}
+
+/*-------*/
+.site-chat-sent {
+	float: right;
+	padding: 0 5px;
+	margin: 3px 0;
+}
+
+.site-chat-body {
+	border: 1px solid #AAAEB9;
+	padding: 5px;
+	word-break: break-word;
+}
+
+.site-chat-sent .site-chat-body {
+	background-color: #c5cad8;
+}
+
+.site-chat-incoming .site-chat-body {
+	background-color: #dce2f4;
+}
+
+.site-arrow-sent {
+	top: 50%;
+	margin-top: -5px;
+	border-width: 5px 0 5px 5px;
+	border-color: transparent transparent transparent #AAAEB9;
+	border-style: solid;
+	position: absolute;
+	right: 0;
+}
+/*-----*/
+.site-chat-incoming {
+	float: left;
+	padding: 0 5px;
+	margin: 3px 0;
+}
+
+.site-arrow-incoming {
+	top: 50%;
+	margin-top: -5px;
+	border-width: 5px 5px 5px 0;
+	border-color: transparent #AAAEB9 transparent transparent;
+	border-style: solid;
+	position: absolute;
+	left: 0;
+}
+
+.site-chatline {
+	width: 100%;
+	display: table;
+}
+.site-closebutton {
+	position: absolute;
+	top: 2px;
+	right: 7px;
+	width: 24px;
+	height: 23px;
+	display: block;
+	text-indent: -9999px;
+	border-width: 0;
+	background: transparent url(/_local/images/close.png) no-repeat center
+		center;
+}
+
+.site-minimize {
+	position: absolute;
+	top: 5px;
+	right: 25px;
+	width: 24px;
+	height: 23px;
+	display: block;
+	text-indent: -9999px;
+	border-width: 0;
+	background: transparent url(/_local/images/common/minus.png) no-repeat center
+		center;
+	z-index: 3000;
+}
+
+.site-maximize {
+	position: absolute;
+	top: 3px;
+	right: 25px;
+	width: 24px;
+	height: 23px;
+	display: block;
+	text-indent: -9999px;
+	border-width: 0;
+	background: transparent url(/_local/images/common/max.png) no-repeat center
+		center;
+	z-index: 3000;
+}

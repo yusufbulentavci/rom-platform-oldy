@@ -1,0 +1,12 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.firmgrps(
+	firmgrp serial,
+	named text,
+	judge int,
+  	primary key(rng)
+  );
+--@END

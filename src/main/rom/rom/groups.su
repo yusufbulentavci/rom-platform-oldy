@@ -1,0 +1,104 @@
+--@DEPENDS:.base,.contacts
+
+--@SEQUENCE
+create sequence group_id_seq;
+--@END
+
+--@TABLE prefix=/_/_groups cache=10m
+create table rom.groups(
+	cids text[],
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+--@FUNCTION norom
+create function rom.groups_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+				a_host,'/_/_groups',null,null,null,null,null,null,
+				'rom','groups','/_/_groups/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user
+create function rom.groups_list(a_host integer)
+ returns setof rom.groups as $$
+begin
+	return query 
+		select * from rom.groups where host_id=a_host;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user exec
+create function rom.groups_new(a_host integer, p_ownercids text[], p_groupcids text[], p_gids text[], p_mask bigint, 
+	p_title text, p_cids text[])
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	insert into rom.groups (host_id, uri, container, ownercids, groupcids, gids, mask,
+						title, cids) 
+		values (a_host, '/_/_groups/'||nextval('group_id_seq'), '/_/_groups/', p_ownercids, p_groupcids, p_gids, p_mask,
+			p_title,p_cids
+			) 
+		returning uri
+		into v_uri;
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=group http=post ver=1
+create function rom.groups_change(a_host integer, a_self text, p_ownercids text[], p_groupcids text[], p_gids text[], 
+	p_title text, p_cids text[])
+ returns text as $$
+begin
+	
+	update rom.groups set 
+			ownercids=p_ownercids,
+			groupcids=p_groupcids,
+			gids=p_gids,
+			title=p_title,
+			cids=p_cids,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.groups_get(a_host integer,a_self text)
+ returns rom.groups as $$
+declare 
+  v_one rom.groups;
+begin
+	
+	select *
+		into v_one 
+		from rom.groups 
+		where host_id=a_host and uri=a_self;
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=group
+create function rom.groups_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.groups where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

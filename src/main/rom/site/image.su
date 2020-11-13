@@ -1,0 +1,84 @@
+--@DEPENDS:.contents,.files
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.crop
+create function site.files_imagecrop(a_host integer,a_self text, 
+	p_left int, p_top int ,p_right int, p_bottom int)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.resize
+create function site.files_imageresize(a_host integer,a_self text, 
+	p_x int, p_y int)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.blur
+create function site.files_imageblur(a_host integer,a_self text)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.sharpen
+create function site.files_imagesharpen(a_host integer,a_self text)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.border
+create function site.files_imageborder(a_host integer,a_self text, 
+	p_width int, p_height int ,p_color int)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.rotate
+create function site.files_imagerotate(a_host integer,a_self text, 
+	p_angle int)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.maketransparent ver=1
+create function site.files_imagemaketransparent(a_host integer,a_self text, p_left int, p_top int, p_closeind int)
+	returns text as $$
+		begin
+			return '';		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.image.makepng
+create function site.files_imagemakepng(a_host integer,a_self text, p_uri text)
+ returns boolean as $$
+declare 
+begin
+	insert into site.files (host_id,p_uri,container,html_file,delegated,ownercid,gid,relatedcids,mask,
+				title,multilang_icon,langcodes,
+				metas,icon,medium_icon,large_icon) 
+				(select * from site.files where host_id=a_host and uri=a_self); 
+	return true;
+end;
+$$ language 'plpgsql';
+--@END

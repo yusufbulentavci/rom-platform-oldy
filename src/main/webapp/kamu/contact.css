@@ -1,0 +1,259 @@
+body, table td, select, button {
+	font-family: Tahoma, Verdana, Bitstream Vera Sans, sans-serif !important;
+	font-size: 13px !important;
+	line-height: 17px;
+}
+
+button::-moz-focus-inner {
+	border: 0;
+}
+
+a, a:visited, a:hover {
+	color: inherit !important;
+	/* 	text-decoration: none !important; */
+}
+
+.site-holder {
+	margin: 0 auto;
+	padding: 30px 0;
+	position: relative !important;
+}
+
+.site-panel {
+	padding: 10px;
+	border-radius: 5px;
+	border: 1px solid #d2d2d2;
+	margin: 10px 10px 10px 0;
+	background-color: #F5F4F8;
+}
+
+.site-padding {
+	padding: 10px;
+}
+
+h1 {
+	line-height: 50px;
+}
+
+h3 {
+	margin: 6px 0;
+}
+
+h4 {
+	margin: 12px 0 6px;
+}
+
+.site-form {
+	/* 	padding-left: 70px; */
+	
+}
+
+.row {
+	height: 32px;
+}
+
+.row td {
+	padding: 0 10px;
+}
+
+label>h3 {
+	display: inline;
+	font-weight: inherit;
+}
+
+/* .site-radio>label { */
+/* 	font-weight: normal !important; */
+/* } */
+.site-radio {
+	padding: 0 5px;
+}
+
+.site-boxgreen {
+	color: green;
+}
+
+.site-boxred {
+	color: red;
+}
+
+.site-buttondisabled {
+	opacity: .5;
+}
+
+.site-launchmessage {
+	font-style: italic;
+	color: #8D118D;
+}
+
+.site-padding {
+	padding: 10px 0;
+}
+
+.GPBYFDEAB {
+	display: inline-block;
+}
+
+.GPBYFDECB {
+	display: inline-block;
+}
+
+.com-google-gwt-user-cellview-client-CellList-Style-cellListOddItem {
+	display: inline-block;
+}
+
+.com-google-gwt-user-cellview-client-CellList-Style-cellListEvenItem {
+	display: inline-block;
+}
+
+.com-google-gwt-user-cellview-client-CellTable-Style-cellTableEvenRow {
+	background-color: d1d4da !important;
+}
+
+.com-google-gwt-user-cellview-client-CellTable-Style-cellTableOddRow {
+}
+
+.com-google-gwt-user-cellview-client-CellTable-Style-cellTableCell div {
+	padding: 5px 10px !important;
+}
+
+.GPBYFDEDB {
+	display: inline-block;
+	border-color: transparent;
+	border-width: 3px 0;
+	border-style: solid;
+	color: red;
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+	border-width: 0 !important;
+}
+
+.gwt-StackLayoutPanelContent {
+	border: 1px solid #dedede;
+	padding: 10px;
+}
+
+.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader {
+	cursor: pointer;
+	cursor: hand;
+	border: 1px solid #bbbbbb;
+	border-bottom: 0px;
+	background: #d3def6 url(images/hborder.png) repeat-x 0px -989px;
+	font-weight: bold;
+	font-size: 1.3em;
+	padding: 3px;
+	text-align: center;
+}
+
+.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader {
+	padding: 3px 10px !important;
+	text-align: left !important;
+	line-height: 27px !important;
+	font-size: 17px !important;
+}
+
+.gwt-Button {
+	background: #d3def6 url(/_public/images/hborder.png) repeat-x 0px
+		-1464px !important;
+}
+
+.site-dlgheader {
+	background-color: #2182ED;
+	color: white;
+	font-weight: bold;
+}
+
+.site-dlg {
+	padding: 10px;
+	e border: 3px solid #2182ED;
+	border-width: 0 3px 3px 3px;
+	background-color: white;
+}
+
+.GPBYFDEAB, .GPBYFDECB {
+	background: none repeat scroll 0 0 #F7F7F7;
+	border: 1px solid #D2D2D2;
+}
+
+.gwt-TextBox {
+	font-size: 13px;
+}
+
+.header {
+	font-weight: bold;
+}
+
+.gwt-Label {
+	color: #3f4343;
+}
+
+.Caption {
+	background: #2182ED !important;
+	color: white;
+	font-weight: bold;
+}
+
+.site-closebutton {
+	position: absolute;
+	top: 4px;
+	right: 8px;
+	width: 21px;
+	height: 23px;
+	display: block;
+	text-indent: -9999px;
+	border-width: 0;
+	background: transparent url(/_local/images/common/close_white.png)
+		no-repeat center center;
+}
+
+.site-img {
+	border: 1px solid #CCCCCC;
+	background-color: white;
+	padding: 6px;
+	border-radius: 3px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.site-img-cell {
+	display: inline-block;
+	/* 	float: left; */
+	min-width: 160px;
+}
+
+.site-img-pad {
+	padding: 10px 0 10px 0;
+	/* 	height: 192px; */
+}
+
+.site-img-desc {
+	color: #696969;
+	text-decoration: none;
+	width: 188px;
+	text-align: center;
+	/* 	height: 6em; */
+	overflow: hidden;
+}
+
+.site-toolbarbutton {
+	padding: 3px;
+	text-align: left;
+	background: #F7F7F7;
+	border: 1px solid #C5C5C5;
+	border-radius: 2px;
+}
+
+.site-btnselected {
+	background: #FFC708 !important;
+	padding: 9px 10px;
+	text-align: center;
+	background-image: linear-gradient(to bottom, #F1D790, #ffc708);
+}
+
+.btn-sml {
+	padding: 0 !important;
+}
+
+.gwt-Tree .gwt-TreeItem-selected {
+	background: none repeat scroll 0 0 #D9EE7B !important;
+	display: inline-block !important;
+}

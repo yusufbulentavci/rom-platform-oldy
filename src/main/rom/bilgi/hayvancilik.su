@@ -1,0 +1,81 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE nores clp ozellik ozellikler=olcum
+CREATE TABLE bilgi.evcil_hayvan
+(
+	id bigint,
+	anasi bigint,
+	babasi bigint,
+	cinsiyet boolean
+);
+--@END
+
+
+--@DATA name=hayvan_turleri table=bilgi.tur cols=id,atalar,ozellikler 
+$-koyun-	{$-evcil_hayvan-}	null
+--@END
+
+
+--@CLIPS
+(defrule menu_hayvancilik
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut hayvancilik)
+			)
+	=>
+		(retract ?s)
+		(printout t "Hayvancilik!!!")
+		(soyle menu ?host ?cint olasi (create$ merhaba yeni_hayvan))
+	)
+
+
+(defrule lazim_kupe_no
+	?i<-(istek (host ?host) (cint ?cint))
+	?l<-(lazim (cint ?cint) (soru kupe_no))
+	=>
+		(soyle soru ?host ?cint soru kupe_no tipi symbol yazi "Kupe numarasi nedir?")
+	)
+
+(defrule lazim_hayvan_turu
+	?i<-(istek (host ?host) (cint ?cint))
+	?l<-(lazim (cint ?cint) (soru kupe_no))
+	=>
+		(soyle soru ?host ?cint soru hayvan_turu tipi symbol yazi "Hangi hayvan turu?"
+			olasi (create$ koyun keci inek))
+	)
+
+(defrule yeni_hayvan_hazirlik
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut yeni_hayvan)
+			)
+	=>
+		(assert 
+			(lazim (cint ?cint) (soru kupe_no))
+			(lazim (cint ?cint) (soru hayvan_turu))
+			)
+	)
+
+(defrule menu_yeni_hayvan
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut yeni_hayvan)
+			)
+	?kn<-(yanit (cint ?cint) (soru kupe_no) (yazi_ ?kupe_no) )
+	?ht<-(yanit (cint ?cint) (soru hayvan_turu) (yazi_ ?hayvan_turu) )
+	
+	=>
+		(retract ?s ?kn ?ht)
+		(bind ?turid (sembol ?hayvan_turu))
+		(printout t "hayvan_turu:" ?kupe_no " " ?hayvan_turu " " ?turid)
+		(insert bilgi.tureyen host_id ?host tur ?turid adi ?kupe_no)
+	)
+	
+
+--@END
+

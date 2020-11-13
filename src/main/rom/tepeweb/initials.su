@@ -1,0 +1,162 @@
+--@DEPENDS:.base
+
+
+--@TABLE prefix=/_/_initials one
+create table tepeweb.initials(
+	primary key(host_id,uri)
+) inherits (rom.resources);
+--@END
+
+--@FUNCTION norom ver=1
+create function tepeweb.initials_new(a_host integer) returns text as $$
+	begin
+		insert into tepeweb.initials (host_id,uri,container,mask) values (a_host,'/_/_initials','no',14549028);
+		return '/_/_initials';
+	end;
+$$ language plpgsql;
+--@END
+
+--@FUNCTION ver=3 http=post after=com.bilgidoku.rom.web.db.domain.adduser roles=admin audit=p_username
+create function tepeweb.initials_adduser(a_host integer, a_lang rom.langs,p_lng rom.langs, p_cc rom.countrycode, p_username text, p_cipher text, p_email text, p_first_name text, p_last_name text, p_mobile text, p_fid text, p_twitter text, a_remote_addr text) 
+	returns text as $$
+	declare
+		v_contact text;
+		v_maildomain text:='/_/mails/'||p_username;
+	begin
+		select rom.contacts_new(
+			a_host,
+			a_lang,
+			a_lang,
+			p_cc,
+			p_email,
+			p_cipher,
+			p_first_name,
+			p_last_name,
+			p_fid,
+			p_twitter,
+			p_mobile,
+			a_remote_addr) into v_contact;
+		
+		perform dict.users_new(a_host, p_username, p_cipher, 0, v_contact);
+		
+		perform rom.mails_breed(a_host,v_contact,v_maildomain||'/inbox',448, null);
+		
+		perform rom.mails_breed(a_host,v_contact,v_maildomain||'/draft',448, null);
+		
+		perform rom.mails_breed(a_host,v_contact,v_maildomain||'/sent',448, null);
+		
+		perform rom.mails_breed(a_host,v_contact,v_maildomain||'/spam',448, null);
+			
+		perform rom.mails_breed(a_host,v_contact,v_maildomain||'/trash',448, null);
+			
+		return v_contact;
+	end; 
+$$ language plpgsql;
+--@UPGRADE: 3 DROP FUNCTION tepeweb.initials_adduser(integer, rom.langs, rom.langs, rom.countrycode, text, text, text, text, text, text, text, text);
+--@END
+
+--@FUNCTION http=post before=com.bilgidoku.rom.web.db.domain.removeuser roles=admin audit=p_username
+create function tepeweb.initials_removeuser(a_host integer, p_username text) 
+	returns text as $$
+	/* eskisi
+	declare
+		v_contact text;
+	begin
+		select contact into strict v_contact from dict.users where host_id=a_host and user_name=p_username;
+		perform dict.users_delete(a_host, p_username);
+		return v_contact;
+	end;
+	*/
+	declare
+		v_contact text;
+		v_maildomain text:='/_/mails/'||p_username;
+	begin
+		select contact into strict v_contact from dict.users where host_id=a_host and user_name=p_username;
+
+		perform rom.contacts_destroy(a_host, v_contact);
+		perform dict.users_delete(a_host, p_username);
+
+		perform rom.mails_destroy(a_host,v_maildomain||'/inbox');
+		perform rom.mails_destroy(a_host,v_maildomain||'/draft');
+		perform rom.mails_destroy(a_host,v_maildomain||'/sent');
+		perform rom.mails_destroy(a_host,v_maildomain||'/spam');
+		perform rom.mails_destroy(a_host,v_maildomain||'/trash');
+
+		return v_contact;
+	end;
+	 
+$$ language plpgsql;
+--@END
+
+
+--@FUNCTION http=post roles=admin audit=p_username
+create function tepeweb.initials_changepass(a_host integer, p_username text, p_credential text) 
+	returns text as $$
+	declare
+		v_loc int;
+	begin
+		select position('/_/co' in p_username) into v_loc;
+		if v_loc=1 then
+			perform rom.contacts_changepwd(a_host,p_username,p_credential);
+			return 'contact';
+		end if;
+	
+		perform dict.users_changepass(a_host, p_username, p_credential);
+		return 'ok';
+	end; 
+$$ language plpgsql;
+--@END
+
+--@FUNCTION http=post roles=admin audit=p_username
+create function tepeweb.initials_changeroles(a_host integer, p_username text, p_roles integer) 
+	returns text as $$
+	begin
+		perform dict.users_updateroles(a_host, p_username, p_roles);
+		return 'ok';
+	end; 
+$$ language plpgsql;
+--@END
+
+--@FUNCTION http=post roles=user
+create function tepeweb.initials_getusers(a_host integer) 
+	returns setof text[] as $$
+		select array[user_name,contact,roles::text] from dict.users where host_id=a_host;
+$$ language sql;
+--@END
+
+
+
+--@FUNCTION 
+create function tepeweb.initials_getfbappid(a_host integer)
+ returns text as $$
+declare
+	v_appid text;
+begin
+
+	select fbappid into v_appid from rom.org where host_id=host_intra(a_host);
+	
+	if found then
+		return v_appid;
+	end if;
+		
+	return null;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user,contact ver=2
+create function tepeweb.initials_getcontact(a_host integer, p_uri text)
+ returns rom.contacts as $$
+declare 
+  v_one rom.contacts;
+begin
+	select >!{resourcefieldnamess}!<,>!{contactfieldnames cipher	null	null	null	fb_id	null	twitter	null	web	null	confirmed	null	address	null	mobile	null	fax	null	tags	null	gids	null	nesting	null	email	null	works	null}!<
+		into v_one 
+		from rom.contacts 
+		where host_id=host_intra(a_host) and uri=p_uri;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END

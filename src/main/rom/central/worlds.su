@@ -1,0 +1,13 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.worlds(
+	worldname text not null,
+	location text not null,
+	internetip text,
+	intranetip text,
+  	primary key(worldname)
+  );
+--@END

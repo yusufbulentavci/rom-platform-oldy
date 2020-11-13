@@ -1,0 +1,436 @@
+--@DEPENDS:base,.testing
+
+
+--@FUNCTION norom
+create function audit(p_hostid integer, p_contact text, p_module text, p_method text, p_text text) 
+	returns void as $$
+begin
+	raise notice 'AUDIT:%|%|%|%|%|%',p_hostid,now(),p_contact,p_module,p_method,p_text;
+end;
+$$ language 'plpgsql';
+
+--@END
+
+
+-- tek 29
+-- intra cift-1
+--@FUNCTION norom
+create function host_intra(p_host integer) 
+	returns integer as $$
+	select case when p_host%2=1 then p_host else p_host-1 end;
+$$ language sql;
+--@END
+
+-- cift 30
+-- inter= tek+1
+--@FUNCTION norom
+create function host_inter(p_host integer) 
+	returns integer as $$
+	select case when p_host%2=0 then p_host else p_host+1 end;
+$$ language sql;
+--@END
+
+
+
+--@FUNCTION norom
+create function name_encode(p_t text) returns text
+as $$
+declare
+	v_one text;
+begin
+	if p_t is null or p_t='' then
+		raise exception 'Name text shouldnt be null or empty';
+	end if;
+	select lower(p_t) into v_one;
+	select translate(v_one,'çüşöğı','cusogi') into v_one;
+	select regexp_replace(v_one,'([^a-z0-9_\.\-])','-','g') into v_one;
+	return v_one;
+end;
+
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+CREATE function pathfix(p_t text)
+	returns text as $$
+	declare
+		v_one text;
+	begin
+	if p_t is null or p_t='' then
+		raise exception 'Path text shouldnt be null or empty';
+	end if;
+	select lower(p_t) into v_one;
+	select translate(v_one,'çüşöğı','cusogi') into v_one;
+	
+	select regexp_replace(v_one,'([^a-z0-9_\.\-\/])','-','g') into v_one;
+	return v_one;
+	end
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function check_has_text(p_val text, p_title text) returns boolean as $$
+begin
+	if p_val is null or p_val='' then
+		raise exception '% parameter should have value',p_title;
+	end if;
+	return true;
+end;
+
+$$ language 'plpgsql';
+--@END
+
+
+-- p_uri does not start with /
+--@FUNCTION norom ver=3
+create function make_host_dir(p_hostid int, p_uri text) returns void as $$
+declare
+	v_test boolean;
+	v_path text:='/home/rompg/rom/data/';
+begin
+	
+	select testing into v_test from dict.envo;
+	
+	if v_test then
+		v_path:=v_path||'test/';
+	end if;
+	
+	v_path:=v_path||'onemli/Dbfs/local/hosts/'||p_hostid||'/'||p_uri;
+	
+	perform rompg_mkplatformdir(v_path);	
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=3
+create function make_host_wwwdir(p_hostid int, p_uri text) returns void as $$
+declare
+	v_test boolean;
+	v_path text:='/home/rompg/rom/data/';
+begin
+	
+	select testing into v_test from dict.envo;
+	
+	if char_length(p_uri) < 4 or p_uri not like '/f/%' then
+		raise exception 'Should begin with /f/ but not %', p_uri;
+	end if;
+	
+	if v_test then
+		v_path:=v_path||'test/';
+	end if;
+	
+	v_path:=v_path||'onemli/Dbfs/local/hosts/'||p_hostid||'/www'||substring(p_uri from 3);
+	
+	perform rompg_mkplatformdir(v_path);	
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom ver=1
+create function rm_host_alldir(p_hostid int) returns void as $$
+declare
+	v_test boolean;
+	v_path text:='/home/rompg/rom/data/';
+begin
+	
+	select testing into v_test from dict.envo;
+	
+	if v_test then
+		v_path:=v_path||'test/';
+	end if;
+	
+	v_path:=v_path||'onemli/Dbfs/local/hosts/'||p_hostid;
+	
+	perform rompg_rmplatformdir(v_path);	
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+-- p_uri does not start with /
+--@FUNCTION norom ver=1
+create function rm_host_dir(p_hostid int, p_uri text) returns void as $$
+declare
+	v_test boolean;
+	v_path text:='/home/rompg/rom/data/';
+begin
+	
+	select testing into v_test from dict.envo;
+	
+	if v_test then
+		v_path:=v_path||'test/';
+	end if;
+	
+	v_path:=v_path||'onemli/Dbfs/local/hosts/'||p_hostid||'/'||p_uri;
+	
+	perform rompg_rmplatformdir(v_path);	
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@F-- p_uri does not start with /
+--@FUNCTION norom ver=2
+create function make_host_dir(p_hostid int, p_uri text) returns void as $$
+declare
+	v_test boolean;
+	v_path text:='/home/rompg/rom/data/';
+begin
+	
+	select testing into v_test from dict.envo;
+	
+	if v_test then
+		v_path:=v_path||'test/';
+	end if;
+	
+	v_path:=v_path||'onemli/Dbfs/local/hosts/'||p_hostid||'/'||p_uri;
+	
+	perform rompg_mkplatformdir(v_path);	
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=3
+create function make_host_wwwdir(p_hostid int, p_uri text) returns void as $$
+declare
+	v_test boolean;
+	v_path text:='/home/rompg/rom/data/';
+begin
+	
+	select testing into v_test from dict.envo;
+	
+	if char_length(p_uri) < 4 or p_uri not like '/f/%' then
+		raise exception 'Should begin with /f/ but not %', p_uri;
+	end if;
+	
+	if v_test then
+		v_path:=v_path||'test/';
+	end if;
+	
+	v_path:=v_path||'onemli/Dbfs/local/hosts/'||p_hostid||'/www'||substring(p_uri from 3);
+	
+	perform rompg_mkplatformdir(v_path);	
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom
+create function array_remove(p_a text[], p_elem text) 
+	returns text[] as $$
+	declare
+	v_result text[];
+	begin
+		select array(
+			select b.e from (select unnest(p_a)) as b(e) where b.e<>p_elem) into v_result;
+		return v_result;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function array_remove_index(p_arr anyarray, p_ind int)
+  returns anyarray as $$ 
+	SELECT p_arr[1:p_ind-1] || p_arr[p_ind+1:2147483647];
+$$
+LANGUAGE sql;
+--@END
+
+
+--@FUNCTION norom ver=2
+create function month_diff(p_last date, p_begin date) 
+	returns integer as $$
+	select (
+		(date_part('year', p_last) - date_part('year', p_begin)) * 12 +
+        (date_part('month', p_last) - date_part('month', p_begin))
+        )::int;
+$$ language sql;
+--@UPGRADE: 2 drop function month_diff(date, date);
+--@END
+
+--@FUNCTION norom
+create function day_diff(p_last date, p_begin date) 
+	returns integer as $$
+	select (extract(doy from p_begin)-extract(doy from p_last))::int;
+$$ language sql;
+--@END
+
+
+
+--@FUNCTION norom
+create function year_diff(p_last date, p_begin date) 
+	returns integer as $$
+	select (
+		date_part('year', p_last) - date_part('year', p_begin)
+		)::int;
+$$ language sql;
+--@UPGRADE: 2 drop function month_diff(date, date);
+--@END
+
+--@FUNCTION norom
+create function moneytocredit(p_money text) 
+	returns bigint as $$
+	select (p_money::numeric(18,4)*1000000)::bigint;
+$$ language sql;
+--@END
+
+
+--@FUNCTION norom
+create function startswith(p_str text, p_from text)
+	returns text as $$
+	declare
+		v_loc int;
+	begin
+		select position(p_from in p_str) into v_loc;
+		return v_loc=1;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom
+create function replaceprefix(p_str text, p_from text, p_to text)
+	returns text as $$
+	declare
+		v_loc int;
+		v_result text;
+	begin
+		select position(p_from in p_str) into v_loc;
+		if v_loc<>1 then
+			raise exception 'replace prefix but str not start with prefix str:%,from:%,to:%',p_str,p_from,p_to;
+		end if;
+
+		select p_to||substr(p_str,length(p_from)+1) into v_result;
+		return v_result;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+--@FUNCTION norom
+create function removeuriprefix(p_str text, p_prefix text)
+	returns text as $$
+	declare
+		v_loc int;
+		v_result text;
+	begin
+		if p_str=p_prefix then
+			return '/';
+		end if;
+		select position(p_prefix in p_str) into v_loc;
+		if v_loc<>1 then
+			raise exception 'strip prefix but str not start with prefix str:%,prefix:%',p_str,p_prefix;
+		end if;
+
+		select substr(p_str,length(p_prefix)+1) into v_result;
+		return v_result;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function removeprefix(p_str text, p_prefix text)
+	returns text as $$
+	declare
+		v_loc int;
+		v_result text;
+	begin
+		select position(p_prefix in p_str) into v_loc;
+		if v_loc<>1 then
+			raise exception 'strip prefix but str not start with prefix str:%,prefix:%',p_str,p_prefix;
+		end if;
+
+		select substr(p_str,length(p_prefix)+1) into v_result;
+		return v_result;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function json_set(p_json json, key_to_set text, value_to_set anyelement)
+	returns json as 
+$$
+	select coalesce(
+	  (select ('{' || string_agg(to_json("key") || ':' || "value", ',') || '}')
+	     from (select *
+	             from json_each(p_json)
+	            where "key" <> key_to_set
+	            union all
+	           select key_to_set, to_json(value_to_set)) as "fields"),
+	  '{}'
+	)::json
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function json_remove(p_json json, key_to_set text)
+	returns json as 
+$$
+	select coalesce(
+	  (select ('{' || string_agg(to_json("key") || ':' || "value", ',') || '}')
+	     from (select *
+	             from json_each(p_json)
+	            where "key" <> key_to_set
+	           ) as "fields"),
+	  '{}'
+	)::json
+$$ language sql;
+--@END
+
+
+--@FUNCTION norom
+create function array_distinctandnotnull(p_arr text[])
+	returns text[] as 
+$$
+	select  
+		array(
+			select distinct 
+				a
+				from 
+					unnest(
+						p_arr
+						) a
+				where a is not null
+			
+			);
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function array_addif(p_arr text[],p_t text)
+	returns text[] as 
+$$
+	declare
+	
+	begin
+		if p_arr @> array[p_t] then
+			return p_arr;
+		end if;
+		
+		return p_arr||p_t; 	
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+--@RUN utest
+
+select assert_equals(array_remove_index('{1,2,3,4,5}'::int[], 4)::text, '{1,2,3,5}'::text); 
+
+select assert_equals(array_addif(array['ali', 'veli'],'veli')::text, '{ali,veli}'::text);
+
+--@END
+
+--@MACRO hostcond
+host_id=a_host
+--@END

@@ -1,0 +1,35 @@
+--@DEPENDS:tepeweb.base
+
+-- sni: facebook: 0
+-- pname: private social network name
+-- pid: private social network id
+-- people: pnames of related people
+-- places:
+-- dates:
+-- phones:
+-- emails:
+-- photos:
+-- robot: robot notes on this
+-- details: ["maried"-> >ahmet %22.03.99","born %19.04.1980 ?istanbul","lived ?eskisehir/ankara"]
+-- realitid: Bot identified profiles associate with same person, give them same id
+
+--@TABLE norom
+create table tepeweb.socialit(
+	sni int,
+	pname text,
+	pid text,
+	people text[],
+	places text[],
+	dates date[],
+	phones text[],
+	emails text[],
+	photos text[],
+	details hstore,
+	robot hstore,
+	tags text[],
+	realitid int,
+	botid int,
+	lastbottouch timestamp,
+	primary key(sni,pname)
+) ;
+--@END

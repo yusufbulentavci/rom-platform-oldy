@@ -1,0 +1,15 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.state(
+	state serial,
+	named text,
+	country int,
+	judge int,
+	tz int,
+	tzt text,
+  	primary key(state)
+  );
+--@END

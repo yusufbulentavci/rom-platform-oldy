@@ -1,0 +1,201 @@
+--@DEPENDS:.base,.langs
+
+
+--@MACRO transfields
+langcodes rom.langs[],
+title json[],
+constants json
+--@END
+
+--@MACRO transfieldnames
+langcodes,title,constants
+--@END
+
+
+--@TABLE prefix=/_/_trans one net=all cache=10m
+create table rom.trans(
+    >!{transfields}!<,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+--@FUNCTION norom ver=2
+create function rom.trans_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.trans where host_id=a_host+1;
+			insert into rom.trans
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,>!{transfieldnames}!< 
+	  				from rom.trans
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.trans_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.trans where host_id=a_host;
+			insert into rom.trans
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,>!{transfieldnames}!< 
+	  				from rom.trans
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.trans_new(
+	a_host integer,
+	p_langs_id rom.langs[],
+	p_title json[],
+	p_constants json
+)
+ returns text as $$
+begin
+	insert into rom.trans (
+			host_id, 
+			uri,
+			langcodes,
+			title,
+			mask,
+			constants
+			) 
+		values (
+			a_host, 
+			'/_/_trans', 
+			p_langs_id,
+			p_title,
+			p_constants
+			);
+	return '/_/_trans';	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=author,designer,admin audit http=post
+create function rom.trans_change(
+	a_host integer,
+	a_lang rom.langs,p_lng rom.langs,
+	p_title json
+)
+ returns text as $$
+declare 
+  v_which rom.langs;  
+begin
+		select rom.langs_which(langcodes,a_lang) into v_which
+			from rom.trans
+			where host_id=a_host and uri=a_self;		
+		
+	update rom.trans 
+		set langcodes[v_which]=a_lang,
+			title[v_which]=p_title,
+			modified_date=now() 
+		where host_id=a_host;
+		
+	return 'ok';	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=author,designer,admin audit http=post
+create function rom.trans_changeconstants(
+	a_host integer,
+	p_constants json
+)
+ returns text as $$
+declare 
+  v_which rom.langs;  
+begin
+		
+	update rom.trans 
+		set constants=p_constants,
+			modified_date=now() 
+		where host_id=a_host;
+		
+	return 'ok';	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,designer,admin audit http=post
+create function rom.trans_changeall(
+	a_host integer,a_self text,
+	p_langs rom.langs[],
+	p_title json[]
+)
+ returns text as $$
+declare 
+  v_langs rom.langs[];
+  v_which rom.langs;  
+  v_i integer;
+begin
+	update rom.trans 
+		set langcodes=p_langs,
+			title=p_title,
+			modified_date=now() 
+		where host_id=a_host;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2
+create function rom.trans_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns rom.trans as $$
+declare
+	v_one rom.trans;
+begin
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+			array[langcodes[wh]],
+			array[title[wh]],
+			constants
+			 into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from rom.trans 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2 roles=author,designer,admin
+create function rom.trans_getall(a_host integer,a_self text)
+ returns rom.trans as $$
+declare
+	v_one rom.trans;
+begin
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+			langcodes,
+			title,
+			constants
+			 into v_one
+		from rom.trans 
+				where host_id=a_host and uri=a_self;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin audit
+create function rom.trans_destroy(
+	a_host integer
+)
+ returns text as $$
+begin
+	delete from rom.trans where host_id=a_host;
+	return '/_/_trans';
+end;
+$$ language 'plpgsql';
+--@END

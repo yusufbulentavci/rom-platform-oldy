@@ -1,0 +1,13 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.locations(
+	name text not null,
+	internetaddr text,
+	intranetaddr text,
+	center text,
+  	primary key(name)
+  );
+--@END

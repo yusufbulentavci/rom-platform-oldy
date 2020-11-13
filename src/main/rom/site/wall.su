@@ -1,0 +1,351 @@
+--@DEPENDS:.contents
+
+--@SEQUENCE
+create sequence wall_id_seq;
+--@END
+
+--@TABLE prefix=/_/wall net=intra ver=3
+create table site.wall(
+	published boolean default false,
+	app text,
+	code text,
+	valid_after timestamp without time zone,
+	valid_before timestamp without time zone,
+	repeat int default 0,
+	ownercomment text[],
+	foreignref text,
+	dialog_uri text,
+	eventcid text,
+	eventusername text,
+	inrefs text[],
+  	primary key(host_id,uri)
+  ) inherits (site.contents);
+--@UPGRADE: 2 alter table site.wall drop column if exists viewat; 
+--@UPGRADE: 2 alter table site.wall drop column if exists vibrate;
+--@UPGRADE: 2 alter table site.wall drop column if exists beep;
+--@UPGRADE: 2 alter table site.wall drop column if exists alert;
+--@UPGRADE: 2 alter table site.wall drop column if exists notifyapp;
+--@UPGRADE: 2 alter table site.wall add column eventcid text;
+--@UPGRADE: 2 alter table site.wall add column eventusername text;
+--@UPGRADE: 3 alter table site.wall drop column if exists inref;
+--@UPGRADE: 3 alter table site.wall add column inrefs text[];
+--@END
+
+--@MACRO wallsels
+published,app,code,valid_after,valid_before,repeat,array[ownercomment[tbl.wh]],foreignref,dialog_uri,eventcid,eventusername,inrefs
+--@END
+  
+--@FUNCTION norom
+create function site.wall_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/wall',null,null,null,null,null,null,
+							'site','wall','/_/wall/',null,null);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user ver=3
+create function site.wall_new(a_host integer,a_lang rom.langs,p_lng rom.langs,a_contact text,p_uricode text,p_eventusername text,p_eventcid text,p_app text, p_code text, 
+	p_title text, p_summary text, p_inrefs text[], p_outref text)
+ returns text as $$
+declare 
+	a_self text:='/_/wall';
+	v_cont rom.containers;
+	v_uri text:='/_/wall/'||coalesce(p_uricode, nextval('wall_id_seq')::text);
+	v_al text;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+	if p_uricode is not null then
+		select uri into v_al from site.wall where host_id=a_host and uri=v_uri and ownercid=a_contact;
+		if found then
+			return v_uri;
+		end if; 
+	end if;
+		
+		--host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask
+		--a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask
+		
+	insert into site.wall (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, eventcid, eventusername, app, code, title, summary, foreignref, inrefs) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], p_eventcid, p_eventusername, p_app, p_code, array[p_title], array[p_summary], p_outref, p_inrefs);
+		
+	perform rompg_sendudp('{"c":"s.m","ani":true,"d":['||a_host||',"'||a_contact||'"]}');
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user ver=1
+create function site.wall_repeat(a_host integer,a_contact text,p_uricode text,p_app text, p_code text, p_repeat int)
+ returns text as $$
+declare 
+	v_walluri text;
+begin
+	select site.wall_new(a_host,'en'::rom.langs,'en'::rom.langs,a_contact,p_uricode,null,null,p_app,p_code,null,null,null,null) into v_walluri;
+	perform site.wall_addtorepeat(a_host,v_walluri,p_repeat);
+	return v_walluri;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+--@FUNCTION http=post roles=owner,admin
+create function site.wall_setownercomment(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_ownercomment text)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.wall
+		where host_id=a_host and uri=a_self;
+	
+	update site.wall
+		set ownercomment[v_which]=p_ownercomment,
+			modified_date=now()  
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=owner,admin
+create function site.wall_addtorepeat(a_host integer,a_self text, p_count int)
+ returns text as $$
+begin
+	update site.wall
+		set repeat=repeat+p_count,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=owner,admin
+create function site.wall_setrepeat(a_host integer,a_self text, p_repeat int)
+ returns text as $$
+begin
+	update site.wall
+		set repeat=p_repeat,
+			modified_date=now()  
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=owner
+create function site.wall_setinrefs(a_host integer,a_self text, p_inrefs text[])
+ returns text as $$
+begin
+	update site.wall set 
+				inrefs=p_inrefs,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=owner
+create function site.wall_setforeignref(a_host integer,a_self text, p_foreignref text)
+ returns text as $$
+begin
+	update site.wall set 
+				outref=p_foreignref,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=owner
+create function site.wall_setvalidperiod(a_host integer,a_self text, p_valid_after timestamp, p_valid_before timestamp)
+ returns text as $$
+declare
+	v_d text;
+begin
+	update site.wall set 
+				valid_after=p_valid_after,
+				valid_before=p_valid_before,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user ver=2
+create function site.wall_createdialog(a_host integer,a_self text,>!{dialogparams}!<)
+	returns text as $$
+		declare
+			v_dlg text;
+			v_ownercid text;
+			v_gid text;
+			v_relatedcids text[];
+			v_mask bigint;
+		begin
+			select ownercid,gid,relatedcids,mask into v_ownercid,v_gid,v_relatedcids,v_mask 
+					from site.wall 
+					where host_id=a_host and uri=a_self; 
+			select * 
+				into strict v_dlg 
+				from rom.dialogs_new(a_host,a_self,
+				v_ownercid,v_gid,v_relatedcids,v_mask,
+				>!{dialogparamnames}!<);
+    		update site.wall set dialog_uri=v_dlg where host_id=a_host and uri=a_self; 
+			return v_dlg;
+		end;
+	$$ language 'plpgsql';
+--@END
+	
+--@FUNCTION roles=owner,admin
+create function site.wall_deletedialog(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_dlg text;
+		begin
+			select * into strict v_dlg from site.wall where host_id=a_host and uri=a_self;
+			if v_dlg is null then
+				return null;
+			end if;
+			
+			perform rom.dialogs_destroy(a_host,v_dlg);
+			
+    		update site.wall set dialog_uri=null where host_id=a_host and uri=a_self; 
+			return v_dlg;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,admin
+create function site.wall_destroy(
+	a_host integer,a_self text
+) returns text as $$
+declare
+	v_dlg text;
+begin
+	
+	perform site.wall_deletedialog(a_host, a_self);
+
+	delete from site.wall where host_id=a_host and uri=a_self;
+	
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+	
+-- Owner contact use this method to manage its wall
+--@FUNCTION roles=contact ver=3
+create function site.wall_listmywall(a_host integer, a_lang rom.langs,p_lng rom.langs, a_contact text)
+ returns setof site.wall as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+				published,app,code,valid_after,valid_before,repeat,array[ownercomment[tbl.wh]],foreignref,dialog_uri,eventcid,eventusername,inrefs
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.wall
+					where host_id=a_host and ownercid=a_contact
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+-- Owner contact use this method to see its wall
+--@FUNCTION roles=contact ver=3
+create function site.wall_seemywall(a_host integer, a_lang rom.langs,p_lng rom.langs, a_contact text)
+ returns setof site.wall as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,>!{wallsels}!<
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.wall
+					where host_id=a_host and ownercid=a_contact and 
+					(valid_after is null or now>valid_after) and
+					(valid_before is null or now<valid_before)
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+-- Everybody can see these on the wall
+--@FUNCTION http=get ver=2
+create function site.wall_content_list(a_host integer, a_lang rom.langs,p_lng rom.langs)
+  returns setof site.wall as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,>!{wallsels}!<
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.wall
+					where host_id=a_host and 
+					(valid_after is null or now>valid_after) and
+					(valid_before is null or now<valid_before) and
+					dict.users_guestcanread(mask)
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION rolest=owner,admin ver=2
+create function site.wall_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns site.wall as $$
+declare 
+	v_one site.wall;
+begin
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,>!{wallsels}!<
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.wall 
+				where host_id=a_host and uri=a_self
+			) tbl;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+select site.wall_breed(1);
+select site.wall_new(1,'en'::rom.langs,'en'::rom.langs,'/_/co/1','mail.incoming',null,null,'mail', 'incoming', 'dene', 'me', null, null);
+select site.wall_repeat(1,'/_/co/1','mail.incoming','mail','incoming',1);
+
+--@END
+
+
+
+
+

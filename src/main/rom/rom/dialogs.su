@@ -1,0 +1,272 @@
+--@DEPENDS:.base,.comments
+
+--@MACRO dialogfields
+	allow_attach boolean,
+	approval boolean,
+	deletable boolean,
+	updatable boolean,
+	likeable boolean,
+	dislikable boolean,
+	sharable boolean,
+	closed boolean,
+	contacts text[],
+	cafe boolean not null default false
+--@END
+
+--@MACRO dialogparams
+	p_allow_attach boolean,
+	p_approval boolean,
+	p_deletable boolean,
+	p_updatable boolean,
+	p_likeable boolean,
+	p_dislikable boolean,
+	p_sharable boolean,
+	p_closed boolean,
+	p_contacts text[]
+--@END
+	
+--@MACRO dialogfieldnames
+	allow_attach,approval,deletable,updatable,likeable,dislikable,sharable,closed,contacts
+--@END
+--@MACRO dialogparamnames
+	p_allow_attach,p_approval,p_deletable,p_updatable,p_likeable,p_dislikable,p_sharable,p_closed,p_contacts
+--@END
+
+
+--@SEQUENCE
+create sequence dialog_id_seq;
+--@END
+
+--@TABLE prefix=/_/_dialogs  net=intra cache=10m ver=4
+create table rom.dialogs(
+	>!{dialogfields}!<,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 2 alter table rom.dialogs add column contacts text[];
+--@UPGRADE: 4 alter table rom.dialogs add column cafe boolean not null default false;
+--@END  
+
+
+--@FUNCTION norom
+create function rom.dialog_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/_dialogs',null,null,null,null,null,null,
+							'rom','dialogs','/_/_dialogs/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.dialogs_new(a_host integer, p_delegator text, p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,>!{dialogparams}!<)
+ returns text as $$
+declare
+  v_ret text;
+begin
+	insert into rom.dialogs (host_id,uri,container,delegated,
+			ownercid,gid,relatedcids,mask,
+			>!{dialogfieldnames}!<) 
+		values (a_host, '/_/_dialogs/'||nextval('dialog_id_seq'),'/_/_dialogs',p_delegator,
+		p_ownercid,p_gid,p_relatedcids,p_mask,
+		>!{dialogparamnames}!<
+		) 
+		returning uri  
+		into v_ret;
+	return v_ret;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user ver=3 http=post
+create function rom.dialogs_change(a_host integer,a_self text,>!{dialogparams}!<)
+ returns rom.dialogs as $$
+declare 
+  v_one rom.dialogs;
+begin
+	update rom.dialogs set 
+			allow_attach=p_allow_attach,
+			approval=p_approval,
+			deletable=p_deletable,
+			updatable=p_updatable,
+			likeable=p_likeable,
+			dislikable=p_dislikable,
+			sharable=p_sharable,
+			closed=p_closed,
+			contacts=p_contacts,
+			cafe=p_cafe,
+			modified_date=now()
+		where host_id=a_host and uri=a_self
+		returning * 
+		 into v_one;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=contact ver=5
+create function rom.dialogs_comment(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, a_contact text, p_comment text, p_cmd json, p_mime json, p_bymail text, p_onpage boolean)
+ returns text as $$
+declare 
+  v_commenturi text;
+  v_onpage boolean:=coalesce(p_onpage,true);
+begin
+	select uri into strict v_commenturi from rom.comments_new(a_host,a_lang,a_self,a_contact,p_comment,p_cmd,p_mime,p_bymail, v_onpage);
+	
+	perform rom.dialogs_notify(a_host,a_self,a_contact,'dialogs','comment',v_commenturi, substring(p_comment for 200));
+	
+	return v_commenturi;	
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 5 DROP FUNCTION rom.dialogs_comment(integer, text, rom.langs, rom.langs, text, text, json, json, text, boolean);
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.dialogs_notify(a_host integer,a_self text, a_contact text, 
+	p_app text, p_code text, p_inref text, p_title text)
+ returns void as $$
+declare 
+	v_contacts text[];
+	v_delegated text;
+	v_eventusername text;
+  
+begin
+	
+	select contacts,delegated into v_contacts,v_delegated from rom.dialogs where host_id=a_host and uri=a_self; 
+	
+	if a_contact is not null then
+		select first_name||' '||last_name into v_eventusername 
+			from rom.contacts 
+			where host_id=a_host and uri=a_contact;
+	end if; 
+	
+	perform rom.waiting_notifyall(a_host, v_contacts, p_app, p_code, p_inref, p_title, v_eventusername);
+	
+		
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 2 DROP FUNCTION rom.dialogs_notify(integer, text, text, text, text, text);
+--@END
+
+--@FUNCTION cache=0m
+create function rom.dialogs_comments(a_host integer,a_self text)
+ returns setof rom.comments as $$
+declare 
+  v_approval boolean;
+begin
+	select approval into strict v_approval from rom.dialogs where host_id=a_host and uri=a_self;
+	return query select * from rom.comments_list(a_host,a_self,v_approval) order by creation_date;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.dialogs_get(a_host integer,a_self text)
+ returns rom.dialogs as $$
+declare 
+  v_one rom.dialogs;
+begin
+	select *
+		into v_one 
+		from rom.dialogs 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user
+create function rom.dialogs_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.comments where host_id=a_host and dialog_id=a_self;
+	delete from rom.dialogs where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user ver=2 http=post
+create function rom.dialogs_setcafe(a_host integer,a_self text,p_cafe boolean)
+ returns boolean as $$
+begin
+	update rom.dialogs 
+		set cafe=p_cafe,
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=contact ver=5 http=post
+create function rom.dialogs_join(a_host integer,a_self text,a_contact text)
+ returns boolean as $$
+begin
+	update rom.dialogs 
+		set contacts=array_addif(contacts,a_contact),
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+
+	perform rom.dialogs_cmd(a_host, a_self, a_contact, '*dlg.join', null, null);
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=contact ver=5 http=post
+create function rom.dialogs_leave(a_host integer,a_self text,a_contact text)
+ returns boolean as $$
+begin
+	update rom.dialogs 
+		set contacts=array_remove(contacts,a_contact),
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+		
+	perform rom.dialogs_cmd(a_host, a_self, a_contact, '*dlg.left', null, null);
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=contact http=post ver=1
+create function rom.dialogs_cmd(a_host integer,a_self text,a_contact text, p_cmd text, p_str text, p_more json)
+ returns boolean as $$
+declare 
+	v_contacts text[];
+	v_delegated text;
+	v_eventusername text;
+	v_text text;
+begin
+	select contacts,delegated into v_contacts,v_delegated from rom.dialogs where host_id=a_host and uri=a_self;
+	
+	
+	if a_contact is not null then
+		select first_name||' '||last_name into v_eventusername 
+			from rom.contacts 
+			where host_id=a_host and uri=a_contact;
+	end if; 
+	
+	if v_contacts is null then
+		return true;
+	end if;
+	
+	select json_build_object('c','s.dlgcmd', 'ani', true, 'hostid', a_host, 'cmd', p_cmd, 'dlg',a_self,
+				'from', a_contact, 'fromname',v_eventusername,'tos', v_contacts, 'str', p_str, 'more', p_more)::text into v_text;
+	
+	perform rompg_sendudp(v_text);
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+

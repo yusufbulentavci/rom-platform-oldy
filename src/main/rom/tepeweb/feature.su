@@ -1,0 +1,60 @@
+--@DEPENDS:tepeweb.base
+
+
+
+-- importance charge order,
+-- 		en buyuk importance'taki feature'lar once charge edilir
+--		domainname belki en yuksek importance'ta olucak
+
+-- tperiod 	period type
+--			0:adet
+-- 			1:gunluk
+--			2:aylik
+--			3:yillik
+--		
+--			adet tipli feature'lar expire olmaz
+
+-- invoicetperiod
+--		fatura hangi period tipine gore
+--		ornegin netusage gunluk ucretlendirilecek ama
+
+-- invoicetperiodamount
+--		ornegin 3 aylik faturalandirilacak seydeki 3 
+
+-- autorenewoptions:
+--		invoicetperiod tipine gore calisir
+--		invoicetperiodamount ile uyumlu/kati olmalidir
+
+
+-- usageunit:
+--		gigabyte
+--		hit
+--		image
+
+--@TABLE norom
+create table tepeweb.feature(
+	item text not null,
+	importance int not null,
+	tperiod int not null,
+	invoicetperiod int,
+	invoicetperiodamount int,
+	autorenewoptions int[],
+	usageunit text,
+	description text,
+	primary key(item)
+);
+--@END
+
+--@FUNCTION norom ver=1
+create function tepeweb.feature_get(p_name text) 
+	returns setof tepeweb.feature as $$
+	select * from tepeweb.feature where item=p_name;
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.feature_list() 
+	returns setof tepeweb.feature as $$
+	select * from tepeweb.feature;
+$$ language sql;
+--@END

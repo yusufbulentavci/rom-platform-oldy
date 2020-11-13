@@ -1,0 +1,54 @@
+--@DEPENDS:.base
+
+
+--@TABLE norom
+create table rom.audits(
+    host_id integer,
+    aid serial,
+    creation_date timestamp without time zone default now(),
+    cid text,
+    amethod text,
+    turi text,
+    params text[],
+    pvalues text[],
+  	primary key(host_id,aid)
+  );
+--@END
+
+--@INDEX
+create index idx_audits_creation_date on rom.audits(creation_date);
+--@END
+
+--@INDEX
+create index idx_audits_cid on rom.audits(cid);
+--@END
+
+
+--@FUNCTION norom
+create function rom.audits_list(a_host integer, p_fromtime timestamp, p_totime timestamp, p_cid text) returns setof rom.audits as $$
+begin
+		return query 
+				select * 
+					from rom.audits 
+					where host_id=a_host
+						and (p_fromtime is null or creation_date>=p_fromtime)
+						and (p_totime is null or creation_date<=p_totime)
+						and (p_cid is null or p_cid=cid)
+					limit 10000;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.audits_new(a_host integer,p_cid text,p_amethod text,p_turi text,p_params text[],p_pvalues text[])
+ returns integer as $$
+declare
+	v_aid integer;
+begin
+	insert into rom.audits (host_id,cid,amethod,turi,params,pvalues) 
+		values (a_host,p_cid,p_amethod,p_turi,p_params,p_pvalues) returning aid into v_aid;
+	return v_aid;	
+end;
+$$ language 'plpgsql';
+--@END
+

@@ -1,0 +1,3 @@
+/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64/CMakeFiles/rebuild_cache.dir
+/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64/CMakeFiles/clips.dir
+/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64/CMakeFiles/edit_cache.dir

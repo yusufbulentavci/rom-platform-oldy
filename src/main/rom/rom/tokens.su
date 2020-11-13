@@ -1,0 +1,69 @@
+--@DEPENDS:.base
+
+
+--@SEQUENCE
+create sequence token_id_seq;
+--@END
+
+--@TABLE prefix=/_/_tokens
+create table rom.tokens(
+	rid text,
+	world text,
+	cmd text not null,
+	dataclient json,
+	dataserver json,
+	expires timestamp,
+	primary key(host_id,uri)
+) inherits (rom.resources);
+--@END
+
+
+
+--@FUNCTION norom
+create function rom.tokens_new(a_host integer, p_rid text, p_world text, p_cmd text, p_dataclient json,p_dataserver json, p_expires timestamp) returns text as $$
+	declare
+		v_uri text;
+	begin
+		v_uri:='/_/_tokens/a'||md5('bilonundusu'||random()::text||now())||'000'||nextval('token_id_seq');
+		
+		insert into rom.tokens (host_id,uri,container,mask, rid, world, cmd, dataclient, dataserver, expires) 
+			values (a_host,v_uri,null,34773702, p_rid, p_world, p_cmd, p_dataclient, p_dataserver, p_expires);
+		return v_uri;
+	end;
+$$ language plpgsql;
+--@END
+
+--@FUNCTION
+create function rom.tokens_get(a_host integer,a_self text) returns json as $$
+	declare 
+		v_one json;
+	begin
+		select dataclient into strict v_one from rom.tokens where host_id=a_host and uri=a_self;
+		return v_one;
+	end; 
+$$ language plpgsql;
+--@END
+
+--@FUNCTION http=post ver=1
+create function rom.tokens_change(a_host integer,a_self text, p_dataclient json) 
+	returns text as $$
+	begin
+		update rom.tokens 
+			set dataclient=p_dataclient,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+		
+		return 'ok';
+	end; 
+$$ language plpgsql;
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.tokens.ready  audit
+create function rom.tokens_ready(a_host integer,a_self text) 
+	returns boolean as $$
+	begin
+		delete from rom.tokens where host_id=a_host and uri=a_self;
+		return true;
+	end; 
+$$ language plpgsql;
+--@END

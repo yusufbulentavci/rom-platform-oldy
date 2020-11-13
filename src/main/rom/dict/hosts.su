@@ -1,0 +1,19 @@
+--@DEPENDS:.base
+
+--@SEQUENCE
+create sequence host_id_seq start with 1 increment by 2 maxvalue 2147483646 no cycle;
+--@END
+
+--@TABLE norom ver=1
+create table dict.hosts(
+	host_id int default nextval('host_id_seq') not null primary key,
+	host_name text unique,
+	mainlang text not null,
+	domainalias text[],
+	servable boolean not null default true,
+	contact json not null,
+	payer_id text,
+	nested json
+);
+--@UPGRADE: 1 alter table dict.hosts add column nested json;
+--@END

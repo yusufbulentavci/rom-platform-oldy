@@ -1,0 +1,48 @@
+--@DEPENDS: .resources
+
+--@TABLE nores
+create table rom.measure(
+	id serial,
+	host_id int,
+	uri text,
+	code text,
+	reading_at date,
+	amount int,
+  	primary key(id)
+);
+--@END
+
+--@FUNCTION
+create function rom.resources_measure_list(a_host integer, a_self text, p_code text) returns setof rom.measure as $$
+begin
+	return query
+		select *
+			from rom.measure
+			where host_id=a_host and uri=a_self and (p_code is null or p_code=code) order by reading_at;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,owner http=post audit
+create function rom.resources_measure_add(a_host integer, a_self text, p_date date, p_code text, p_val int) returns int as $$
+declare
+  p_id int;
+begin
+	insert into rom.measure (host_id,uri,code,reading_at,amount) values (a_host,a_self,p_code,p_date,p_val) returning id into p_id;
+	return p_id;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,owner http=post audit
+create function rom.resources_measure_del(a_host integer, p_id text) returns integer as $$
+begin
+	delete from rom.measure where host_id=a_host and id=p_id;
+	return p_id;
+end;
+$$ language 'plpgsql';
+--@END
+
+

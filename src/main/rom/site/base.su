@@ -1,0 +1,5 @@
+--@DEPENDS:dict.ready,rom.ready
+
+--@SCHEMA
+create schema site;
+--@END

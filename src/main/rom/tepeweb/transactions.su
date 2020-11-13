@@ -1,0 +1,131 @@
+--@DEPENDS:.base,.account
+
+
+-- ttype:	
+--			sale,refund,buycredit,refundmoney
+
+-- creditchange: 
+--			'sale' disindaki ttype'lar icin temel teskil eder
+--			negatif deger alabilir
+
+-- tariff:
+--			'sale' icindir
+--			creditchange fromtime,totime ve amount verileri ile tarife kullanilarak hesaplanir
+
+-- fromtime:
+--			baslangis tarihidir, inclusive
+
+-- totime:
+--			bitis tarihi, exclusive
+--			expire tarihi anlami da tasir
+
+-- amount:
+--			tarihsel olmayan tarifelerde kullanilir
+
+
+--@TABLE norom
+create table tepeweb.transactions(
+	seq_id serial,
+	host_id int,
+	ttype text,
+	creditchange bigint,
+	feature text,
+	named text,
+	usage int,
+	amount int,
+	fromdate date,
+	todate date,
+	tariff json,
+	ignored boolean not null default false,
+	canceled boolean not null default false,
+	cancelwhy text,
+	contact text,
+	description text,
+	moneyamount text,
+	ftid text,
+	primary key(seq_id)
+);
+--@END
+
+--@FUNCTION norom
+create function tepeweb.transactions_new(a_host integer, p_ttype text, p_feature text, p_named text, p_usage int, p_amount int,
+    p_fromdate date, p_todate date, p_tariff tepeweb.tariff, a_contact text, p_description text, p_ftid text) returns int as $$
+	declare
+		v_ret int;
+		v_tariffjson json;
+		v_credits bigint;
+		
+	begin
+	
+		-- using errcode='rm402'
+		update tepeweb.account 
+			set credits=credits+p_creditchange 
+			where host_id=a_host and credits+p_creditchange>=0 
+			returning credits into v_credits;
+
+		if not found then
+			raise exception 'Not enough credits';
+		end if;
+		
+		insert into tepeweb.transactions (host_id,ttype,creditchange,
+				feature,named,usage,
+				amount,fromdate,todate,tariff,
+				contact,description,moneyamount,ftid) 
+			values (a_host, p_ttype, p_creditchange,
+				p_feature,p_named,p_usage,
+				p_amount,p_fromdate,p_todate,row_to_json(tariff),
+				a_contact,p_description,v_credits,p_ftid)
+			returning seq_id into strict v_ret;
+		
+		return v_ret;
+	end;
+$$ language plpgsql;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.transactions_cancel(a_host int, p_seqid int, p_cancelwhy text) returns boolean as $$
+	declare
+ 		v_one tepeweb.transactions;
+	begin
+	
+		select * into strict v_one 
+			from tepeweb.transactions 
+			where host_id=a_host and seq_id=p_seq_id;
+
+		update tepeweb.account set credits=credits-v_one.creditchange where credits-v_one.creditchange>=0;
+
+		if not found then
+			raise exception 'Charge action cancel failed: hostId:%,seq_id:%',a_host,p_seqid;
+		end if;
+
+		update tepeweb.transactions
+			set canceled=true,
+				cancelwhy=p_cancelwhy
+			where host_id=a_host and seq_id=p_seq_id;
+
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom
+create function tepeweb.transactions_get(a_host integer,a_self text) returns tepeweb.transactions as $$
+	declare 
+		v_one tepeweb.transactions;
+	begin
+		select * into strict v_one from tepeweb.transactions where host_id=a_host and uri=a_self;
+		return v_one;
+	end; 
+$$ language plpgsql;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.transactions_list(a_host integer) returns setof tepeweb.transactions as $$
+begin
+	return query 
+			select * from tepeweb.transactions where host_id=a_host;
+end;
+$$ language 'plpgsql';
+--@END

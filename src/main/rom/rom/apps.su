@@ -1,0 +1,157 @@
+--@DEPENDS:.base,.resources,.containers
+
+--@MACRO appfields
+title text not null,
+codes json,
+cls integer,
+state json
+--@END
+
+--@MACRO appfieldnames
+title,codes,cls,state
+--@END
+
+--@MACRO appparams
+p_title text,p_codes json, p_cls integer,p_state json
+--@END
+
+--@MACRO appparamnames
+p_title text,p_codes json, p_cls integer,p_state json
+--@END
+
+
+--@TABLE prefix=/_/apps hsc net=all cache=10m
+create table rom.apps(
+  >!{appfields}!<,
+  primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+
+--@FUNCTION roles=admin audit=p_uri http=post
+create function rom.apps_breed(a_host integer,a_contact text,p_uri text,p_mask bigint, p_parent text)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+			v_uri text:=pathfix(p_uri);
+		begin
+			--a_host integer, a_self text, p_html_file text,p_delegated text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,
+			--p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]
+			select * into strict v_one 
+				from rom.containers_new(a_host,v_uri,null,p_parent,a_contact,null,null,p_mask,
+				'rom','apps',v_uri||'/',null,null);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=user audit=p_title http=post
+create function rom.apps_new(a_host integer,a_self text,a_contact text,p_title text)
+ returns text as $$
+declare 
+	v_uri text;
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	if p_title is null or p_title='' then
+			raise exception 'title parameter should have value';
+	end if;
+	v_uri:=v_cont.uri_prefix||name_encode(p_title);	
+	
+	insert into rom.apps (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, title) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, p_title);
+	return v_uri;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=2
+create function rom.apps_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.apps where host_id=a_host+1;
+			insert into rom.apps
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,>!{appfieldnames}!<
+	  				from rom.apps
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.apps_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.apps where host_id=a_host;
+			insert into rom.apps
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,>!{appfieldnames}!<
+	  				from rom.apps
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin ver=2 http=post
+create function rom.apps_list(a_host integer,a_self text)
+ returns setof rom.apps as $$
+begin
+	return query 
+			select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,title,null::json,cls,null::json from rom.apps where host_id=a_host and container=a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin audit http=post ver=1
+create function rom.apps_change(a_host integer,a_self text,>!{appparamnames}!<)
+ returns text as $$
+begin
+	
+	update rom.apps set 
+			title=p_title,
+			codes=p_codes,
+			cls=p_cls,
+			state=p_state,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2 cache=30m
+create function rom.apps_get(a_host integer,a_self text)
+ returns rom.apps as $$
+declare 
+  v_one rom.apps;
+begin
+	
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,>!{appfieldnames}!<
+		into v_one 
+		from rom.apps 
+		where host_id=a_host and uri=a_self;
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin audit http=post
+create function rom.apps_destroy(a_host integer,a_self text)
+ returns text as $$
+begin
+	delete from rom.apps where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+

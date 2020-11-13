@@ -1,0 +1,333 @@
+--@DEPENDS:.base
+
+
+
+  	
+  	
+
+
+
+--@TABLE prefix=/_/_contents
+create table site.contents(
+   title text[] default array[''],
+summary text[] default array[''],
+tip text[] default array[null],
+icon text,
+medium_icon text,
+large_icon text,
+multilang_icon text[] default array[null],
+sound text,
+langcodes rom.langs[],
+viewy json
+   ) inherits (rom.resources);
+--@END
+
+   
+--@FUNCTION roles=owner,author,admin http=post audit ver=2
+create function site.contents_content(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,	p_title text,	
+	p_summary text, 
+	p_tip text, 
+	p_icon text, 
+	p_medium_icon text,
+	p_large_icon text, 
+	p_multilang_icon text,
+	p_sound text,
+	p_viewy json)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_select(langcodes,a_lang) into v_which
+		from site.contents
+		where host_id=a_host and uri=a_self;
+	
+	update site.contents
+		set   	title[v_which]=p_title,
+	summary[v_which]=p_summary, 
+	tip[v_which]=p_tip, 
+	icon=p_icon, 
+	medium_icon=p_medium_icon, 
+	large_icon=p_large_icon, 
+	multilang_icon[v_which]=p_multilang_icon, 
+	sound=p_sound,
+	langcodes[v_which]=a_lang,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin audit http=post ver=4
+create function site.contents_newlang(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+		select rom.langs_which(langcodes,a_lang) into v_which
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+		update rom.resources
+			set title[v_which]=title[1],
+				summary[v_which]=summary[1], 
+				multilang_icon[v_which]=multilang_icon[1], 
+				langcodes[v_which]=a_lang,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin audit http=post ver=2
+create function site.contents_dellang(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns boolean as $$
+declare 
+  v_which integer;
+begin
+		select rom.langs_has(langcodes,a_lang) into v_which
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+		if v_which is null then
+			return false;
+		end if;
+		update rom.resources
+			set langcodes=array_remove_index(langcodes,v_which),
+				title=array_remove_index(title,v_which),
+				summary=array_remove_index(summary,v_which),
+				multilang_icon=array_remove_index(multilang_icon,v_which),
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+		
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=owner,author,admin http=post ver=3
+create function site.contents_title(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,  p_title text)
+ returns text as $$
+declare
+	v_which integer;
+begin
+		select rom.langs_select(langcodes,a_lang) into v_which
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+		update rom.resources
+			set title[v_which]=p_title,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin ver=5 http=post
+create function site.contents_summary(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,  p_summary text)
+ returns text as $$
+declare
+	v_which integer;
+begin
+		select rom.langs_select(langcodes,a_lang) into v_which
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+		update rom.resources
+			set summary[v_which]=p_summary,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin http=post ver=4
+create function site.contents_tip(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,  p_tip text)
+ returns text as $$
+declare
+	v_which integer;
+begin
+		select rom.langs_select(langcodes,a_lang) into v_which
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+		update rom.resources
+			set tip[v_which]=p_tip,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin http=post ver=3
+create function site.contents_multilangicon(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,  p_icon text)
+ returns text as $$
+declare
+	v_which integer;
+begin
+		select rom.langs_select(langcodes,a_lang) into v_which
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+		update rom.resources
+			set multilang_icon[v_which]=p_icon,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=owner,author,admin http=post ver=3
+create function site.contents_icon(a_host integer,a_self text,  p_icon text)
+ returns text as $$
+declare
+begin
+		update rom.resources
+			set icon=p_icon,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin http=post ver=3
+create function site.contents_mediumicon(a_host integer,a_self text,  p_icon text)
+ returns text as $$
+declare
+begin
+		update rom.resources
+			set medium_icon=p_icon,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post ver=2
+create function site.contents_changelang(a_host integer,a_self text,  p_lng rom.langs)
+ returns text as $$
+declare
+begin
+	update site.contents 
+		set langcodes=array[p_lng]
+			,modified_date=now() 
+		where host_id=a_host and array_length(langcodes,1)=1;
+	return 'ok';
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin http=post ver=4
+create function site.contents_largeicon(a_host integer,a_self text,  p_icon text)
+ returns text as $$
+declare
+begin
+		update rom.resources
+			set large_icon=p_icon,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return v_d;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@MACRO contentfields
+title text[] default array[''],
+summary text[] default array[''],
+tip text[] default array[null],
+icon text,
+medium_icon text,
+large_icon text,
+multilang_icon text[] default array[null],
+sound text,
+langcodes rom.langs[],
+viewy json
+--@END
+
+--@MACRO contentsels
+array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+--@END
+
+--@MACRO contentfieldnames
+title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy
+--@END
+
+
+--@MACRO contentparams
+	p_title text,	
+	p_summary text, 
+	p_tip text, 
+	p_icon text, 
+	p_medium_icon text,
+	p_large_icon text, 
+	p_multilang_icon text,
+	p_sound text,
+	p_viewy json
+--@END
+
+
+--@MACRO contentparamnames
+	p_title,p_summary,p_tip,p_icon,p_medium_icon,p_large_icon,p_multilang_icon,p_sound,p_viewy
+--@END
+
+--@MACRO contentpublish
+title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy
+--@END
+
+
+--@MACRO contentinsertfields
+title, summary, tip, icon, medium_icon, large_icon, multilang_icon, sound, langcodes, viewy
+--@END
+
+
+--@MACRO contentinsertvalues
+array[p_title],array[p_summary],array[p_tip], p_icon, p_medium_icon, p_large_icon, array[p_multilang_icon], p_sound, array[a_lang], p_viewy
+--@END
+
+
+--@MACRO contentupdate
+  	title[v_which]=p_title,
+	summary[v_which]=p_summary, 
+	tip[v_which]=p_tip, 
+	icon=p_icon, 
+	medium_icon=p_medium_icon, 
+	large_icon=p_large_icon, 
+	multilang_icon[v_which]=p_multilang_icon, 
+	sound=p_sound,
+	langcodes[v_which]=a_lang
+--@END
+
+
+--@MACRO contentnewlang
+  	title[v_which]=title[1],
+	summary[v_which]=summary[1], 
+	multilang_icon[v_which]=multilang_icon[1], 
+	langcodes[v_which]=a_lang
+--@END
+
+
+--@MACRO contenturidef
+	v_uri text;
+  	v_uri_prefix text;
+--@END
+
+ --@MACRO contenturiassign
+ 	select uri_prefix into strict v_uri_prefix  from rom.containers where host_id=a_host and uri=a_self;
+	if v_uri_prefix is null then
+		v_uri_prefix:=a_self||'/';
+	end if;
+
+	if p_title is null or p_title='' then
+			raise exception 'title parameter should have value';
+	end if;
+	v_uri:=v_uri_prefix||name_encode(p_title);
+--@END

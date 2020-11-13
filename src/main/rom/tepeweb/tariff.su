@@ -1,0 +1,82 @@
+--@DEPENDS:tepeweb.base
+
+
+
+-- model: 
+--		tarife farklilastirmaya yarar, host basina charging tablosunda girilmistir
+
+-- feature:
+--
+
+-- limitto:
+--		her model,feature ikilisi icin satin alinacak miktara gore farkli tarife girilmesini saglar
+--		ornegin domainname satin almalarda 1 yillik icin farkli, 5 yillik icin farkli degerler vardir.
+
+-- denied:
+--		belli modeller icin bu hizmetin alinmasi yasaklanmistir
+
+-- credits:
+--		bu deger cent'ten kucuk olabilir yuvarlamalar soz konusu olucaktir
+
+--@TABLE norom
+create table tepeweb.tariff(
+	model text not null,
+	feature text not null,
+	limitto int not null,
+	denied boolean not null default false,
+	credits bigint,
+	primary key(model,feature,limitto)
+);
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.tariff_get(p_model text, p_feature text, p_use int)
+ returns tepeweb.tariff as $$
+declare
+	v_tariff tepeweb.tariff;
+begin
+	select * into strict v_tariff from tepeweb.tariff
+		where model=p_model and feature=p_feature and pr=p_pr and p_use<limitto
+		order by limitto asc
+		limit 1;
+	
+	
+	return v_tariff;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function tepeweb.tariff_credits(p_tariff tepeweb.tariff, p_fromtime date, p_todate date, p_amount int)
+ returns bigint as $$
+declare
+begin
+	if p_tariff.period=0 then
+		return p_amount*p_tariff.credits;
+	elsif p_tariff.period=1 then
+		return day_diff(p_todate,p_fromdate);
+	elsif p_tariff.period=2 then
+		return month_diff(p_todate,p_fromdate);
+	end if;
+	
+	return year_diff(p_todate,p_fromdate);
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.tariff_expire(p_tariff tepeweb.tariff, p_todate date)
+ returns date as $$
+declare
+begin
+	if p_tariff.period=0 then
+		return null;
+	end if;
+	
+	return p_todate;
+end;
+$$ language 'plpgsql';
+--@END

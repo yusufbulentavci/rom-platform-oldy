@@ -1,0 +1,157 @@
+--@DEPENDS:.base
+
+--@TABLE norom
+create table dict.users(
+	host_id integer not null,
+	user_name text not null,
+	credentials text not null,
+	roles integer not null default 0,
+	contact text,
+	active boolean not null default true,
+	primary key(host_id,user_name)
+);
+--@END
+
+--@FUNCTION norom
+create function dict.users_new(a_host integer, p_name text, p_pass text, p_roles integer, p_contact text)
+ returns void
+as
+$$
+begin
+	if p_roles is null then 
+		p_roles:=0;
+	end if;
+	insert into dict.users 
+		(host_id, user_name, credentials, roles, contact) values
+		(a_host, p_name, p_pass, p_roles, p_contact);
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function dict.users_changepass(a_host integer, p_name text, p_pass text)
+ returns void
+as
+$$
+begin
+	update dict.users 
+		set credentials=p_pass 
+		where host_id=a_host and user_name=p_name;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function dict.users_updateroles(a_host integer, p_name text, p_roles integer)
+ returns void
+as
+$$
+begin
+	update dict.users 
+		set roles=p_roles 
+		where host_id=a_host and user_name=p_name;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function dict.users_delete(a_host integer, p_name text)
+ returns void
+as
+$$
+begin
+	delete from dict.users where host_id=a_host and user_name=p_name;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function dict.users_makerolemask(p_role bigint, p_cando bigint)
+ returns bigint
+as
+$$
+declare
+	v_ret bigint:=0;
+begin
+	for i in 0..20 loop
+		if (p_role & (1<<i))!=0 then
+			v_ret:=v_ret+(p_cando<<(i*3));
+		end if;
+	end loop;
+	return v_ret;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function dict.users_canread(a_contact text, a_role int, p_owner text, p_mask bigint,p_relatedcids text[])
+ returns boolean
+as
+$$
+begin
+	if a_contact=p_owner then
+		a_role:=a_role|(1<<2);
+	else
+		a_role:=a_role&(~(1<<2));
+	end if;
+	
+	return (p_mask&dict.users_makerolemask(a_role,7))!=0;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function dict.users_cando(a_contact text, a_role int, p_owner text, p_mask bigint,p_relatedcids text[],p_do int)
+ returns boolean
+as
+$$
+begin
+	if a_contact=p_owner then
+		a_role:=a_role|(1<<2);
+	else
+		a_role:=a_role&(~(1<<2));
+	end if;
+	
+	return (p_mask&dict.users_makerolemask(a_role,p_do))!=0;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function dict.users_desk(a_host integer)
+	returns setof dict.users as $$
+		select host_id,user_name,credentials,roles,contact,active from dict.users where (roles&(1<<8))<>0 and host_id=a_host;
+	$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function dict.users_guestcanread(p_mask bigint)
+ returns boolean
+as
+$$
+begin
+	return (p_mask&4)!=0;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function dict.users_guestorcontactcanread(p_mask bigint)
+ returns boolean
+as
+$$
+begin
+	return (p_mask&36)!=0;
+	
+end;
+$$ language 'plpgsql';
+--@END

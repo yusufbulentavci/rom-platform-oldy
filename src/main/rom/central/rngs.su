@@ -1,0 +1,14 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.rngs(
+	rng serial,
+	ipt boolean,
+	sta bigint,
+	sto bigint,
+	judge int,
+  	primary key(rng)
+  );
+--@END

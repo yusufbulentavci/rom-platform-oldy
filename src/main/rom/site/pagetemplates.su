@@ -1,0 +1,56 @@
+--@DEPENDS:.base
+
+--@TABLE prefix=/_/pagetemplates net=one
+create table site.pagetemplates(
+	langcodes rom.langs[],
+	titles text[],
+	uris text[],
+	summaries text[],
+	spots text[],
+	bodies text[],
+	
+	metas text[],
+  	primary key(host_id,uri)  	
+) inherits (rom.resources);
+--@END
+
+
+--@FUNCTION norom
+create function rom.langs_which(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return 1;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return 1;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+  
+--@FUNCTION norom
+create function rom.langs_has(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return null;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return null;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END

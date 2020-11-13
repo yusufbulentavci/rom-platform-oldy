@@ -1,0 +1,31 @@
+--@DEPENDS:.base
+
+
+--@TABLE nores clp ozellik=2 ozellikler=
+CREATE TABLE bilgi.buyukluk
+(
+	id bigint,
+	boolean sonradan not null
+);
+--@END
+
+
+--@TABLE nores clp ozellik=2 ozellikler=
+CREATE TABLE bilgi.birim
+(
+	id smallint primary key,
+	alan bigint references bilgi.buyukluk(id),
+	adi text
+);
+--@END
+
+
+--@TABLE nores clp ozellik=2 ozellikler=
+CREATE TABLE bilgi.olcum
+(
+	id bigint,
+	birim bigint references bilgi.birim(id),
+	miktar bigint
+);
+--@END
+

@@ -1,0 +1,210 @@
+--@DEPENDS:.base,.contacts
+
+
+--@MACRO commentfields
+  dialog_id text not null,
+  contact text not null,
+  lang_id rom.langs not null,
+  comment text,
+  cmd json,
+  mime json,
+  bymail text,
+  approved boolean not null default false,
+  refer_comment text,
+  likes text[],
+  dislikes text[],
+  onpage boolean not null default false
+--@END
+
+--@MACRO commentfieldnames
+	dialog_id,contact,lang_id,comment,cmd,mime,bymail,approved,refer_comment,likes,dislikes,onpage
+--@END
+
+--@MACRO commentparams
+	p_dialog_id text,
+	p_contact text,
+	p_comment text,
+	p_cmd json,
+	p_mime json,
+	p_bymail text,
+	p_approved boolean,
+	p_refer_comment text,
+	p_likes text[],
+	p_dislikes text[],
+	p_onpage boolean
+--@END
+	
+--@MACRO commentparamnames
+	p_dialog_id,p_contact,p_comment,p_cmd,p_mime,p_bymail,p_approved,p_refer_comment,p_likes,p_dislikes,p_onpage
+--@END
+
+	
+
+--@SEQUENCE
+create sequence comment_id_seq;
+--@END
+
+--@TABLE prefix=/_/_comments roles=contact  net=intra cache=0m ver=1
+create table rom.comments(
+  >!{commentfields}!<,
+  primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.comments add column onpage boolean not null default false; 
+--@END  
+
+--@FUNCTION norom
+create function rom.comments_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/_comments',null,null,null,null,null,null,
+							'rom','comments','/_/_comments/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.comments_list(a_host integer, p_dialog_id text, p_approval boolean) returns setof rom.comments as $$
+begin
+	return query select * from rom.comments where host_id=a_host and dialog_id=p_dialog_id and onpage=true and (not p_approval or approved=true);
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin,author ver=1 http=post
+create function rom.comments_listwaitingapproval(a_host integer, p_dialog_id text)
+ returns setof rom.comments as $$
+begin
+	if (p_dialog_id is not null) then
+		return query select * from rom.comments where host_id=a_host and dialog_id=p_dialog_id and approved=false  and onpage=true;
+	else
+		return query select * from rom.comments where host_id=a_host and approved=false  and onpage=true;
+		
+	end if;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+--@FUNCTION norom ver=1 http=post
+create function rom.comments_new(a_host integer, a_lang rom.langs, p_dialog_id text, 
+	a_contact text, p_comment text, p_cmd json, p_mime json, p_bymail text, p_onpage boolean)
+ returns rom.comments as $$
+declare 
+	v_one rom.comments;
+	v_delegated text;
+	v_gid text;
+	v_relatedcids text[];
+	v_mask bigint;
+begin
+	 
+	select delegated,gid,relatedcids,mask 
+		into strict v_delegated,v_gid,v_relatedcids,v_mask 
+		from rom.dialogs where host_id=a_host and uri=p_dialog_id;
+
+	insert into rom.comments (host_id,uri,container,delegated,ownercid,
+			gid,relatedcids,mask,
+			dialog_id,contact,lang_id,comment,cmd,mime,bymail,onpage) 
+		values (a_host,'/_/_comments/'||nextval('comment_id_seq'),'/_/_comments',v_delegated,a_contact,
+			v_gid,v_relatedcids,v_mask,
+			p_dialog_id,a_contact,a_lang,p_comment,p_cmd,p_mime,p_bymail,p_onpage)
+		returning *  
+		into v_one;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION ver=2 http=post
+create function rom.comments_change(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,>!{commentparams}!<)
+ returns text as $$
+begin
+	update rom.comments set 
+			contact=p_contact,
+			lang_id=a_lang,
+			comment=p_comment,
+			cmd=p_cmd,
+			mime=p_mime,
+			bymail=p_bymail,
+			approved=p_approved,
+			refer_comment=p_refer_comment,
+			likes=p_likes,
+			dislikes=p_dislikes,
+			onpage=p_onpage,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user,admin http=post ver=1
+create function rom.comments_approve(a_host integer,a_self text)
+ returns text as $$
+declare 
+	v_one rom.comments;
+begin
+	update rom.comments set 
+			approved=true, modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.comments_get(a_host integer,a_self text)
+ returns rom.comments as $$
+declare 
+	v_one rom.comments;
+begin
+	select *
+		into v_one 
+		from rom.comments 
+		where host_id=a_host and uri=a_self;
+
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=contact http=post
+create function rom.comments_destroy(
+	a_host integer, 
+	a_self text
+)
+ returns text as $$
+declare
+	v_one rom.comments;
+begin
+	delete from rom.comments where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.comments_maintain()
+ returns void as $$
+declare
+	v_expire_date timestamp:=now()-(interval '1 hour');
+begin
+	delete from rom.comments 
+		where onpage=false and creation_date<v_expire_date;
+		
+end;
+$$ language 'plpgsql';
+--@END

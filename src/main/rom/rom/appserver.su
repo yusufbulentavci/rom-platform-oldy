@@ -1,0 +1,115 @@
+--@DEPENDS:.base,.containers,.contacts
+
+--@TYPE
+create type rom.appserver_resource as(
+  uri text,
+  container text,
+  html_file text,
+  modified_date timestamp,  
+  owner_role text,  
+  schema_name text,
+  type_name text,
+  is_container boolean  
+);
+--@END
+
+--@FUNCTION norom
+create function rom.appserver_get_resource(a_host integer, p_uri text) 
+returns rom.appserver_resource
+as
+$$
+declare
+	v_one rom.appserver_resource;
+begin
+	
+	select r.uri,r.container,r.html_file,r.modified_date,r.owner_role,n.nspname::text,c.relname::text,false
+		into v_one 
+		from rom.resources r, pg_class c, pg_namespace n 
+		where  host_id=a_host and uri=p_uri and c.oid=r.tableoid and c.relnamespace=n.oid;
+	
+	if v_one.uri is null then
+		return v_one;
+	end if;
+		
+	if v_one.schema_name='rom' and v_one.type_name='containers' then
+		
+		select schema_name,type_name, true 
+			into strict v_one.schema_name,v_one.type_name,v_one.is_container
+			from rom.containers 
+			where host_id=a_host and uri=v_one.uri;
+	end if; 
+	
+	return v_one;		
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function rom.appserver_cnameofcid(a_host integer, p_cid text) 
+returns text as $$
+declare
+	v_cname text;
+begin
+	select first_name||' '||last_name into v_cname from rom.contacts where host_id=a_host and uri=p_cid;
+	return v_cname;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.appserver_emailofcid(a_host integer, p_cid text) 
+returns text as $$
+	select email from rom.contacts where host_id=a_host and uri=p_cid;
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function rom.appserver_pwdofcid(a_host integer, p_cid text) 
+returns text as $$
+	select cipher from rom.contacts where host_id=a_host and uri=p_cid;
+$$ language sql;
+--@END
+
+
+--@FUNCTION norom
+create function rom.appserver_pwdofemail(a_host integer, p_email text) 
+returns text as $$
+	select cipher from rom.contacts where host_id=a_host and email=p_email;
+$$ language sql;
+--@END
+
+
+--@FUNCTION norom
+create function rom.appserver_usernamebyemail(a_host integer, p_email text) 
+returns setof text
+as
+$$
+begin
+	return query 
+		select du.user_name 
+			from dict.users du,rom.contacts rc 
+				where du.host_id=a_host and rc.host_id=a_host and rc.uri=du.contact
+					and rc.email=p_email;		
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.appserver_getcidbyfbid(a_host integer, p_fbid text) 
+returns setof rom.contacts as $$
+	select * from rom.contacts where host_id=a_host and fb_id=p_fbid limit 1;
+$$ language sql;
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.appserver_getcidbyemail(a_host integer, p_email text) 
+returns setof rom.contacts as $$
+	select * from rom.contacts where host_id=a_host and email=p_email limit 1;
+$$ language sql;
+--@END
+
+
+
+

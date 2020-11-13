@@ -1,0 +1,460 @@
+--@DEPENDS:.base
+
+
+-- paystyle:
+--		paypal:
+--			active: boolean
+-- 			cert_id: upload to paypal and paypal gives you
+--			paypalid: business id
+--			chargepercentage:
+--			chargeprice:
+--		transfer:
+--			active: boolean
+--			chargepercentage:
+--			chargeprice:
+--			banks[]:
+--				username:
+--				bank:
+--				branch:
+--				iban:
+--		ondelivery:
+--			active: boolean
+--			chargepercentage:
+--			chargeprice:
+
+-- shipstyle:
+--		manual:
+--			active: boolean
+--			title:
+--			chargepercentage:
+--			chargeprice:
+--			acceptpayment:
+--			acceptcreditcard:			
+
+-- cpic: pre informing conditions
+-- crs: remote sale contract
+
+--@TABLE ver=7 prefix=/_/_org one net=intra
+create table rom.org(
+	issue_year integer not null,
+	issue_nextid integer not null,
+	shipstyle json,
+	paystyle json,
+	langcodes rom.langs[],
+	cpic text[],
+	crs text[],
+	fbappid text,
+	nfs json,
+	startssl text,
+	ga text,
+	forcehttps boolean not null default false,
+	primary key(host_id,uri)
+) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.org add column shipstyle json;
+--@UPGRADE: 1 alter table rom.org add column paystyle json;
+--@UPGRADE: 2 alter table rom.org add column cpic text[];
+--@UPGRADE: 2 alter table rom.org add column crs text[];
+--@UPGRADE: 3 alter table rom.org add column fbappid text;
+--@UPGRADE: 4 alter table rom.org add column nfs text;
+--@UPGRADE: 5 alter table rom.org add column startssl text;
+--@UPGRADE: 6 alter table rom.org add column ga text;
+--@UPGRADE: 7 alter table rom.org add column forcehttps boolean not null default false;
+--@END
+
+--@FUNCTION norom
+create function rom.org_new(a_host integer) returns text as $$
+	begin
+		insert into rom.org (host_id,uri,issue_year,issue_nextid) values (a_host,'/_/_org',EXTRACT(YEAR FROM current_date),0);
+		return '/_/_org';
+	end;
+$$ language plpgsql;
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.org_nextissue(
+	a_host integer
+)
+ returns text as $$
+declare 
+  v_ret text;
+  v_foundyear integer;
+  v_tableyear integer;
+begin
+	select issue_year,EXTRACT(YEAR FROM current_date) into v_tableyear,v_foundyear 
+		from rom.org
+		where host_id=a_host;
+	
+	if v_foundyear <> v_tableyear then
+		update rom.org set issue_nextid=0,
+				issue_year=v_foundyear,
+				modified_date=now() 
+			where host_id=a_host;
+	end if;
+
+
+	update rom.org set issue_nextid=issue_nextid+1,
+			modified_date=now() 
+		where host_id=a_host 
+		returning issue_year||''||issue_nextid into v_ret;
+	
+	return v_ret;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION role=admin http=post audit=p_paystyle ver=1
+create function rom.org_setpaystyle(
+	a_host integer,
+	p_paystyle json
+)
+ returns boolean as $$
+begin
+	update rom.org 
+		set paystyle=p_paystyle,
+			modified_date=now() 
+		where host_id=a_host;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION role=admin
+create function rom.org_getpaystyle(a_host integer) 
+	returns json as $$
+	select paystyle from rom.org where host_id=a_host;
+$$ language sql;
+--@END
+
+--@FUNCTION role=admin http=post audit=p_paystyle ver=1
+create function rom.org_setshipstyle(
+	a_host integer,
+	p_shipstyle json
+)
+ returns boolean as $$
+begin
+
+	update rom.org 
+		set shipstyle=p_shipstyle,
+			modified_date=now() 
+		where host_id=a_host;
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION role=admin
+create function rom.org_getshipstyle(a_host integer) 
+	returns json as $$
+	select shipstyle from rom.org where host_id=a_host;
+$$ language sql;
+--@END
+
+--@FUNCTION http=post
+create function rom.org_getorderpref(
+	a_host integer
+)
+ returns json as $$
+declare
+	v_shipstyle json;
+	v_paystyle json;
+	v_ret json;
+	v_paypal json;
+	v_ondelivery json;
+	v_transfer json;
+	v_newpaystyle json;
+begin
+	select paystyle,shipstyle 
+		into v_paystyle,v_shipstyle 
+		from rom.org
+		where host_id=a_host;
+	
+	if not found or v_paystyle is null or v_shipstyle is null then
+		raise exception 'order pref not found';
+	end if;
+
+	v_paypal:=v_paystyle->'paypal';
+	if v_paypal is not null and (v_paypal->'active') is not null and (v_paypal->'active')::text::boolean then
+		v_newpaystyle:=json_set(v_newpaystyle,'paypal',true);
+	end if;
+	
+	v_ondelivery:=v_paystyle->'ondelivery';
+	if v_ondelivery is not null and (v_ondelivery->'active') is not null and (v_ondelivery->'active')::text::boolean then
+		v_newpaystyle:=json_set(v_newpaystyle,'ondelivery',v_ondelivery);
+	end if;
+	
+	v_transfer:=v_paystyle->'transfer';
+	if v_transfer is not null and (v_transfer->'active') is not null and (v_transfer->'active')::text::boolean then
+		v_newpaystyle:=json_set(v_newpaystyle,'transfer',v_transfer);
+	end if;
+
+	v_ret:=json_set(v_ret,'shipstyle',v_shipstyle);
+	v_ret:=json_set(v_ret,'paystyle',v_newpaystyle);
+			
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1
+create function rom.org_getcpic(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns text as $$
+declare
+	v_one text;
+	v_langempty boolean;
+	
+begin
+
+	select langcodes is null into v_langempty 
+		from rom.org 
+		where host_id=a_host and uri=a_self;
+	if v_langempty then
+		return '';
+	end if;
+
+	select cpic[wh] into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from rom.org 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1
+create function rom.org_getcrs(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns text as $$
+declare
+	v_one text;
+	v_langempty boolean;
+begin
+
+	select langcodes is null into v_langempty 
+			from rom.org 
+			where host_id=a_host and uri=a_self;
+	if v_langempty then
+		return '';
+	end if;
+
+	select crs[wh] into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from rom.org 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin ver=2 http=post
+create function rom.org_changelanged(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,p_cpic text, p_crs text)
+ returns text as $$
+declare 
+	v_which integer;
+	v_langempty boolean;
+begin
+	select langcodes is null into v_langempty 
+		from rom.org 
+		where host_id=a_host and uri=a_self;
+	if v_langempty then
+		update rom.org
+			set
+			langcodes=array[a_lang]::rom.langs[],
+			cpic=array[p_cpic]::text[],
+			crs=array[p_crs]::text[]
+			where host_id=a_host and uri=a_self;
+		return a_self;
+	end if;
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+			from rom.org
+			where host_id=a_host and uri=a_self;
+		
+	update rom.org 
+		set 
+			langcodes[v_which]=a_lang,
+			cpic[v_which]=p_cpic,
+			crs[v_which]=p_crs
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION role=admin http=post audit=p_fbappid ver=1
+create function rom.org_setfbappid(a_host integer, p_fbappid text)
+ returns boolean as $$
+begin
+
+	update rom.org 
+		set fbappid=p_fbappid,
+			modified_date=now() 
+		where host_id=a_host;
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION role=admin http=post audit=p_fbappid ver=1
+create function rom.org_setstartssl(a_host integer, p_startssl text)
+ returns boolean as $$
+begin
+
+	update rom.org 
+		set startssl=p_startssl,
+			modified_date=now() 
+		where host_id=a_host;
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 role=admin http=post
+create function rom.org_getstartssl(a_host integer)
+ returns text as $$
+declare
+	v_ret text;
+begin
+	select startssl into v_ret from rom.org 
+		where host_id=a_host;
+
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION role=admin http=post
+create function rom.org_setnfs(a_host integer, p_nfs json)
+ returns boolean as $$
+begin
+
+	update rom.org 
+		set nfs=p_nfs,
+			modified_date=now() 
+		where host_id=a_host;
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION role=admin http=post
+create function rom.org_getnfs(a_host integer)
+ returns boolean as $$
+declare
+	v_ret json;
+begin
+	select nfs into v_ret 
+		where host_id=a_host;
+
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION role=admin http=post
+create function rom.org_setga(a_host integer, p_ga text)
+ returns boolean as $$
+begin
+
+	update rom.org 
+		set ga=p_ga,
+			modified_date=now() 
+		where host_id=a_host;
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION role=admin http=post
+create function rom.org_getga(a_host integer)
+ returns text as $$
+declare
+	v_ret text;
+begin
+	select ga into v_ret from rom.org 
+		where host_id=a_host;
+
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION role=admin http=post
+create function rom.org_setforcehttps(a_host integer, p_forcehttps boolean)
+ returns boolean as $$
+begin
+
+	update rom.org 
+		set forcehttps=p_forcehttps,
+			modified_date=now() 
+		where host_id=a_host;
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION role=admin http=post
+create function rom.org_getforcehttps(a_host integer)
+ returns boolean as $$
+declare
+	v_ret boolean;
+begin
+	select forcehttps into v_ret from rom.org 
+		where host_id=a_host;
+
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin audit http=post
+create function rom.org_dellang(a_host integer, p_dellang rom.langs)
+ returns boolean as $$
+declare 
+  v_which integer;
+begin
+	select rom.langs_has(langcodes,p_dellang) into v_which
+		from rom.org
+		where host_id=a_host;
+	if v_which is null then
+		return false;
+	end if;
+	update rom.org
+		set langcodes=array_remove_index(langcodes,v_which),
+			cpic=array_remove_index(cpic,v_which),
+			crc=array_remove_index(crc,v_which),
+			modified_date=now()
+		where host_id=a_host;
+
+		
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@RUN utest
+	select check_not_null(rom.org_new(1));
+	select rom.org_setshipstyle(1,'{}'::json);
+	select rom.org_setpaystyle(1,'{"paypal":{"active": true, "cert_id":"blabla","paypalid":"at@at"},"transfer":{"active":true,"banks":[{"username":"Ali Nail","bank":"Yapı kredi","branch":"Rize,Merkez","iban":"sdfasf"}]},"ondelivery":{"active":true}}'::json);
+	select check_not_null(rom.org_getorderpref(1));
+--@END
+

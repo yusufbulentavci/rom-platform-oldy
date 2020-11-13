@@ -1,0 +1,392 @@
+--@DEPENDS:.base,.contents,.questions,.writings
+
+
+
+--@TABLE norom
+create table site.examon(
+	host_id int,
+	uri text,
+	cid text,
+	starttime timestamp,
+	endtime timestamp,
+	responses int[],
+	truecount int,
+	falses int[],
+	empties int[],
+	grade int,
+  	primary key(host_id,uri,cid)
+);
+--@END  
+
+
+--@SEQUENCE
+create sequence exams_id_seq;
+--@END
+
+
+--@TABLE prefix=/_/exams ver=1 net=intra cache=10m
+create table site.exams(
+	questions text[],
+	requirements text[],
+	duration int,
+	elimination int,
+	page text,
+	primary key(host_id,uri)
+  ) inherits (site.contents);
+--@UPGRADE: 1 alter table site.exams add column page text;
+--@END  
+
+
+--@FUNCTION norom
+create function site.exams_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(a_host,'/_/exams',null,null,null,null,null,1835300,
+				'site','exams','/_/exams/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=user audit=p_uri
+create function site.exams_new(	a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_title text)
+ returns text as $$
+declare 
+	v_cont rom.containers;
+	v_uri text:='/_/exams/'||nextval('exams_id_seq');
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+	insert into site.exams (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, title) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], array[p_title]);
+	return v_uri;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=contact ver=2
+create function site.exams_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns setof site.contents as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.exams
+					where host_id=a_host and container=a_self
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user audit
+create function site.exams_destroy(a_host integer,a_self text) returns text as $$
+	begin
+		delete from site.exams where host_id=a_host and uri=a_self;
+		return a_self;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user ver=2
+create function site.exams_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns site.exams as $$
+declare 
+	v_one site.exams;
+begin
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,questions,requirements,duration
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.exams 
+				where host_id=a_host and uri=a_self
+			) tbl;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user http=post 
+create function site.exams_setquestions(a_host integer,a_self text,p_questions text[])
+ returns boolean as $$
+declare 
+begin
+	
+	update site.exams
+		set questions=p_questions,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user http=post 
+create function site.exams_setrequirements(a_host integer,a_self text,p_requirements text[])
+ returns boolean as $$
+declare 
+begin
+	
+	update site.exams
+		set requirements=p_requirements,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user http=post 
+create function site.exams_setduration(a_host integer,a_self text,p_duration int)
+ returns boolean as $$
+declare 
+begin
+	
+	update site.exams
+		set duration=p_duration,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user http=post 
+create function site.exams_setelimination(a_host integer,a_self text,p_elim int)
+ returns boolean as $$
+declare 
+begin
+	
+	update site.exams
+		set elimination=p_elim,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,author
+create function site.exams_open(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_contact text)
+ returns site.exams as $$
+declare 
+	v_one site.exams;
+	v_t text;
+begin
+	select uri into v_t 
+		from site.examon
+		where host_id=a_host and uri=a_self and cid=p_contact;
+	
+	-- already attended
+	if found then
+		return null;
+	end if;
+	
+	insert into site.examon (host_id,uri,cid) values (a_host,a_self,p_contact);
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=contact ver=2
+create function site.exams_start(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, a_contact text)
+ returns site.exams as $$
+declare 
+	v_one site.exams;
+	v_t text;
+begin
+	select uri into v_t 
+		from site.examon
+		where host_id=a_host and uri=a_self and cid=a_contact;
+	
+	-- not opened
+	if not found then
+		return null;
+	end if;
+	
+	
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,questions,requirements,duration
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.exams 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	
+	if not found then
+		return v_one;
+	end if;
+	
+	insert into site.examon (host_id,uri,cid,starttime) values (a_host,a_self,a_contact,now());
+	
+	update site.examon set 
+		starttime=now()
+		where hostid=a_host and uri=a_self and cid=a_contact;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user http=post ver=3
+create function site.exams_finished(a_host integer,a_self text,a_contact text, p_responses int[])
+ returns boolean as $$
+declare 
+	v_on site.examon;
+	v_one site.exams;
+	v_t text;
+	v_end timestamp:=now();
+	v_cc int:=0;
+	v_falses int[];
+	v_empties int[];
+	v_co int;
+	v_emptycount int:=0;
+	v_falsecount int:=0;
+	v_lefttrues real:=0;
+	v_trues int:=0;
+	v_grade int;
+begin
+	
+	select * into strict v_on 
+		from site.examon
+		where host_id=a_host and uri=a_self and cid=a_contact;
+
+
+	-- if already attended return false
+	if v_on.endtime is not null then
+		return false;
+	end if;
+
+		
+	select * into strict v_one 
+		from site.exams
+		where host_id=a_host and uri=a_self;
+	
+  	if array_length(p_responses, 1) <> array_length(v_one.questions,1) then
+		return false;
+	end if;
+	
+
+	for i in array_lower(p_responses,1)..array_upper(p_responses,1) loop
+		
+		select correct_option into v_co 
+			from site.questions
+			where host_id=a_host and uri=v_one.questions[i];
+		
+		if p_responses[i] is null then
+			v_empties:=v_empties||i;
+			v_emptycount:=v_emptycount+1;
+		elsif v_co=p_responses[i] then
+			v_cc:=v_cc+1;
+		else
+			v_falses:=v_falses||i;
+			v_falsecount:=v_falsecount+1;
+		end if;
+	end loop;
+	
+	
+	--select v_end-now()=(0||' secs')::interval
+	v_lefttrues:=v_cc;
+	if v_one.elimination is not null and v_falsecount>0 then
+		v_lefttrues:=v_lefttrues-v_falsecount::numeric/v_one.elimination;
+	end if;
+	
+	--now grade
+	v_grade:=(10000/array_lower(p_responses,1)::numeric)*v_lefttrues;
+	
+	
+	
+	update site.examon
+		set endtime=v_end,
+			responses=p_responses,
+			truecount=v_cc,
+			falses=v_falses,
+			empties=v_empties,
+			grade=v_grade
+		where host_id=a_host and uri=a_self and cid=a_contact;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=contact ver=1
+create function site.exams_myresults(a_host int, a_contact text)
+ returns setof json as $$
+begin
+   return query
+   select row_to_json(row(host_id , uri, to_char(starttime, 'YYYY-MM-DD HH:MI:SS'), to_char(endtime, 'YYYY-MM-DD HH:MI:SS'), 
+       responses, truecount, falses, empties, grade)) 
+   from site.examon
+   where host_id=a_host and cid=a_contact;
+   
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function site.exams_listresults(a_host int, p_contact text)
+ returns setof json as $$
+begin
+	return query
+		select to_json(s) 
+		from site.examon s
+		where host_id=a_host and cid=p_contact; 
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user http=post 
+create function site.exams_setpage(a_host integer,a_self text,p_page text)
+ returns boolean as $$
+declare 
+begin
+	
+	update site.exams
+		set page=p_page,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=contact http=post 
+create function site.exams_getexambypage(a_host int,p_page text)
+ returns text as $$
+declare 
+	v_one text;
+begin
+	
+	select uri into v_one
+		from site.exams
+		where host_id=a_host and page=p_page;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+

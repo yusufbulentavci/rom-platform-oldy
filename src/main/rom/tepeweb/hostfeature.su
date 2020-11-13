@@ -1,0 +1,190 @@
+--@DEPENDS:tepeweb.base,.feature,.transactions,.account,.tariff
+
+
+-- expire:
+--			bazi feature'lar expire olmaz
+
+-- named:
+--			host bir feature'dan farkli expire date'li iki taneye sahip olabilir
+--			domain name icin uyduruldu
+
+-- autorenewperiod:
+--			feature.autorenewoptions degerlerinden biri
+--			invoicetperiod tipinde
+
+-- usage:
+--			feature.usageunit birimindedir
+
+-- stock:
+--			satin alinan isimle, id ile adreslenebilen ogeler
+
+--@TABLE norom
+create table tepeweb.hostfeature(
+	host_id int not null,
+	feature text not null,
+	named text not null,
+	disabled boolean not null default false,
+	expire date,
+	autorenewperiod int,
+	usage int not null default 0,
+	usage_hourly int[],
+	usage_daily int[],
+	usage_monthly int[],
+	refid text[],
+	reasons int[],
+	primary key(host_id,feature,named)
+);
+--@END
+
+--@FUNCTION norom
+create function tepeweb.hostfeature_min(a_host int) 
+	returns boolean as $$
+	declare
+		v_expire date;
+	begin
+		select (now()+interval '1 month')::date into v_expire;
+	
+		insert into tepeweb.hostfeature (host_id,feature,named,expire) values (a_host,'cost.base','cost.base',v_expire);
+		
+		insert into tepeweb.hostfeature (host_id,feature,named,expire) values (a_host,'usage.disk','usage.disk',v_expire);
+		insert into tepeweb.hostfeature (host_id,feature,named,expire) values (a_host,'usage.cpu','usage.cpu',v_expire);
+		insert into tepeweb.hostfeature (host_id,feature,named,expire) values (a_host,'usage.net','usage.net',v_expire);
+		
+		return true;
+	end;
+			
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.hostfeature_list(a_host int) 
+	returns setof tepeweb.hostfeature as $$
+	select * from tepeweb.hostfeature where host_id=a_host;
+$$ language sql;
+--@END
+
+--@FUNCTION norom ver=1
+create function tepeweb.hostfeature_get(a_host int, p_feature text, p_named text) 
+	returns setof tepeweb.hostfeature as $$
+	select * from tepeweb.hostfeature 
+			where host_id=a_host and feature=p_feature and named=p_named;
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.hostfeature_get(a_host int) 
+	returns setof tepeweb.hostfeature as $$
+	select * from tepeweb.hostfeature 
+			where host_id=a_host;
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.hostfeature_sale(a_host int, a_contact text, p_feature text, p_named text, p_refid text,
+		p_autorenewperiod int, p_fromdate date, p_todate date, p_amount int,
+		p_desc text, p_ftid text) 
+	returns int as $$
+	declare
+		v_account tepeweb.account;
+		v_feature tepeweb.feature;
+		v_tariff tepeweb.tariff;
+		v_featureuser tepeweb.hostfeature;
+		v_use int:=0;
+		v_tid int;
+		
+		v_credits bigint;
+		v_expire date;
+	begin
+
+-- Get or create host feature			
+		select * into v_featureuser 
+			from tepeweb.hostfeature_get(a_host,p_feature,p_named);
+		
+		if not found then
+			insert into v_featureuser (host_id,feature,named) values (a_host,p_feature,p_named);
+			select * into strict v_featureuser 
+				from tepeweb.hostfeature_get(a_host,p_feature,p_named);
+		end if;
+
+-- Find out tariff
+		select * into strict v_tariff 
+			from tepeweb.tariff_get(v_account.model, p_feature, v_use);
+		
+-- Make calculations with tariff
+		select * into strict v_credits
+			from tepeweb.tariff_credits(v_tariff, v_fromdate, v_todate, p_amount);
+		
+		select * into strict v_expire
+			from tepeweb.tariff_expire(v_tariff, v_todate);
+
+
+-- Charge user for feature
+		select * into strict v_tid
+			from tepeweb.transactions_new(a_host, 'sale', 
+				p_feature, p_named, p_usage, v_featureuser.usage, p_amount,
+    			p_fromdate, v_expire, v_tariff, a_contact, p_desc, p_ftid); 
+
+		
+-- Update host feature
+		update tepeweb.hostfeature 
+			set expire=v_expire,
+				refid=refid||p_refid,
+				reasons=reasons||v_tid
+			where host_id=a_host and feature=p_feature and named=p_named;
+		
+		return v_tid;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function tepeweb.hostfeature_disable(a_host int, p_feature text, p_named text) 
+	returns int as $$
+	declare
+	begin
+		update tepeweb.hostfeature
+			set disabled=true
+			where host_id=a_host and feature=p_feature and named=p_named;
+		
+		return 0;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function tepeweb.hostfeature_canceltransaction(a_host int, p_feature text, p_named text, p_tid int, p_refid text, p_why text) 
+	returns boolean as $$
+	declare
+		v_hf tepeweb.hostfeature;
+		v_trans tepeweb.transactions;
+		v_temp boolean;
+		v_left int[];
+		v_leftrefid text[];
+	begin
+		select * into strict v_hf
+			from tepeweb.hostfeature
+			where host_id=a_host and feature=p_feature and named=p_named and p_tid=any(reasons);
+		
+		select * into strict v_temp
+			from tepeweb.transactions_cancel(a_host,p_tid,p_why);
+
+		select array_remove(v_fh.reasons,p_tid) into v_left;
+		
+		if p_refid is null then
+			select v_hf.refid into v_leftrefid;
+		else
+			select array_remove(v_fh.refid,p_refid) into v_leftrefid;
+		end if;
+		
+		update tepeweb.hostfeature
+			set disabled=(array_length(v_left,1) is null),
+				reasons=v_left,
+				refid=v_leftrefid
+			where host_id=a_host and feature=p_feature and named=p_named;
+		
+		return true;
+	end;
+$$ language 'plpgsql';
+--@END
+

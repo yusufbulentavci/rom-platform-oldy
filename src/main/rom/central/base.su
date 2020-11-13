@@ -1,0 +1,6 @@
+--@DEPENDS:dict.ready
+
+--@SCHEMA
+create schema central;
+--@END
+

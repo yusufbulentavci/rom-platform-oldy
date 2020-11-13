@@ -1,0 +1,148 @@
+--@DEPENDS:.contacts
+
+-- Calculates price,vat(tariff) with options(json) of stocks
+-- Do not know stocks, Stocks do know tariffmodel
+--		Stocks updates its tariff json every time options json changes
+-- code: enum 'coef'
+-- coefficient: stock içinde price of options->coef.
+
+--@TABLE prefix=/_/tariffmodel net=intra
+create table rom.tariffmodel(
+	title text,
+	code text,
+	baseprice text,
+	vatpercentage int,
+	coefficient text,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END
+
+  
+--@FUNCTION norom
+create function rom.tariffmodel_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/tariffmodel',null,null,null,null,null,null,
+							'rom','tariffmodel','/_/tariffmodel/',null,null);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post
+create function rom.tariffmodel_new(a_host integer,a_contact text,p_title text)
+ returns text as $$
+declare 
+	a_self text:='/_/tariffmodel';
+	v_cont rom.containers;
+	v_uri text:='/_/tariffmodel/' || name_encode(p_title);
+begin
+
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+
+		--host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask
+		--a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask
+		
+	insert into rom.tariffmodel (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, title) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, p_title);
+
+	return v_uri;
+		
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin
+create function rom.tariffmodel_setcode(a_host integer,a_self text, p_code text)
+ returns text as $$
+declare
+begin
+	update rom.tariffmodel set 
+				code=p_code,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin ver=1
+create function rom.tariffmodel_setbaseprice(a_host integer,a_self text, p_baseprice text)
+ returns text as $$
+declare
+begin
+	update rom.tariffmodel set 
+				baseprice=p_baseprice,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin
+create function rom.tariffmodel_setvatpercentage(a_host integer,a_self text, p_vatpercentage int)
+ returns text as $$
+declare
+begin
+	update rom.tariffmodel set 
+				vatpercentage=p_vatpercentage,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin
+create function rom.tariffmodel_setcoefficient(a_host integer,a_self text, p_coefficient text)
+ returns text as $$
+declare
+begin
+	update rom.tariffmodel set 
+				coefficient=p_coefficient,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function rom.tariffmodel_destroy(
+	a_host integer,a_self text
+) returns text as $$
+declare
+	
+begin
+	delete from rom.tariffmodel where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+	
+
+--@FUNCTION roles=admin
+create function rom.tariffmodel_list(a_host integer)
+ returns setof rom.tariffmodel as $$
+begin
+	return query
+		select *
+			from rom.tariffmodel
+			where host_id=a_host;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+
+

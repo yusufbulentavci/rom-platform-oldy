@@ -1,0 +1,21 @@
+--@DEPENDS:.base
+
+--@TABLE nores clp ozellik=6 ozellikler=hayvan
+CREATE TABLE bilgi.canli
+(
+	id bigint,
+	dogum bigint,
+	olum bigint
+);
+--@END
+
+
+--@TABLE nores clp ozellik=2 ozellikler=canli
+CREATE TABLE bilgi.hayvan
+(
+	id bigint,
+	anasi bigint,
+	babasi bigint,
+	cinsiyet boolean,
+);
+--@END

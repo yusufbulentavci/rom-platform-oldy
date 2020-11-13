@@ -1,0 +1,67 @@
+body,table td,select,button {
+	font-family: Tahoma, Verdana, Bitstream Vera Sans, sans-serif !important;
+	font-size: 12px !important;
+}
+
+.site-message {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: white;
+}
+
+.site-error {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: white;
+}
+
+.site-passform {
+	background-color: #BD1E47;
+	padding: 21px 21px 10px;
+	color: white;
+	font-weight: bold;
+}
+
+#site-loginbutton {
+	font-size: larger !important;
+}
+
+.gwt-TextBox {
+	border: 1px solid #999999;	
+	padding: 4px !important;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	
+}
+
+.gwt-PasswordTextBox {
+	border: 1px solid #999999;
+	padding: 4px !important;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	
+}
+
+.site-register {
+	background-color: #DC5630;
+	padding: 21px 21px 10px;
+	color: white;
+	font-weight: bold;
+	border: 6px solid #FFFFFF;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	box-shadow: 0 0 10px #DC5630;
+}
+
+.site-header {
+	
+	font-size:20px !important;
+	padding-bottom:10px;
+	
+	
+}

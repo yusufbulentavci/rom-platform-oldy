@@ -1,0 +1,1045 @@
+[
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/agenda.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/agenda.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/agenda.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/analysis.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/analysis.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/analysis.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/argacces.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/argacces.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/argacces.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/bload.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/bload.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/bload.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/bmathfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/bmathfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/bmathfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/bsave.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/bsave.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/bsave.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/classcom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classcom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classcom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/classexm.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classexm.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classexm.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/classfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/classinf.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classinf.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classinf.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/classini.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classini.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classini.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/classpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/classpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_environment.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_environment_facts.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_facts.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_facts.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_environment_instances.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_instances.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_instances.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_environment_repl.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_repl.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_repl.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_environment_routers.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_routers.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_routers.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_environment_rules.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_rules.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_environment_rules.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_glue.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_glue.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_glue.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clipsjni_utilities.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_utilities.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clipsjni_utilities.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/clsltpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clsltpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/clsltpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/commline.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/commline.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/commline.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/conscomp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/conscomp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/conscomp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/constrct.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/constrct.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/constrct.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/constrnt.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/constrnt.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/constrnt.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/crstrtgy.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/crstrtgy.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/crstrtgy.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrcbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrcbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrcbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrccom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrccom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrccom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrcpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrcpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrcpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrnbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrnchk.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnchk.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnchk.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrncmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrncmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrncmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrnops.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnops.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnops.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrnpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/cstrnutl.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnutl.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/cstrnutl.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/default.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/default.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/default.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/defins.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/defins.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/defins.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/developr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/developr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/developr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffctbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffctbsc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctbsc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctbsc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffctcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffctdef.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctdef.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctdef.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffctpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffctpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffnxbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffnxcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffnxexe.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxexe.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxexe.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffnxfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dffnxpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dffnxpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dfinsbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dfinsbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dfinsbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/dfinscmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dfinscmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/dfinscmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/drive.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/drive.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/drive.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/emathfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/emathfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/emathfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/engine.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/engine.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/engine.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/envrnbld.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/envrnbld.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/envrnbld.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/envrnmnt.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/envrnmnt.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/envrnmnt.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/evaluatn.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/evaluatn.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/evaluatn.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/expressn.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/expressn.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/expressn.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/exprnbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/exprnbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/exprnbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/exprnops.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/exprnops.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/exprnops.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/exprnpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/exprnpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/exprnpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/extnfunc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/extnfunc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/extnfunc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factbld.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factbld.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factbld.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factcom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factcom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factcom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factgen.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factgen.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factgen.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/facthsh.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/facthsh.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/facthsh.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factlhs.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factlhs.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factlhs.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factmch.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factmch.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factmch.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factmngr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factmngr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factmngr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factprt.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factprt.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factprt.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factqpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factqpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factqpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factqury.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factqury.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factqury.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factrete.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factrete.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factrete.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/factrhs.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factrhs.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/factrhs.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/filecom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/filecom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/filecom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/filertr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/filertr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/filertr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/fileutil.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/fileutil.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/fileutil.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/generate.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/generate.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/generate.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/genrcbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/genrccmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrccmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrccmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/genrccom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrccom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrccom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/genrcexe.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcexe.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcexe.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/genrcfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/genrcpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/genrcpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/globlbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/globlbsc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlbsc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlbsc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/globlcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/globlcom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlcom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlcom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/globldef.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globldef.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globldef.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/globlpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/globlpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/immthpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/immthpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/immthpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/incrrset.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/incrrset.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/incrrset.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/inherpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/inherpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/inherpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/inscom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/inscom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/inscom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insfile.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insfile.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insfile.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insmngr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insmngr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insmngr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insmoddp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insmoddp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insmoddp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insmult.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insmult.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insmult.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/inspsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/inspsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/inspsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insquery.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insquery.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insquery.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/insqypsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insqypsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/insqypsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/iofun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/iofun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/iofun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/lgcldpnd.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/lgcldpnd.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/lgcldpnd.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/main.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/main.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/main.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/memalloc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/memalloc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/memalloc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/miscfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/miscfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/miscfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/modulbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/modulbsc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulbsc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulbsc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/modulcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/moduldef.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/moduldef.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/moduldef.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/modulpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/modulutl.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulutl.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/modulutl.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/msgcom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgcom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgcom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/msgfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/msgpass.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgpass.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgpass.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/msgpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/msgpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/multifld.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/multifld.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/multifld.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/multifun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/multifun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/multifun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objrtbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objrtbld.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtbld.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtbld.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objrtcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objrtfnx.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtfnx.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtfnx.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objrtgen.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtgen.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtgen.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/objrtmch.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtmch.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/objrtmch.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/parsefun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/parsefun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/parsefun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/pattern.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/pattern.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/pattern.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/pprint.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/pprint.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/pprint.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/prccode.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prccode.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prccode.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/prcdrfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prcdrfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prcdrfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/prcdrpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prcdrpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prcdrpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/prdctfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prdctfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prdctfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/prntutil.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prntutil.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/prntutil.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/proflfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/proflfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/proflfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/reorder.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/reorder.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/reorder.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/reteutil.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/reteutil.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/reteutil.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/retract.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/retract.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/retract.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/router.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/router.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/router.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulebin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulebin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulebin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulebld.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulebld.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulebld.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulebsc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulebsc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulebsc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulecmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulecmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulecmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulecom.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulecom.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulecom.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulecstr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulecstr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulecstr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/ruledef.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/ruledef.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/ruledef.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/ruledlt.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/ruledlt.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/ruledlt.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulelhs.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulelhs.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulelhs.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/rulepsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulepsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/rulepsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/scanner.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/scanner.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/scanner.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/sortfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/sortfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/sortfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/strngfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/strngfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/strngfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/strngrtr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/strngrtr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/strngrtr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/symblbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/symblbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/symblbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/symblcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/symblcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/symblcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/symbol.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/symbol.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/symbol.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/sysdep.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/sysdep.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/sysdep.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/textpro.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/textpro.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/textpro.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltbin.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltbin.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltbin.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltbsc.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltbsc.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltbsc.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltcmp.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltcmp.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltcmp.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltdef.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltdef.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltdef.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltfun.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltfun.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltfun.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltlhs.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltlhs.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltlhs.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltpsr.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltpsr.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltpsr.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltrhs.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltrhs.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltrhs.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/tmpltutl.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltutl.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/tmpltutl.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/userdata.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/userdata.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/userdata.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/userfunctions.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/userfunctions.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/userfunctions.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/utility.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/utility.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/utility.c"
+},
+
+{
+  "directory": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64",
+  "command": "/usr/bin/cc -Dclips_EXPORTS -I/home/rompg/rom/packs/jdk-13.0.1/include -I/home/rompg/rom/packs/jdk-13.0.1/include/linux  -g -fPIC   -o CMakeFiles/clips.dir/watch.c.o   -c /home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/watch.c",
+  "file": "/home/rompg/backup/rom-22/phase8/java/rom/src/main/clips/watch.c"
+}
+]

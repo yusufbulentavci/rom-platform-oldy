@@ -1,0 +1,148 @@
+--@DEPENDS:.base,.resources,.containers
+
+--@MACRO stylefields
+title text not null,
+codes json not null
+--@END
+
+--@MACRO stylefieldnames
+title,codes
+--@END
+
+--@MACRO styleparams
+p_title text,p_codes json
+--@END
+
+--@MACRO styleparamnames
+p_title,p_codes
+--@END
+
+--@TABLE prefix=/_/styles net=all cache=10m
+create table rom.styles(
+  >!{stylefields}!<,
+  primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+
+--@FUNCTION roles=designer,admin
+create function rom.styles_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+				a_host,'/_/styles',null,null,null,null,null,16515108,
+				'rom','styles','/_/styles/',null,null
+			);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user audit=p_title
+create function rom.styles_new(	a_host integer,a_self text, a_contact text, p_title text)
+ returns text as $$
+declare 
+	v_uri text;
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	if p_title is null or p_title='' then
+			raise exception 'title parameter should have value';
+	end if;
+	v_uri:=v_cont.uri_prefix||name_encode(p_title);	
+	
+	insert into rom.styles (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, 
+			title) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, 
+			p_title);
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.styles_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.styles where host_id=a_host+1;
+			insert into rom.styles
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,>!{stylefieldnames}!<
+	  				from rom.styles
+	  				where host_id=a_host;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.styles_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.styles where host_id=a_host;
+			insert into rom.styles
+	    		select ri, a_host, >!{resourcepublish modified_date	now()}!<,>!{stylefieldnames}!<
+	  				from rom.styles
+	  				where host_id=a_host+1;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=designer,admin ver=2
+create function rom.styles_list(a_host integer,a_self text)
+ returns setof rom.styles as $$
+begin
+	return query 
+			select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,title,null::json from rom.styles where host_id=a_host and container=a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=designer,admin audit http=post ver=1
+create function rom.styles_change(a_host integer,a_self text,>!{styleparams}!<)
+ returns text as $$
+begin
+	
+	update rom.styles set 
+			title=p_title,
+			codes=p_codes,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.styles_get(a_host integer,a_self text)
+ returns rom.styles as $$
+declare 
+  v_one rom.styles;
+begin
+	
+	select *
+		into v_one 
+		from rom.styles 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=designer,admin audit
+create function rom.styles_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.styles where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

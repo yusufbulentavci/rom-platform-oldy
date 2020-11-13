@@ -1,0 +1,142 @@
+/* .site-holder { */
+/* 	padding: 10px; */
+/* 	border-radius: 5px; */
+/* 	border:1px solid #d2d2d2; */
+/* 	margin: 10px 0; */
+/* 	background-color: #e9e9e9; */
+/* } */
+
+.ship_row {
+	padding: 0 10px;
+}
+
+.ship_row.selected {	
+	background-color: #E3E3E3;
+	border-bottom: 1px solid #E3E3E3;		
+}
+
+.site-header {
+	font-size:20px;
+	color:orange;
+	font-weight:bold;
+	padding: 10px 0 15px;
+}
+
+.site-headersmall {
+	font-size:16px;
+	font-weight:bold;
+	padding: 7px 0 10px;
+}
+
+.site-headersmaller {
+	font-size:15px;
+	font-weight:bold;
+	padding: 7px 0 10px;
+	color: #3f4343;
+}
+
+/*coloring the site*/
+.site-right {
+	float: right;
+}
+
+.warning {
+	border: 2px inset red;
+	border-radius:3px;
+}
+
+.site-btnnext {
+    background-color: orange !important;
+    background-image: url("/_public/images/bar/br_next_icon.png") !important;
+    background-position: 135px 10px;
+    background-repeat: no-repeat;    
+    height: 40px !important;
+    line-height: 30px !important;
+    margin: 10px;
+    text-align: center;
+    width: 160px;
+    border: 1px solid #c4b6b6 !important;
+    color: white !important;
+}
+
+.site-btnprev {
+    background-color: #615F5F !important;
+    background-image: url("/_public/images/bar/br_prev_icon.png") !important;
+    background-position: 8px 10px;
+    background-repeat: no-repeat;    
+    height: 40px !important;
+    line-height: 30px !important;
+    margin: 10px;
+    text-align: center;
+    width: 160px;
+    border: 1px solid #c4b6b6 !important;
+    color: white !important;
+}
+
+.site-btnfinish {
+    background-color: orange !important;
+    height: 40px !important;
+    line-height: 30px !important;
+    margin: 10px;
+    text-align: center;
+    width: 160px;
+    border: 1px solid #c4b6b6 !important;
+    color: white !important;	
+    background-image: none !important;
+}
+
+.site-optionpnl {
+	background-color: #E3E3E3;
+	margin: 21px 0 0 -59px;
+	padding:10px;
+/* 	min-height: 175px; */
+}
+
+.pay_row {
+/* 	color: orange; */
+	padding:3px 0px;
+	font-weight: bold;
+	font-size:15px;
+}
+
+.pay_row.selected {	
+	background-color: #E3E3E3;
+	border-bottom: 1px solid #E3E3E3;		
+}
+
+.bank-row > span {
+    display: inline-block;
+}
+
+.bank-row > a {
+	text-decoration: none;
+	color: inherit;
+}
+
+.gwt-TabLayoutPanelContentContainer {
+	border-width: 2px 0 0 !important;
+}
+
+.flow-number {
+	background: orange;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-top: 2px;
+    line-height: 32px;
+    text-align: center;
+    font-size:18px;
+    display:inline-block;
+}
+
+.flow-title {
+    font-size: 20px;
+    line-height: 46px;
+    display:inline-block;
+}
+
+.gwt-TabBarItem-selected .flow-number{
+	background-color: #7a4792 !important; 
+}
+

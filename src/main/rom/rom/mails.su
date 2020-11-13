@@ -1,0 +1,390 @@
+--@DEPENDS:.base,.resources,.containers
+
+--@SEQUENCE
+create sequence mails_id_seq;
+--@END
+
+
+--@TABLE prefix=/_/mails hsc ver=1
+create table rom.mails(
+	state int not null default 0,
+	mime json not null,
+	remotehost text,
+	remoteaddr text,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.mails add column remotehost text;
+--@UPGRADE: 1 alter table rom.mails add column remoteaddr text;
+--@END
+
+
+--@INDEX
+create index idx_mails_creation_date on rom.mails(creation_date);
+--@END
+
+
+--@INDEX
+create index idx_mails_container on rom.mails(container);
+--@END
+
+--@FUNCTION roles=user ver=2
+create function rom.mails_breed(a_host integer,a_contact text,p_uri text,p_mask bigint, p_parent text)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+			v_uri text:=pathfix(p_uri);
+		begin
+			--a_host integer, a_self text, p_html_file text,p_parent text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,
+			--p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]
+			select * into strict v_one 
+				from rom.containers_new(a_host,v_uri,null,p_parent,a_contact,null,null,p_mask,
+				'rom','mails',v_uri||'/',null,null);
+			perform rom.containers_setnesting(a_host,v_one.uri,'m.s=>0,m.c=>0'::hstore);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=user ver=3
+create function rom.mails_new(a_host integer,a_self text, a_contact text, p_mime json)
+ returns text as $$
+declare
+	v_uri text;
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	v_uri:=v_cont.uri_prefix||nextval('mails_id_seq');	
+	
+	insert into rom.mails (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, state, mime) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, 16, p_mime);
+		
+	perform rom.resources_incnestingvalue(a_host,a_self,true,'m.c', 1);
+	
+	return v_uri;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=4
+create function rom.mails_delivered(a_host integer,a_self text, a_contact text, p_mime json, p_dbfs text[], p_remotehost text, p_remoteaddr text)
+ returns text as $$
+declare
+	v_uri text;
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	v_uri:=v_cont.uri_prefix||nextval('mails_id_seq');	
+	
+	insert into rom.mails (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, mime, dbfs) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, p_mime, p_dbfs);
+	
+	perform rom.resources_incnestingvalue(a_host,a_self,true,'m.c', 1);
+	
+	
+	-- if subject of mail ends with /RN, it is rom system notification mail. Then do not generate new notification.
+	if (not (
+				((p_mime->'subject')::text) ~ '/RN$'
+			) 
+				
+		) then
+			perform rom.waiting_new(a_host,a_contact,'mail','incoming',v_uri, (p_mime->'subject')::text, ((p_mime->'from')->0->'a')::text);
+	end if;
+	
+	
+		
+	return v_uri;
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 4 DROP FUNCTION if exists rom.mails_delivered(integer, text, text, json, text[]);
+--@END
+
+
+--@FUNCTION ver=3
+create function rom.mails_list(a_host integer,a_self text, p_offset integer default 0, p_limit integer default 21)
+ returns setof rom.mails as $$
+begin
+	return query 
+			select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,state,mime,remotehost,remoteaddr 
+				from rom.mails 
+				where host_id=a_host and container=a_self
+				order by creation_date desc limit p_limit offset p_offset;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post ver=1
+create function rom.mails_change(a_host integer,a_self text,p_mime json)
+ returns text as $$
+begin
+	
+	update rom.mails set 
+			mime=p_mime,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function rom.mails_changestate(a_host integer,a_self text,p_state int)
+ returns text as $$
+begin
+	
+	update rom.mails set 
+			state=p_state,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=1
+create function rom.mails_get(a_host integer,a_self text)
+ returns rom.mails as $$
+declare 
+  v_one rom.mails;
+begin
+	
+	select host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,>!{appfieldnames}!<
+		into v_one 
+		from rom.mails 
+		where host_id=a_host and uri=a_self;
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.mail.UserSendMail ver=1 http=post
+create function rom.mails_send(a_host integer,a_self text,p_mimedbfs text,a_contact text)
+ returns text as $$
+declare
+	v_uri text;
+	v_cont rom.containers;
+	v_ret text;
+	v_sentbox text;
+begin
+	-- rename mail from draft to sent; rename container and uri
+	update rom.mails set 
+			state=state&(~16),
+			dbfs=p_mimedbfs||dbfs,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	select rom.mails_usermailbox(a_host,a_contact,'sent')
+		into strict v_sentbox;
+	
+	select rom.mails_changemailbox(a_host,a_self,v_sentbox)
+		into strict v_ret;
+	
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function rom.mails_changemailbox(a_host integer,a_self text,p_to text)
+ returns text as $$
+declare
+	v_seen boolean;
+	v_old rom.containers;
+	v_new rom.containers;
+	v_urisuffix text;
+	v_ret text;
+	v_d text;
+begin
+
+
+	select ((r.state&32)=32) into strict v_seen 
+		from rom.containers c,rom.mails r 
+		where r.host_id=a_host and r.uri=a_self and c.host_id=a_host and c.uri=r.container;
+
+	select c.* into strict v_old 
+		from rom.containers c,rom.mails r 
+		where r.host_id=a_host and r.uri=a_self and c.host_id=a_host and c.uri=r.container;
+
+	select * into strict v_new 
+		from rom.containers 
+		where host_id=a_host and uri=p_to;
+		
+	update rom.mails 
+		set 
+			container=v_new.uri,
+			uri=replaceprefix(uri,v_old.uri_prefix,v_new.uri_prefix),
+			modified_date=now()
+		where 
+			host_id=a_host and uri=a_self returning uri into strict v_ret;
+
+	perform rom.resources_incnestingvalue(a_host,v_old.uri,true,'m.c', -1);
+	if v_seen then
+		perform rom.resources_incnestingvalue(a_host,v_old.uri,true,'m.s', -1);
+	end if;
+	
+	perform rom.resources_incnestingvalue(a_host,v_new.uri,true,'m.c', 1);
+	if v_seen then
+		perform rom.resources_incnestingvalue(a_host,v_new.uri,true,'m.s', 1);
+	end if;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.mails_usermailbox(a_host int,a_contact text,p_box text)
+ returns text as $$
+declare
+	v_user text;
+begin
+	select rom.contacts_username(a_host,a_contact) into strict v_user;
+	return '/_/mails/'||v_user||'/'||p_box;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=1 http=post
+create function rom.mails_seen(a_host integer,a_self text,p_seen boolean)
+ returns text as $$
+declare
+	v_dif int:=case p_seen when true then 1 else -1 end;
+	v_cont text;
+	v_seen boolean;
+	v_ret int;
+begin
+
+	if p_seen then
+		update rom.mails set 
+				state=state|32,
+			modified_date=now()
+			where host_id=a_host and uri=a_self
+			returning container,state into v_cont,v_ret;
+	else 
+		update rom.mails set 
+				state=state&(~32),
+			modified_date=now()
+			where host_id=a_host and uri=a_self
+			returning container,state into v_cont,v_ret;
+	end if;
+
+	perform rom.resources_incnestingvalue(a_host,v_cont,true,'m.s', v_dif);
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 http=post
+create function rom.mails_answered(a_host integer,a_self text,p_answered boolean)
+ returns int as $$
+declare 
+	v_ret int;
+begin
+	if p_answered then
+		update rom.mails set 
+				state=state|2,
+				modified_date=now()
+			where host_id=a_host and uri=a_self
+			returning state into v_ret;
+	else 
+		update rom.mails set 
+				state=state&(~2),
+				modified_date=now()
+			where host_id=a_host and uri=a_self
+			returning state into v_ret;
+	end if;
+
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function rom.mails_important(a_host integer,a_self text,p_important boolean)
+ returns text as $$
+declare 
+	v_ret int;
+begin
+	if p_important then
+		update rom.mails set 
+				state=state|256,
+				modified_date=now()
+			where host_id=a_host and uri=a_self
+			returning state into v_ret;
+	else 
+		update rom.mails set 
+				state=state&(~256),
+				modified_date=now()
+			where host_id=a_host and uri=a_self
+			returning state into v_ret;
+	end if;
+
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION ver=1
+create function rom.mails_destroy(a_host integer,a_self text)
+ returns text as $$
+declare
+	v_cont text;
+	v_seen boolean := true;
+begin
+
+	delete from rom.mails where host_id=a_host and uri=a_self returning container,((state&32)>0) into v_cont,v_seen;
+	perform rom.resources_incnestingvalue(a_host,v_cont,true,'m.c', -1);
+	
+	if v_seen is not null and v_seen then
+		perform rom.resources_incnestingvalue(a_host,v_cont,true,'m.s', -1);
+	end if;	
+	
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function rom.mails_maintainseen()
+ returns boolean as $$
+declare
+begin
+
+	with t as(
+			select host_id,container,count(*) c 
+				from rom.mails group by host_id,container
+			)
+		update rom.containers cont 
+				set nesting = case when nesting is null then hstore('m.c', t.c::text)  else nesting || hstore('m.c', t.c::text) end
+					,
+					modified_date=now()
+				from t
+				where cont.host_id=t.host_id and cont.uri=t.container;
+				
+				
+	with t as(
+			select host_id,container,count(*) c 
+				from rom.mails where state&32>0 group by host_id,container
+			)
+		update rom.containers cont 
+				set nesting = case when nesting is null then hstore('m.s', t.c::text)  else nesting || hstore('m.s', t.c::text) end
+					,
+				modified_date=now()
+				from t
+				where cont.host_id=t.host_id and cont.uri=t.container;
+	
+	
+	
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+

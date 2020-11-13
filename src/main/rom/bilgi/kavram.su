@@ -1,0 +1,37 @@
+--@DEPENDS:.base
+
+--@TABLE nores clp
+CREATE TABLE bilgi.tur
+(
+	id bigint,
+	atalar bigint[],
+	ozellikler bigint[],
+	primary key(id)
+);
+--@END
+
+--@TABLE nores clp
+CREATE TABLE bilgi.ozellik
+(
+	id smallint primary key,
+	adi text
+);
+--@END
+
+
+--@TABLE nores clp
+CREATE TABLE bilgi.tureyen
+(
+	id bigserial,
+	host_id smallint,
+	tur smallint references bilgi.tur(id),
+	dogum bigint,
+	adi text,
+	primary key(id)
+);
+--@END
+
+
+--@DATA name=temel_turler table=bilgi.tur cols=id,atalar,ozellikler 
+$-kurum-	null	{$-kurum-,$-satici- }
+--@END

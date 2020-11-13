@@ -1,0 +1,176 @@
+--@DEPENDS:.contents
+
+
+--@TABLE prefix=/_/links net=all hsc cache=10m
+create table site.links(
+	linked_uri text,
+  	primary key(host_id,uri)
+  ) inherits (site.contents);
+--@END
+
+  
+--@FUNCTION roles=user audit=p_uri ver=2
+create function site.links_breed(a_host integer,a_contact text,p_uri text,p_mask bigint, p_parent text)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+			v_uri text:=pathfix(p_uri);
+		begin
+			--a_host integer, a_self text, p_html_file text,p_parent text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,
+			--p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]
+			select * into strict v_one 
+				from rom.containers_new(a_host,v_uri,null,p_parent,a_contact,null,null,p_mask,
+				'site','links',v_uri||'/',null,null);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+	
+--@FUNCTION roles=user audit=p_uri
+create function site.links_new(	a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_title text, p_uri text)
+ returns text as $$
+declare 
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+	insert into site.links (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, title) 
+		values (a_host,p_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], array[p_title]);
+	return p_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=author,designer,admin ver=3
+create function site.links_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_search text default null)
+ returns setof site.contents as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.links
+					where host_id=a_host and container=a_self
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=get ver=3
+create function site.links_content_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+  returns setof site.contents as $$
+begin
+	return query
+		select >!{resourcefieldnames uri	linked_uri}!<,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.links
+					where host_id=a_host and container=a_self
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=2
+create function site.links_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.links where host_id=a_host+1;
+			insert into site.links
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, linked_uri 
+	  				from site.links
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.links_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.links where host_id=a_host;
+			insert into site.links
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, linked_uri 
+	  				from site.links
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION audit
+create function site.links_extinct(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_one rom.containers;
+		begin
+			perform site.links_extinct(a_host,uri) 
+					from rom.containers where host_id=a_host and container=a_self;
+			
+		
+			delete from site.links where host_id=a_host and container=a_self;
+    		delete from rom.containers where host_id=a_host and uri=a_self;
+			return a_self;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=author,admin audit
+create function site.links_destroy(a_host integer,a_self text) returns text as $$
+	begin
+		delete from site.links where host_id=a_host and uri=a_self;
+		return a_self;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=author,admin audit ver=1
+create function site.links_change(a_host integer,a_self text,p_linked_uri text)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	update site.links
+		set
+			linked_uri=p_linked_uri,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=4
+create function site.links_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns site.links as $$
+declare 
+	v_one site.links;
+begin
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,linked_uri
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.links 
+				where host_id=a_host and uri=a_self
+			) tbl;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+

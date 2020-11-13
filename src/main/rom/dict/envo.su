@@ -1,0 +1,19 @@
+--@DEPENDS:.base
+
+--@TABLE norom ver=4
+create table dict.envo(
+	lastindexed timestamp not null default now(),
+	chargingdataversion int not null default 0,
+	testing boolean not null default false,
+	lastfilecheck timestamp not null default '2004-10-19 10:23:54'::timestamp,
+	groups text[],
+	dnsserver boolean default false
+);
+--@UPGRADE: 1 alter table dict.envo add column chargingdataversion int not null default 0;
+--@UPGRADE: 2 alter table dict.envo add column testing boolean not null default false;
+--@UPGRADE: 3 alter table dict.envo add column lastfilecheck timestamp not null default '2004-10-19 10:23:54'::timestamp;
+--@UPGRADE: 4 alter table dict.envo drop column world;
+--@UPGRADE: 4 alter table dict.envo add column groups text[];
+--@UPGRADE: 4 alter table dict.envo add column dnsserver boolean default false;
+--@END
+

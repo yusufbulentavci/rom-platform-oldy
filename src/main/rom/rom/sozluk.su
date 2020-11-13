@@ -1,0 +1,153 @@
+--@DEPENDS:.base,.contacts
+
+--@SEQUENCE
+create sequence note_id_seq;
+--@END
+
+--@TABLE prefix=/_/_sozluk roles=user cache=10m
+create table rom.sozluk(
+	langcodes rom.langs,
+	str text,
+	related text[],
+	relatedweb text[],
+	sentences json,
+	icon text,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+--@INDEX
+create index idx_sozluk_named on rom.sozluk using gin(named);
+--@END
+
+--@INDEX
+create index idx_sozluk_related on rom.sozluk using gin(related);
+--@END
+
+--@INDEX
+create index idx_sozluk_relatedweb on rom.sozluk using gin(relatedweb);
+--@END
+
+
+--@FUNCTION norom
+create function rom.sozluk_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+				a_host,'/_/_sozluk',null,null,null,null,null,null,
+				'rom','sozluk','/_/_sozluk/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function rom.sozluk_list(a_host integer, p_related text, p_relatedweb text)
+ returns setof rom.sozluk as $$
+begin
+	return query 
+		select * from rom.sozluk 
+			where host_id=a_host 
+				and (p_related is null or related @> p_related)
+				and (p_relatedweb is null or relatedweb @> p_relatedweb);
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.sozluk_new(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text, p_named text, p_str text, p_related text[], p_relatedweb text[])
+ returns text as $$
+declare 
+	v_cont rom.containers;
+	v_uri text:='/_/_sozluk/'||nextval('note_id_seq');
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+	insert into rom.sozluk (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, named, str, related, relatedweb) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], array[p_named], array[p_str], p_related, p_relatedweb);
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function rom.sozluk_changestrnamed(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_named text,p_str text)
+ returns text as $$
+declare 
+	v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+			from rom.sozluk
+			where host_id=a_host and uri=a_self;
+	
+	update rom.sozluk set 
+			langcodes[v_which]=a_lang,
+			str[v_which]=p_str,
+			str[v_named]=p_named,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function rom.sozluk_changerelated(a_host integer,a_self text,a_contact text,p_related text[])
+ returns text as $$
+declare 
+begin
+	update rom.sozluk set 
+			related=p_related,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 http=post
+create function rom.sozluk_changerelatedweb(a_host integer,a_self text,a_contact text,p_relatedweb text[])
+ returns text as $$
+declare 
+begin
+	update rom.sozluk set 
+			relatedweb=p_relatedweb,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.sozluk_get(a_host integer,a_self text)
+ returns rom.sozluk as $$
+declare 
+  v_one rom.sozluk;
+begin
+	
+	select *
+		into v_one 
+		from rom.sozluk 
+		where host_id=a_host and uri=a_self;
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.sozluk_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.sozluk where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

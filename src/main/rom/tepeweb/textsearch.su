@@ -1,0 +1,158 @@
+--@DEPENDS:.base
+
+--@FUNCTION norom
+create function tepeweb.textsearch_ts(p_langs rom.langs)
+  returns regconfig as
+$BODY$
+	declare
+		v_l text:=p_langs::text;
+	begin
+		case v_l
+			when 'en' then
+				return 'english';
+			when 'da' then
+				return 'danish';
+			when 'nl' then
+				return 'dutch';
+			when 'fi' then
+				return 'finnish';
+			when 'fr' then
+				return 'french';
+			when 'de' then
+				return 'german';
+			when 'hu' then
+				return 'hungarian';
+			when 'it' then
+				return 'italian';
+			when 'nb' then
+				return 'norwegian';
+			when 'pt' then
+				return 'portuguese';
+			when 'ro' then
+				return 'romanian';
+			when 'ru' then
+				return 'russion';
+			when 'es' then
+				return 'spanish';
+			when 'sv' then
+				return 'swedish';
+			when 'tr' then
+				return 'turkish';
+			else
+				return 'english';
+		end case;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+
+--@MACRO ftovec
+	if p_title is not null and p_title[i] is not null then
+				select 
+					v_ret || to_tsvector(tepeweb.textsearch_ts(p_langs[i]),p_title[i]) 
+						into v_ret;
+	end if;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.textsearch_tovector(p_langs rom.langs[], p_tags text[], p_title text[], p_summary text[], p_tip text[], p_spot text[], p_body text[])
+  RETURNS tsvector AS
+$BODY$
+	declare
+		v_ret tsvector:=''::tsvector;
+	begin
+		if p_langs is null or array_length(p_langs,1)=0 then
+			return null;
+		end if;
+		
+		
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			
+			>!{ftovec}!<
+			>!{ftovec p_title	p_summary}!<
+			>!{ftovec p_title	p_tip}!<
+			>!{ftovec p_title	p_spot}!<
+			>!{ftovec p_title	p_body}!<
+			
+		end loop;
+
+		return v_ret;
+		
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+
+--@FUNCTION norom ver=2
+create function tepeweb.textsearch_indexwritings()
+	returns boolean as $$
+		declare
+			v_dlg text;
+			v_from timestamp;
+			v_to timestamp:=now();
+		begin
+			select lastindexed into strict v_from from dict.envo;
+		
+			update site.writings
+				set
+					lexemes=tepeweb.textsearch_tovector(langcodes,tags,title,summary,tip,spot::text[],body::text[])
+				where
+					modified_date>=v_from;
+					
+			update dict.envo set lastindexed=v_to;
+			
+			return true;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function tepeweb.textsearch_infotsquery(a_host integer,p_search text)
+ returns tsquery as $$
+declare 
+	v_ret tsquery:=''::tsquery;
+	v_langs rom.langs[];
+begin
+	select langcodes into strict v_langs 
+		from site.info
+		where host_id=a_host;
+
+	for i in array_lower(v_langs,1)..array_upper(v_langs,1) loop
+		select v_ret||plainto_tsquery(tepeweb.textsearch_ts(v_langs[i]), p_search)
+				into v_ret;
+	end loop;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=6
+create function site.writings_textsearch(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_search text)
+ returns setof site.contents as $$
+declare  
+	v_container rom.containers;
+	v_uri_prefix text;
+	v_query tsquery;
+begin
+
+	if p_search is null then
+		raise exception 'Search phase needed';
+	end if;
+	
+	select tepeweb.textsearch_infotsquery(a_host,p_search) into strict v_query;
+	
+	return query 
+		select >!{resourcefieldnames lexemes	null::tsvector}!<,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.writings
+					where host_id=a_host and lexemes @@ v_query limit 200
+			) tbl  order by host_id, creation_date;
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 2 drop function site.writings_textsearch(integer,text);
+--@END

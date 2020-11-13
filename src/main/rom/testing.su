@@ -1,0 +1,118 @@
+--@DEPENDS:base
+
+--@FUNCTION norom
+create function assert_true(p_b boolean) returns boolean
+as
+$$
+begin
+  if not p_b then
+  	RAISE EXCEPTION 'Expected true but got false';
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function assert_true(p_msg text, p_b boolean) returns boolean
+as
+$$
+begin
+  if not p_b then
+  	RAISE EXCEPTION '%', p_msg;
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function assert_false(p_b boolean) returns boolean
+as
+$$
+begin
+  if p_b then
+  	RAISE EXCEPTION 'Expected false but got true';
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function assert_false(p_msg text, p_b boolean) returns boolean
+as
+$$
+begin
+  if p_b then
+  	RAISE EXCEPTION '%', p_msg;
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function assert_equals(p_expected integer, p_generated anyelement) returns boolean
+as
+$$
+begin
+  if not p_expected=p_generated then
+  	RAISE EXCEPTION 'Expected % but generated %',p_expected,p_generated;
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function assert_equals(p_expected text, p_generated text) returns boolean
+as
+$$
+begin
+  if not p_expected=p_generated then
+  	RAISE EXCEPTION 'Expected % but generated %',p_expected,p_generated;
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function check_null(p_b anyelement) returns boolean
+as
+$$
+begin
+  if p_b is not null then
+  	RAISE EXCEPTION 'Should have been null';
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function check_not_null(p_b anyelement) returns boolean
+as
+$$
+begin
+  if p_b is null then
+  	RAISE EXCEPTION 'Shouldnt have been null';
+  end if;
+  return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+select assert_true(true);
+select assert_false(false);
+select assert_true('Benim mesajim', true);
+select assert_false('Benim mesajim', false);
+select assert_equals(1, 1);
+select assert_equals('1', '1');
+--select assert_equals(1, 1::bigint);
+select check_not_null('dd'::text);
+select check_null(null::text);
+--@END

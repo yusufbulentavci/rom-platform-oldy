@@ -1,0 +1,6 @@
+--@DEPENDS:site.ready,asset.ready,bilgi.ready
+
+--@SCHEMA
+create schema tepeweb;
+--@END
+

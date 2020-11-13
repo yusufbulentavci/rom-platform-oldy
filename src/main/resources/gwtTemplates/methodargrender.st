@@ -1,0 +1,1 @@
+methodargrender(arg)::="%arg.typeHolder.javaType% %arg.suffix%"

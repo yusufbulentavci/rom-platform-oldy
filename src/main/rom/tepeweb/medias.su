@@ -1,0 +1,106 @@
+--@DEPENDS:tepeweb.base
+
+
+--@SEQUENCE
+create sequence media_id_seq;
+--@END
+
+
+--@TABLE prefix=/_/_medias
+create table tepeweb.medias(
+	pr int,
+	pid text,
+	title text,
+	previewuri text,
+	tags text[],
+	primary key(host_id,uri)
+) inherits (rom.resources);
+--@END
+
+--@FUNCTION norom
+create function tepeweb.medias_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/_medias',null,null,null,null,null,null,
+							'tepeweb','medias','/_/_medias/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function tepeweb.medias_new(a_host integer, p_pr int, p_pid text, 
+	p_title text, p_previewuri text)
+ returns text as $$
+declare
+	v_cont rom.containers;
+  	v_uri text;
+  	v_desc text;
+  	v_credits integer;
+begin
+	select * into strict v_cont from rom.containers 
+			where host_id=a_host and uri='/_/_medias';
+			
+	select '/_/_medias/'||nextval('media_id_seq') into strict v_uri;
+
+	insert into tepeweb.medias (host_id,uri,
+			container,html_file,delegated,ownercid,gid,relatedcids,mask,
+			pr,pid,title,previewuri) 
+		values (a_host, v_uri,
+			'/_/_medias',v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask,
+		p_pr,p_pid,p_title,p_previewuri
+		);
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function tepeweb.medias_list(a_host integer)
+ returns setof tepeweb.medias as $$
+begin
+	return query 
+		select * from tepeweb.medias where host_id=a_host;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function tepeweb.medias_get(a_host integer,a_self text) returns tepeweb.medias as $$
+	declare 
+		v_one tepeweb.medias;
+	begin
+		select * into strict v_one from tepeweb.medias where host_id=a_host and uri=a_self;
+		return v_one;
+	end;
+$$ language plpgsql;
+--@END
+
+
+--@FUNCTION
+create function tepeweb.medias_getbyprovider(a_host text, p_pr int, p_pid text) returns tepeweb.medias as $$
+	declare 
+		v_one tepeweb.medias;
+	begin
+		select * into strict v_one from tepeweb.medias where host_id=a_host and pr=p_pr and pid=p_pid;
+		return v_one;
+	end;
+$$ language plpgsql;
+--@END
+
+
+--@FUNCTION roles=admin
+create function tepeweb.medias_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from tepeweb.medias where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

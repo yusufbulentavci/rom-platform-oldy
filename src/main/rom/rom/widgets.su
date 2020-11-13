@@ -1,0 +1,110 @@
+--@DEPENDS:.base,.resources,.containers
+
+--@MACRO widgetfields
+title text not null,
+codes json not null
+--@END
+
+--@MACRO widgetfieldnames
+title,codes
+--@END
+
+--@MACRO widgetparams
+p_title text,p_codes json
+--@END
+
+--@MACRO widgetparamnames
+p_title,p_codes
+--@END
+
+--@TABLE prefix=/_/widgets one net=all cache=10m
+create table rom.widgets(
+  >!{widgetfields}!<,
+  primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+--@FUNCTION norom ver=2
+create function rom.widgets_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.widgets where host_id=a_host+1;
+			insert into rom.widgets
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,>!{widgetfieldnames}!<
+	  				from rom.widgets
+	  				where host_id=a_host;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.widgets_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.widgets where host_id=a_host;
+			insert into rom.widgets
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,>!{widgetfieldnames}!<
+	  				from rom.widgets
+	  				where host_id=a_host+1;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin ver=2
+create function rom.widgets_list(a_host integer,a_self text)
+ returns setof rom.widgets as $$
+begin
+	return query 
+			select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,title,null::json from rom.widgets where host_id=a_host and container=a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin audit http=post ver=1
+create function rom.widgets_change(a_host integer,a_self text,>!{widgetparams}!<)
+ returns text as $$
+begin
+	
+	update rom.widgets set 
+			title=p_title,
+			codes=p_codes,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.widgets_get(a_host integer,a_self text)
+ returns rom.widgets as $$
+declare 
+  v_one rom.widgets;
+begin
+	
+	select *
+		into v_one 
+		from rom.widgets 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin audit
+create function rom.widgets_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.widgets where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

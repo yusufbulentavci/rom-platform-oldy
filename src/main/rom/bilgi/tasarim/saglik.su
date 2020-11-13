@@ -1,0 +1,17 @@
+--@DEPENDS:.base
+
+
+--@TABLE nores clp ozellik ozellikler=olcum
+CREATE TABLE bilgi.evcil_hayvan
+(
+	id bigint,
+	anasi bigint,
+	babasi bigint,
+	cinsiyet boolean
+);
+--@END
+
+
+--@DATA name=hayvan_turleri table=bilgi.tur cols=id,atalar,ozellikler 
+$-koyun-	{$-evcil_hayvan-}	null
+--@END

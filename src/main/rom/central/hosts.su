@@ -1,0 +1,11 @@
+--@DEPENDS:.base
+
+--@TABLE norom
+create table central.hosts(
+	hostname text not null,
+	worldname text not null,
+	alias text[],
+	modified timestamp not null default now(),
+  	primary key(hostname)
+  );
+--@END

@@ -1,0 +1,3 @@
+/home/rompg/rom/phase8/java/rom/src/main/clips/CMakeFiles/rebuild_cache.dir
+/home/rompg/rom/phase8/java/rom/src/main/clips/CMakeFiles/edit_cache.dir
+/home/rompg/rom/phase8/java/rom/src/main/clips/CMakeFiles/clips.dir

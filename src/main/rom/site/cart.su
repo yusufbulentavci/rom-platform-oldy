@@ -1,0 +1,877 @@
+--@DEPENDS:.base,.writings
+
+--@SEQUENCE
+create sequence cart_id_seq;
+--@END
+
+-- tariff:
+--         price:   row(345,'USD')::rom.money <- json
+--         
+
+-- validity : 	0-->valid
+--				1-->initial condition not valid
+--				2-->shipprice,itemsprice,vatprice; one of them is empty
+
+--@TABLE prefix=/_/_cart net=intra ver=3
+create table site.cart(
+	sid text,
+	active boolean not null default true,
+	design boolean not null default true,
+	confirmed boolean not null default false,
+	paysatisfied boolean not null default false,
+	payconfirmed boolean not null default false,
+	cancelled boolean not null default false,
+	shipdate bigint,
+	invoicesent boolean not null default false,
+	items json,
+	itemsprice json,
+	paystyle text,
+	payments json[],
+	calcdetails json,
+	shipstyle text,
+	shipaddr json,
+	shipref text,
+	shipdays integer,
+	shipprice json,
+	vatprice json,
+	discountprice json,
+	totalprice json,
+	invoiceaddr json,
+	notice text,
+	issue text,
+	lang_id rom.langs not null,
+	validity integer not null default 1,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table site.cart add column lang_id rom.langs;
+--@UPGRADE: 3 alter table site.cart add column validity integer default 0;
+--@END  
+
+
+--@FUNCTION norom ver=1
+create function site.cart_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(a_host,'/_/_cart',null,null,null,null,null,1835446,
+				'site','cart','/_/_cart/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function site.cart_new(a_host integer, a_contact text, a_sid text, a_lang rom.langs)
+ returns text as $$
+declare 
+  v_ret text;
+  v_assign boolean;
+begin
+	
+	select uri,(ownercid is null and a_contact is not null)
+		into v_ret, v_assign 
+		from site.cart 
+		where host_id=a_host and design and active and not cancelled
+			and (
+					(a_contact is null and ownercid is null and sid=a_sid) 
+					or 
+					(a_contact is not null and ownercid=a_contact)
+				);
+
+	if v_assign is not null and v_assign then
+		perform site.cart_activeassign(a_host, v_ret, a_contact, a_sid);
+	end if;
+	
+	if v_ret is null then
+		insert into site.cart (
+			host_id, 
+			uri,
+			container,
+			mask,
+			ownercid,
+			sid,
+			lang_id
+			) 
+			values (
+				a_host, 
+				'/_/_cart/'||nextval('cart_id_seq'),
+				'/_/_cart',
+				1835446,
+				a_contact,
+				(case when(a_contact is null) then a_sid else null end),
+				a_lang
+				) 
+			returning uri  
+			into v_ret;
+	end if;
+	
+	return v_ret;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function site.cart_activeassign(a_host integer, a_self text, a_contact text, a_sid text)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set
+			ownercid=a_contact,
+			sid=null,
+			modified_date=now()
+		where host_id=a_host and uri=a_self 
+			and ownercid is null 
+			and sid=a_sid;
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function site.cart_list(a_host int)
+ returns setof site.cart as $$
+ begin
+		return query 
+			select * from site.cart where host_id=a_host and active;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function site.cart_listmycarts(a_host int, a_contact text)
+ returns setof site.cart as $$
+ begin
+		return query 
+			select * from site.cart where host_id=a_host and ownercid=a_contact and active;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2
+create function site.cart_activeget(a_host integer, a_contact text, a_sid text)
+ returns site.cart as $$
+declare 
+  v_ret text;
+  v_one site.cart;
+  v_assign boolean;
+begin
+	
+	select uri,(ownercid is null and a_contact is not null)
+		into v_ret,v_assign 
+		from site.cart 
+		where host_id=a_host 
+			and design and active and not cancelled
+			and (
+					(ownercid is not null and ownercid=a_contact) 
+						or 
+					(ownercid is null and sid=a_sid)
+				);
+				
+	if not found then
+		raise 'No record found' USING ERRCODE = 'P0002';
+	end if;
+	
+	if v_assign is not null and v_assign then
+		perform site.cart_activeassign(a_host, v_ret, a_contact, a_sid);
+	end if; 
+	
+	select *
+		into v_one 
+		from site.cart 
+		where host_id=a_host and uri=v_ret;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2
+create function site.cart_get(a_host integer,a_self text,a_contact text, a_sid text)
+ returns site.cart as $$
+declare 
+  v_one site.cart;
+  --v_checkuri text;
+begin
+
+	--v_checkuri := site.cart_activeget(a_host,a_contact,a_sid);
+
+	--if v_checkuri is null or a_self<>v_checkuri then
+	--	raise exception 'invalid cart request';
+	--end if;
+
+	select *
+		into v_one 
+		from site.cart 
+		where host_id=a_host and uri=a_self 
+			and (
+					(ownercid is not null and ownercid=a_contact) 
+						or 
+					(ownercid is null and sid=a_sid)
+						
+				);
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 http=post after=com.bilgidoku.rom.web.db.cart.encrypt
+create function site.cart_getencrypted(a_host integer,a_self text,a_contact text, a_sid text, p_forwhat text)
+ returns site.cart as $$
+declare 
+  v_one site.cart;
+  --v_checkuri text;
+begin
+
+	select *
+		into v_one 
+		from site.cart 
+		where host_id=a_host and uri=a_self 
+			and (
+					(ownercid is not null and ownercid=a_contact) 
+						or 
+					(ownercid is null and sid=a_sid)
+				);
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 http=post ver=1
+create function site.cart_add(a_host integer,a_contact text,a_sid text,p_stock text,p_diff integer, a_lang rom.langs,p_lng rom.langs)
+ returns boolean as $$
+declare
+	v_cart text;
+	v_sa boolean;
+	v_items json;
+	v_changed boolean;
+begin
+	
+	if p_diff>0 then
+		select rom.stocks_available(a_host,p_stock,p_diff) into v_sa;
+		if not v_sa then
+			return false;
+		end if;
+	end if;
+	
+	select site.cart_new(a_host,a_contact,a_sid,a_lang) into strict v_cart;
+	
+	update site.cart
+		set items=site.cart_itemdiff(a_host,items,p_stock,p_diff),
+			modified_date=now()
+		where host_id=a_host and uri=v_cart and site.cart_itemdiff(a_host,items,p_stock,p_diff) is not null
+		returning true into v_changed;
+
+	return v_changed is not null and v_changed;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function site.cart_itemdiff(a_host integer,p_items json,p_stock text,p_diff integer)
+ returns json as $$
+declare
+	v_cart text;
+	v_itemcur json;
+	v_ret json;
+	v_sa boolean;
+begin
+	if p_diff=0 then
+		return p_items;
+	end if;
+	
+	select p_items->p_stock into v_itemcur;
+	
+	if v_itemcur is null then
+		if p_diff<0 then
+			return p_items;			
+		end if;
+		
+		select json_set(p_items, p_stock, site.cart_item(p_diff)) into v_ret;
+	else
+		select json_set(v_itemcur, 'amount', (v_itemcur->'amount')::text::integer+p_diff) into v_itemcur;
+	
+		if (v_itemcur->'amount')::text::integer<=0 then
+			select json_remove(p_items,p_stock) into v_ret;
+		else
+			select json_set(p_items,p_stock,v_itemcur) into v_ret;
+		end if;	
+	end if;
+	
+	if p_diff>0 then
+		select rom.stocks_available(a_host,p_stock,(v_ret->p_stock->'amount')::text::integer) into v_sa;
+	end if;
+
+	if v_sa is not null and not v_sa then
+		return null;
+	end if;
+	
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.cart_item(p_cnt integer)
+ returns json as $$
+	select json_set('{}'::json,'amount',p_cnt);
+$$ language sql;
+--@END
+
+--@RUN utest
+select rom.stocks_new(1,'/dd','{"elini":"opem"}'::json,null,3,null);
+select check_not_null(site.cart_itemdiff(host_id,'{}'::json,uri,2)) from rom.stocks;
+--@END
+
+
+--@FUNCTION http=post ver=1
+create function site.cart_setactive(a_host integer,a_self text,p_active boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set active=p_active,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setconfirmed(a_host integer,a_self text,p_confirmed boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set confirmed=p_confirmed,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setpayconfirmed(a_host integer,a_self text,p_payconfirmed boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set payconfirmed=p_payconfirmed,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setpaysatisfied(a_host integer,a_self text,p_paysatisfied boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set paysatisfied=p_paysatisfied,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setcancelled(a_host integer,a_self text,p_cancelled boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set cancelled=p_cancelled,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setinvoicesent(a_host integer,a_self text,p_invoicesent boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set invoicesent=p_invoicesent,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2 http=post
+create function site.cart_setshipdate(a_host integer,a_self text,p_shipdate bigint)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set shipdate=p_shipdate,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setitems(a_host integer,a_self text,p_items json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set items=p_items,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setshipaddr(a_host integer,a_self text,p_shipaddr json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set shipaddr=p_shipaddr,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setinvoiceaddr(a_host integer,a_self text,p_invoiceaddr json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set invoiceaddr=p_invoiceaddr,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=2
+create function site.cart_setitemsprice(a_host integer,a_self text,p_itemsprice json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set itemsprice=p_itemsprice,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=2
+create function site.cart_setshipprice(a_host integer,a_self text,p_shipprice json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set shipprice=p_shipprice,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=2
+create function site.cart_setvatprice(a_host integer,a_self text,p_vatprice json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set vatprice=p_vatprice,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=2
+create function site.cart_setdiscountprice(a_host integer,a_self text,p_discountprice json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set discountprice=p_discountprice,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=2
+create function site.cart_settotalprice(a_host integer,a_self text,p_totalprice json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set totalprice=p_totalprice,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setpaystyle(a_host integer,a_self text,p_paystyle text)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set paystyle=p_paystyle,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setshipref(a_host integer,a_self text,p_shipref text)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set shipref=p_shipref,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setshipstyle(a_host integer,a_self text,p_shipstyle text)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set shipstyle=p_shipstyle,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setnotice(a_host integer,a_self text,p_notice text)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set notice=p_notice,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setissue(a_host integer,a_self text,p_issue text)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set issue=p_issue,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setpayments(a_host integer,a_self text,p_payments json[])
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set payments=p_payments,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setdesign(a_host integer,a_self text,p_design boolean)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set design=p_design,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=2
+create function site.cart_setcalcdetails(a_host integer,a_self text,p_calcdetails json)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set calcdetails=p_calcdetails,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.cart_setshipdays(a_host integer,a_self text,p_shipdays int)
+ returns boolean as $$
+declare 
+begin
+	update site.cart
+		set shipdays=p_shipdays,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function site.cart_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from site.cart where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=6
+create function site.cart_tariffprice(a_host integer,p_stockuri text,p_cartitem json, 
+	p_allitems json, p_shipstyle json, p_paystyle json, a_lang rom.langs) returns json as
+$$
+declare
+	v_stock rom.stocks;
+	v_ret json;
+	v_price rom.money;
+	v_itemprice rom.money;
+	v_itemvat rom.money;
+	v_vat rom.money;
+	
+	v_wtitle text;
+	v_wsummary text;
+	v_wicon text;
+	v_amount int;
+	v_writing text;
+begin
+	select * into strict v_stock from rom.stocks where host_id=a_host and uri=p_stockuri;
+	
+	v_ret:=json_set(v_ret,'stock',p_stockuri);
+	v_ret:=json_set(v_ret,'options',v_stock.options);
+
+	if v_stock.firststock is not null then
+		select * into strict v_stock from rom.stocks where host_id=a_host and uri=v_stock.firststock;
+	end if;
+	
+	
+	v_amount:=(p_cartitem->'amount')::text::integer;
+	
+	v_ret:=json_set(v_ret,'amount',v_amount::text);
+	v_ret:=json_set(v_ret,'tariff',v_stock.tariff);
+	v_ret:=json_set(v_ret,'physical',v_stock.physical);
+	
+	v_ret:=json_set(v_ret,'wuri', v_stock.writing);
+	
+	select title[tbl.wh],summary[tbl.wh],icon
+		into v_wtitle, v_wsummary, v_wicon
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from site.writings 
+				where host_id=a_host and uri=v_stock.writing  
+			) tbl;
+
+	if found then
+		v_ret:=json_set(v_ret,'wtitle', v_wtitle);
+		v_ret:=json_set(v_ret,'wsummary', v_wsummary);
+		v_ret:=json_set(v_ret,'wicon', v_wicon);
+	end if;
+	
+	v_itemprice:=rom.money_fromjsonarray((v_stock.tariff->'price')::json);
+	v_itemvat:=rom.money_fromjsonarray((v_stock.tariff->'vat')::json);
+	
+	v_price:=rom.money_mul(v_itemprice, v_amount);
+	v_vat:=rom.money_mul(v_itemvat, v_amount);
+	
+	v_ret:=json_set(v_ret,'price',rom.money_tojsonarray(v_price));
+	v_ret:=json_set(v_ret,'vat',rom.money_tojsonarray(v_vat));
+	
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=5
+create function site.cart_processtariff() returns trigger as
+$$
+declare
+	v_shipstyle json;
+	v_paystyle json;
+	v_m rom.money;
+	v_j json;
+	v_shipcalc json;
+	v_totalprice rom.money;
+	v_shipprice rom.money;
+	v_itemsprice rom.money;
+begin
+
+	if old.design then
+	
+		new.validity:=1;
+	
+	-- design durumda items degismedi ise burada yapilacak birsey yok
+	--	if old.items::text=new.items::text and old.shipstyle::text=new.shipstyle::text then
+	--		return new;
+	--	end if;
+	
+		
+		select shipstyle, paystyle 
+		    	into strict v_shipstyle, v_paystyle 
+		    from rom.org 
+		    where host_id=new.host_id;
+		
+		new.shipprice:=null;
+		new.totalprice:=null;
+		new.itemsprice:=null;
+		
+		--Her stock tarifesini al
+		select json_object_agg(key, site.cart_tariffprice(new.host_id,key,value,new.items,v_shipstyle,v_paystyle,new.lang_id)) 
+				into new.calcdetails
+			from json_each(new.items);
+		
+		
+		if v_shipstyle is not null and new.shipstyle is not null then
+			v_shipcalc:=v_shipstyle->new.shipstyle;
+			if v_shipcalc is not null then
+				new.shipprice:=(v_shipcalc->'chargeprice')::json;
+				v_shipprice:=rom.money_fromjsonarray(new.shipprice);
+			end if;		
+		end if;
+		
+		if new.calcdetails is not null then
+			select rom.money_tojsonarray(rom.sum(rom.money_fromjsonarray(value->'price')))
+				into new.itemsprice
+				from json_each(new.calcdetails);
+			
+			
+			v_itemsprice:=rom.money_fromjsonarray(new.itemsprice);
+		end if;
+		
+		
+		
+		v_totalprice:=rom.money_add(v_itemsprice,v_shipprice);
+		
+		
+		if v_totalprice is not null then
+			new.totalprice:=rom.money_tojsonarray(v_totalprice);
+		end if;
+		
+		if new.shipprice is null or new.itemsprice is null then
+			new.validity:=2;
+		end if;
+
+		if new.validity=1 then
+			new.validity:=0;
+		end if;
+		
+	--else
+	-- design durumda degilse items'in degistirilmesine izin verme
+	--	if old.items::text<>new.items::text then
+	--		raise exception 'Cart items can only be changed in design';
+	--	end if;
+
+	end if; 
+	
+	return new;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@TRIGGER
+create trigger cart_update_trigger before update on site.cart
+	for each row  execute procedure site.cart_processtariff();
+--@END
+
+--@RUN utest
+ --select check_null(site.cart_activeget(1,'contactsample','sidsample'));
+ select site.cart_new(1,'contactsample','sidsample','en'::rom.langs);
+ --select check_not_null(site.cart_activeget(1,'contactsample','sidsample'));
+--@END
+
+--@RUN utest
+ select check_not_null(rom.org_new(1));
+ select rom.stocks_new(1,'/dd','{"price":[345,"USD"]}'::json,null,3,null);
+ select assert_true(site.cart_add(1,'contactsample','sidsample',uri, 2, 'en'::rom.langs, 'en'::rom.langs)) from rom.stocks;
+ select assert_equals(1,count(*)) from site.cart;
+ select assert_true(calcdetails::text ~ '.*690.*' ) from site.cart;
+ select check_not_null(totalprice) from site.cart;
+ select assert_equals('[690,"USD"]'::text,totalprice::text) from site.cart;
+ 
+ select assert_false(site.cart_add(1,'contactsample','sidsample',uri, 2, 'en'::rom.langs, 'en'::rom.langs)) from rom.stocks;
+ select assert_true(site.cart_add(1,'contactsample','sidsample',uri, -1, 'en'::rom.langs, 'en'::rom.langs)) from rom.stocks;
+--@END

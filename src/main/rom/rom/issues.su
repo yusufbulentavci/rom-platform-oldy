@@ -1,0 +1,534 @@
+--@DEPENDS:.base
+
+
+--@TABLE prefix=/_/issues net=intra cache=1m ver=5
+create table rom.issues(
+  created_by text,
+  assigned_to text, 
+  assign_date timestamp,
+  resolve_date timestamp,
+  close_date timestamp,
+  dialog_uri text,
+  tags text[],
+  lang_id rom.langs,
+  title text,
+  description text,
+  resolve_lang rom.langs,
+  resolve_desc text,
+  resolve_code integer,
+  duplicate_issue text,
+  related_issues text[],
+  start_date timestamp,
+  stop_date timestamp,
+  due_date timestamp,  
+  due_start timestamp,
+  cls text not null default 'task',
+  ozne bigint[],
+  nesne bigint[],
+  oznetags text[],
+  nesnetags text[],
+  primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.issues add column start_date timestamp;
+--@UPGRADE: 1 alter table rom.issues add column stop_date timestamp;
+--@UPGRADE: 1 alter table rom.issues add column due_date timestamp;
+--@UPGRADE: 2 alter table rom.issues add column due_start timestamp;
+--@UPGRADE: 2 alter table rom.issues add column cls text not null default 'task';
+--@UPGRADE: 4 alter table rom.issues add column ozne bigint[];
+--@UPGRADE: 4 alter table rom.issues add column nesne bigint[];
+--@UPGRADE: 5 alter table rom.issues add column oznetags text[];
+--@UPGRADE: 5 alter table rom.issues add column nesnetags text[];
+--@END
+
+--due_date timestamp,
+--priority integer,  
+
+
+--@FUNCTION norom
+create function rom.issues_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+					a_host,'/_/issues',null,null,null,null,null,1058947504,
+					'rom','issues','/_/issues',null,null
+					);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=contact audit=p_title ver=1
+create function rom.issues_new(
+	a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,
+	a_contact text,
+	p_title text,
+	p_desc text,
+	f_attach text,
+	p_cls text
+)
+ returns text as $$
+declare 
+  v_uri text;
+  v_id text;
+  v_attach text[]:=case when f_attach is null then ARRAY[]::text[] else array[f_attach] end; 
+begin
+
+	select rom.org_nextissue(a_host) into strict v_id;
+
+	v_uri:='/_/issues/'||v_id;
+
+	insert into rom.issues (host_id, uri,container, mask, created_by, lang_id, title, description,dbfs,cls) 
+		values (a_host, v_uri, '/_/issues', 7707440600, a_contact, a_lang, p_title, p_desc,v_attach,p_cls);
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 1 DROP FUNCTION rom.issues_new(integer, text, rom.langs, rom.langs, text, text, text, text);
+--@END
+
+
+--@FUNCTION roles=contact ver=3
+create function rom.issues_listmine(a_host integer, a_contact text, p_notclosed boolean, p_notresolved boolean, p_since timestamp, p_totime timestamp)
+ returns setof rom.issues as $$
+begin
+	return query 
+		select * from rom.issues
+		where
+		host_id=a_host and
+		created_by=a_contact and
+		(resolve_date is null)=p_notresolved and
+		(close_date is null)=p_notclosed 
+		and ((p_since is null) or p_since<due_start) and
+		((p_totime is null) or p_totime>due_start)
+		order by due_start;
+	
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 1 drop function rom.issues_listmine(integer, text, boolean, boolean);
+--@END
+
+
+--@FUNCTION roles=user
+create function rom.issues_list(a_host integer, p_notclosed boolean, p_notresolved boolean)
+ returns setof rom.issues as $$
+begin
+	if p_notclosed is null then
+		if p_notresolved is null then
+			return query 
+					select * from rom.issues where host_id=a_host;	
+		end if;
+		return query 
+				select * from rom.issues where host_id=a_host and (resolve_date is null)=p_notresolved;
+	end if;
+		
+	if p_notresolved is null then
+		return query 
+				select * from rom.issues where host_id=a_host and (close_date is null)=p_notclosed;	
+	end if;
+
+		return query 
+				select * from rom.issues where host_id=a_host and (resolve_date is null)=p_notresolved 
+					and (close_date is null)=p_notclosed;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION http=post roles=user,owner audit=p_contact ver=5
+create function rom.issues_assignto(
+	a_host integer,a_self text,
+	p_contact text
+)
+ returns text as $$
+declare
+	 v_dlg text;
+	 v_created_by text;
+	 v_relatedcids text[];
+	 v_contacts text[];
+	 v_lang rom.langs;
+	 v_title text;
+	
+begin
+	select dialog_uri,created_by,relatedcids,lang_id,title into v_dlg,v_created_by,v_relatedcids,v_lang,v_title 
+		from rom.issues where host_id=a_host and uri=a_self;
+	
+	
+	if v_dlg is null then
+		select array_distinctandnotnull(array_cat(array[v_created_by,p_contact], v_relatedcids))
+			into v_contacts;
+		select rom.issues_createdialog(a_host, a_self, true, false, true, true, true, true, false, false, v_contacts)
+			into v_dlg;
+	end if;
+	update rom.issues 
+		set assigned_to=p_contact, assign_date = now(),
+			modified_date=now() where host_id=a_host and uri=a_self;
+	
+	perform rom.dialogs_notify(a_host,v_dlg, p_contact, 'issue', 'assigned', a_self, v_title);
+	
+	return v_dlg;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post audit ver=2
+create function rom.issues_setcreator(
+	a_host integer,a_self text,
+	p_contact text
+)
+ returns text as $$
+begin
+	update rom.issues 
+		set created_by=p_contact,
+			modified_date=now()
+			 where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user,owner http=post audit ver=2
+create function rom.issues_changetags(
+	a_host integer,a_self text,
+	p_tags text[]
+)
+ returns text as $$
+begin
+	update rom.issues 
+		set rtags=p_tags,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user,owner http=post audit ver=1
+create function rom.issues_changetitle(
+	a_host integer,a_self text,
+	p_title text
+)
+ returns text as $$
+begin
+	update rom.issues set
+			title=p_title,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user,owner http=post audit ver=1
+create function rom.issues_changedesc(
+	a_host integer,a_self text,
+	p_description text
+)
+ returns text as $$
+begin
+	update rom.issues set
+			description=p_description,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=user audit ver=5 http=post
+create function rom.issues_resolve(
+	a_host integer, a_self text, p_html_file text,p_delegated text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,a_lang rom.langs,p_lng rom.langs,
+	p_resolvedesc text, p_resolvecode integer,
+	a_contact text
+)
+ returns text as $$
+declare
+	v_dlg text;
+	v_contact text;
+	v_title text;
+begin
+	update rom.issues set
+			resolve_lang=a_lang,
+			resolve_desc=p_resolvedesc,
+			resolve_code=p_resolvecode,
+			resolve_date=now(),
+			stop_date=coalesce(stop_date,now()),
+			modified_date=now()
+		where host_id=a_host and uri=a_self
+		returning dialog_uri,title into v_dlg,v_title;
+	
+	if v_dlg is not null then
+		perform rom.dialogs_notify(a_host,v_dlg,a_contact,'issue', 'resolved', a_self, v_title);
+	end if;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin,manager audit ver=1
+create function rom.issues_close(
+	a_host integer, a_self text, p_html_file text,p_delegated text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint
+)
+ returns text as $$
+begin
+	update rom.issues set
+			close_date=now(),
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=user audit ver=1
+create function rom.issues_reopen(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	update rom.issues set
+			close_date=null,
+			resolve_date=null,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION
+create function rom.issues_get(a_host integer,a_self text)
+ returns rom.issues as $$
+declare 
+  v_one rom.issues;
+begin
+	
+	select *
+		into v_one 
+		from rom.issues 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION audit roles=admin,owner
+create function rom.issues_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.issues where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=2
+create function rom.issues_createdialog(a_host integer,a_self text,p_allow_attach boolean,
+	p_approval boolean,
+	p_deletable boolean,
+	p_updatable boolean,
+	p_likeable boolean,
+	p_dislikable boolean,
+	p_sharable boolean,
+	p_closed boolean,
+	p_contacts text[])
+	returns text as $$
+		declare
+			v_dlg text;
+			v_ownercid text;
+			v_gid text;
+			v_relatedcids text[];
+			v_mask bigint;
+		begin
+			select ownercid,gid,relatedcids,mask into v_ownercid,v_gid,v_relatedcids,v_mask 
+				from rom.issues 
+				where host_id=a_host and uri=a_self; 
+			
+			select * into strict v_dlg 
+				from rom.dialogs_new(a_host,a_self,
+					v_ownercid,v_gid,v_relatedcids,v_mask,
+					p_allow_attach,p_approval,p_deletable,p_updatable,p_likeable,p_dislikable,p_sharable,p_closed,p_contacts);
+    		update rom.issues 
+    			set dialog_uri=v_dlg,
+					modified_date=now()
+    			where host_id=a_host and uri=a_self; 
+			return v_dlg;
+		end;
+	$$ language 'plpgsql';
+--@END
+	
+--@FUNCTION roles=admin,owner ver=1 http=post
+create function rom.issues_deletedialog(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_dlg text;
+		begin
+			select dialog_uri into strict v_dlg from rom.issues where host_id=a_host and uri=a_self;
+			if v_dlg is null then
+				raise exception 'no dialog for issues';
+			end if;
+			
+			perform rom.dialogs_destroy(a_host,v_dlg);
+			
+    		update rom.issues 
+    			set dialog_uri=null,
+				modified_date=now()
+			 where host_id=a_host and uri=a_self;
+			  
+			return a_dlg;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=user audit ver=1
+create function rom.issues_start(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	update rom.issues set
+			start_date=now(),
+			stop_date=null,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=user audit ver=1
+create function rom.issues_stop(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	update rom.issues set
+			stop_date=now(),
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,owner http=post audit ver=1
+create function rom.issues_setduedate(
+	a_host integer,a_self text,
+	p_ts timestamp
+)
+ returns text as $$
+begin
+	update rom.issues set
+			due_date=p_ts,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin,owner http=post audit ver=1
+create function rom.issues_setduestart(
+	a_host integer,a_self text,
+	p_ts timestamp
+)
+ returns text as $$
+begin
+	update rom.issues set
+			due_start=p_ts,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin,owner http=post audit
+create function rom.issues_setcls(
+	a_host integer,a_self text,
+	p_cls text
+)
+ returns text as $$
+begin
+	update rom.issues set
+			cls=p_cls,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post 
+create function rom.issues_set_ozne(
+	a_host integer,a_self text,p_val bigint[]
+)
+ returns text as $$
+begin
+	update rom.issues set
+			ozne=p_val,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post 
+create function rom.issues_set_nesne(
+	a_host integer,a_self text,p_val bigint[]
+)
+ returns text as $$
+begin
+	update rom.issues set
+			nesne=p_val,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post 
+create function rom.issues_set_oznetags(
+	a_host integer,a_self text,p_val text[]
+)
+ returns text as $$
+begin
+	update rom.issues set
+			oznetags=p_val,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post 
+create function rom.issues_set_nesnetags(
+	a_host integer,a_self text,p_val text[]
+)
+ returns text as $$
+begin
+	update rom.issues set
+			nesnetags=p_val,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END

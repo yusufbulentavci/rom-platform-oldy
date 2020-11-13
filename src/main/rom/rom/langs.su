@@ -1,0 +1,90 @@
+--@DEPENDS:.base
+
+--@ENUM
+create type rom.langs as enum(
+'en','tr','es','zh','hi','fr','de','ru','bn','ja','ar','vi','ko','ku','eo','ks','el','qu','kn','id, in','km','kl','kk','wo','ka','dz','jv','pt','ps','pl','da','vo','cy','pa','cs','iu','co','it','is','uz','or','ik','ur','om','ca','ie','uk','ia','oc','ug','hy','yi, ji','br','hu','bo','hr','bi','tw','bh','bg','tt','no','be','ts','nl','zu','ba','to','tn','tl','tk','ne','az','ti','ay','th','tg','na','te','as','ta','he, iw','gv','gu','my','am','mt','ms','gn','sw','mr','sv','gl','su','af','st','mo','ss','mn','sr','ml','ab','sq','mk','aa','so','sn','mi','gd','sm','sl','mg','sk','ga','yo','si','sh','sg','sd','fy','sa',' ','lv','lt','fo','rw','fj','lo','ln','fi','ro','li','rn','rm','fa','la','xh','eu','et','ky'
+);
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.makefirst(p_langs rom.langs[], p_which integer) returns rom.langs[]
+as $$
+declare
+	v_ret rom.langs[];
+	v_dif integer:=1;
+begin
+	if p_which=1 or array_length(p_langs, 1)=1 then
+		return p_langs;
+	end if;
+
+	v_ret:=p_langs;
+	v_ret[1]:=p_langs[p_which];
+	v_ret[p_which]:=p_langs[1];
+	
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function rom.langs_which(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return 1;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return array_upper(p_langs,1)+1;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+
+
+--@FUNCTION norom
+create function rom.langs_select(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return 1;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return 1;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+  
+--@FUNCTION norom
+create function rom.langs_has(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return null;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return null;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+

@@ -1,0 +1,583 @@
+--@DEPENDS:.base,.org,.tariffmodel
+
+
+-- Farkli tshirt oluşturmak isteyen kullanicilar'e stock yaratma imkani verecegiz
+-- options: color, size, resimleri tasir. Option definition tanimlamaya gerek yok. Opsiyonlari ismine göre uygulama taniyor. Opsiyon enumlari ise tanimlanmis stock'lardan cikartilacak.
+-- firststock: temel stock'tur writing ile iliskilendirilir, temelstock'un firststock'u null'dir. Kirmizi renkli erkek M t-shirt'un muhtemelen beyaz renki bir base'i olur 
+-- alternatives: firststock'larda tanimlanir.
+-- virtualsparent: virtual stock'larda null degildir. Virtual stock'larin bagli oldugu stock'u gosterir. 
+--		amount reserved gibi gercek degerler bagli stock'larda degerlenir. 
+
+
+--@SEQUENCE
+create sequence stock_id_seq;
+--@END
+
+
+
+
+--@TABLE ver=5 prefix=/_/_stocks net=intra
+create table rom.stocks(
+	writing text,
+	tariff json,
+	physical json,
+	reserved int not null default 0,
+	amount int not null default 0,
+	alertonleft int,
+	onsale boolean not null default true,
+	options json,
+	firststock text,
+	alternatives text[],
+	virtualsparent text,
+	title text,
+	summary text,
+	tariffmodel text,
+	icon text,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.stocks drop constraint stocks_amount_check;
+--@UPGRADE: 1 alter table rom.stocks alter column writing drop not null;
+--@UPGRADE: 1 alter table rom.stocks add column options json;
+--@UPGRADE: 1 alter table rom.stocks add column firststock text;
+--@UPGRADE: 1 alter table rom.stocks add column alternatives text[];
+--@UPGRADE: 1 alter table rom.stocks add column virtualsparent text;
+--@UPGRADE: 3 alter table rom.stocks add column title text;
+--@UPGRADE: 3 alter table rom.stocks add column summary text;
+--@UPGRADE: 4 alter table rom.stocks add column tariffmodel text;
+--@UPGRADE: 5 alter table rom.stocks add column icon text;
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.stocks_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(a_host,'/_/_stocks',null,null,null,null,null,1835300,
+				'rom','stocks','/_/_stocks/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=1
+create function rom.stocks_list(a_host int)
+ returns setof rom.stocks as $$
+ begin
+		return query 
+			select * from rom.stocks where host_id=a_host and virtualsparent is null;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2
+create function rom.stocks_virtualslist(a_host int, a_self text)
+ returns setof rom.stocks as $$
+ begin
+		return query 
+			select * from rom.stocks where host_id=a_host 
+	        and virtualsparent = a_self 
+	        and ownercid in (select contact from dict.users where host_id = a_host)
+	        and title is not null
+	        and options is not null;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function rom.stocks_listalternatives(a_host int, p_first text)
+ returns setof rom.stocks as $$
+ begin
+		return query 
+			select * from rom.stocks where host_id=a_host and firststock=p_first;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin ver=3
+create function rom.stocks_new(
+	a_host integer,
+	p_writing text,
+	p_tariff json,
+	p_physical json,
+	p_amount integer,
+	p_alertonleft integer
+)
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	insert into rom.stocks (
+			host_id, 
+			uri,
+			container,
+			mask,
+			writing,
+			tariff,
+			physical,
+			amount,
+			alertonleft
+			) 
+		values (
+			a_host, 
+			'/_/_stocks/'||nextval('stock_id_seq'), 
+			'/_/_stocks',
+			1835300,
+			p_writing,
+			(case p_tariff is null when true then '{"price":[0,"TRY"]}'::json else p_tariff end),
+			p_physical,
+			p_amount,
+			p_alertonleft
+			) 
+		returning uri  
+		into v_uri;
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2 roles=contact
+create function rom.stocks_virtualstock(
+	a_host integer,
+	a_contact text,
+	p_stock text
+)
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	insert into rom.stocks (
+			host_id, 
+			uri,
+			container,
+			mask,
+			ownercid,
+			virtualsparent
+			) 
+		values (
+			a_host, 
+			'/_/_stocks/'||nextval('stock_id_seq'), 
+			'/_/_stocks',
+			2059748,
+			a_contact,
+			p_stock
+			) 
+		returning uri  
+		into v_uri;
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@RUN utest
+ select rom.stocks_new(1,'/dd','{"elini":"opem"}'::json,null,0,null);
+--@END
+
+--@FUNCTION
+create function rom.stocks_get(a_host integer,a_self text)
+ returns rom.stocks as $$
+declare 
+  v_one rom.stocks;
+begin
+	
+	select *
+		into v_one 
+		from rom.stocks 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.stocks_available(a_host integer,a_self text,p_amount integer)
+ returns boolean as $$
+declare 
+  v_cnt integer;
+  v_stock rom.stocks;
+begin
+	
+	select * 
+			into strict v_stock
+		from rom.stocks 
+		where host_id=a_host and uri=a_self and onsale;
+	
+	if v_stock.virtualsparent is not null then
+		a_self:=v_stock.virtualsparent;
+		select * 
+				into strict v_stock
+			from rom.stocks 
+			where host_id=a_host and uri=a_self and onsale;
+	
+	end if;
+
+	return v_stock.amount is not null and v_stock.amount>=p_amount;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.stocks_settariff(a_host integer,a_self text,p_tariff json)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set tariff=p_tariff,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin ver=1
+create function rom.stocks_settm(a_host integer,a_self text,p_tm text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set tariffmodel=p_tm,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	perform rom.stocks_applytariffmodel(a_host,a_self);
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+ select rom.stocks_settariff(1,'/dd','{"elini":"opem"}'::json);
+--@END
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.stocks_setphysical(a_host integer,a_self text,p_physical json)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set physical=p_physical,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post=ver=1
+create function rom.stocks_setamount(a_host integer,a_self text,p_amount int)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set amount=p_amount,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.stocks_setonsale(a_host integer,a_self text,p_onsale boolean)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set onsale=p_onsale,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function rom.stocks_addamount(a_host integer,a_self text,p_diff int)
+ returns int as $$
+declare 
+	v_ret int;
+	v_alertonleft boolean;
+begin
+	
+	update rom.stocks
+		set amount=amount+p_diff
+		where host_id=a_host and uri=a_self and (amount+p_diff)>=0
+		returning amount into v_ret;
+
+-- Check price
+	
+	return v_ret;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+ select rom.stocks_new(1,'/dd','{"elini":"opem"}'::json,null,0,null);
+ 
+ select rom.stocks_addamount(host_id,uri,3) from rom.stocks;
+ 
+ 
+ select assert_true(rom.stocks_available(host_id,uri,3)) from rom.stocks;
+ 
+--@END
+
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.stocks_setalertonleft(a_host integer,a_self text,p_alertonleft int)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set alertonleft=p_alertonleft,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin,contact http=post ver=2
+create function rom.stocks_setoptions(a_host integer,a_self text,p_options json)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set options=p_options,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	perform rom.stocks_applytariffmodel(a_host,a_self);
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,contact http=post ver=1
+create function rom.stocks_setfirststock(a_host integer,a_self text,p_firststock text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set firststock=p_firststock,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,contact http=post ver=1
+create function rom.stocks_settitle(a_host integer,a_self text,p_title text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set title=p_title,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post
+create function rom.stocks_setsummary(a_host integer,a_self text,p_summary text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set summary=p_summary,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post
+create function rom.stocks_setalternatives(a_host integer,a_self text,p_alternatives text[])
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set alternatives=p_alternatives,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post
+create function rom.stocks_setvirtualsparent(a_host integer,a_self text,p_virtualsparent text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set virtualsparent=p_virtualsparent,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin
+create function rom.stocks_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.stocks where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function rom.stocks_updatewriting(a_host int, p_writing text, p_oldstock text, p_newstock text)
+ returns text as $$
+ begin
+ 
+ 	if p_oldstock is not null and p_newstock is not null and p_oldstock=p_newstock then
+ 		return p_newstock;
+ 	end if;
+ 
+	if p_oldstock is not null then
+		update rom.stocks 
+				set writing=null 
+				where host_id=a_host and uri=p_oldstock;
+	end if;
+
+	if p_newstock is not null then
+		update rom.stocks 
+			set writing=p_writing
+			where host_id=a_host and uri=p_newstock;
+	end if;	
+	
+	
+	 
+ 	return p_newstock;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=2
+create function rom.stocks_applytariffmodel(a_host integer,a_self text)
+ returns boolean as $$
+declare
+	v_stock rom.stocks;
+	v_ret json;
+	
+	v_baseprice text;
+	v_coef text;
+	v_vatpercentage int;
+	v_price rom.money;
+	v_vat rom.money;
+	
+	v_co rom.money;
+	v_code text;
+	
+	v_tm text;
+	
+begin
+
+	select * into strict v_stock
+		from rom.stocks
+		where host_id=a_host and uri=a_self;
+	
+	
+	
+	if v_stock.tariffmodel is null then
+		if v_stock.firststock is null then
+			return false;
+		end if;
+	
+		select tariffmodel into v_tm 
+			from rom.stocks 
+			where host_id=a_host and uri=v_stock.firststock;
+		
+		if v_tm is null then
+			return false;
+		end if;
+	else
+		v_tm:=v_stock.tariffmodel;
+	end if;
+		
+	select code,baseprice,vatpercentage,coefficient 
+			into strict v_code,v_baseprice,v_vatpercentage,v_coef
+		from rom.tariffmodel
+		where host_id=a_host and uri=v_tm;
+	
+	if v_code='coef' then
+		v_price:=rom.money_add(rom.money_fromtext(v_baseprice), rom.money_mul(rom.money_fromtext(v_coef),(v_stock.options->'coef')::text::int));
+		v_vat:=rom.money_percentage(v_price,v_vatpercentage);
+		v_ret:=json_set(v_ret,'price',rom.money_tojsonarray(v_price));
+		v_ret:=json_set(v_ret,'vat',rom.money_tojsonarray(v_vat));
+		v_ret:=json_set(v_ret,'vatperc',v_vatpercentage);
+	end if;
+
+	update rom.stocks
+		set tariff=v_ret,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin,contact http=post ver=1
+create function rom.stocks_seticon(a_host integer,a_self text,p_icon text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.stocks
+		set icon=p_icon,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END

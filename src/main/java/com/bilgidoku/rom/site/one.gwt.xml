@@ -1,0 +1,60 @@
+<module rename-to='one'>
+
+	<inherits name="com.google.gwt.user.User" />
+
+	<inherits name="com.google.gwt.logging.Logging" />
+
+	<set-property name="gwt.logging.enabled" value="TRUE" />
+	<set-property name="gwt.logging.logLevel" value="INFO" />
+	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
+	<set-property name="gwt.logging.developmentModeHandler"
+		value="ENABLED" />
+	<set-property name="gwt.logging.hasWidgetsHandler" value="DISABLED" />
+	<set-property name="gwt.logging.simpleRemoteHandler"
+		value="DISABLED" />
+
+
+	<inherits name="com.google.gwt.user.theme.chrome.Chrome" />
+	<inherits name='com.google.gwt.http.HTTP' />
+	<inherits name='com.google.gwt.json.JSON' />
+	<inherits name="com.google.gwt.xml.XML" />
+	<inherits name='com.google.gwt.visualization.Visualization' />
+
+	<inherits name="com.google.gwt.i18n.I18N" />
+	
+	<extend-property name="locale" values="en" />
+	<extend-property name="locale" values="tr" />
+
+<!--    <set-property name="locale" value="en,tr" />-->
+        <set-property name="locale" value="en" />
+
+	<set-property-fallback name="locale" value="en" />
+	
+	<set-configuration-property name="locale.useragent" value="Y"/>
+
+    <set-configuration-property name="locale.searchorder" value="queryparam,cookie,meta,useragent"/>
+
+
+	<entry-point class="com.bilgidoku.rom.site.yerel.one" />
+
+	<inherits name='rom-min' />
+	<inherits name='rom-gwt-client-common' />
+	<inherits name='rom-gwt-client-util' />
+	<inherits name='rom-gwt-shared' />
+	<inherits name='rom-shared' />
+	<!-- <inherits name='rom-client-common' /> -->
+
+	<inherits name='rom-gwt-client-rom' />
+	<inherits name='rom-gwt-client-site' />
+	<inherits name='rom-gwt-client-tepeweb' />
+	<inherits name='rom-gwt-client-service' />
+
+	<source path="yerel" />
+	
+	<!-- set-property name="gwt.logging.consoleHandler" value="DISABLED" /> 
+		<set-property name="gwt.logging.systemHandler" value="DISABLED" /> <set-property 
+		name="gwt.logging.developmentModeHandler" value="DISABLED" / -->
+	<!-- <set-property name="gwt.logging.popupHandler" value="DISABLED" /> -->
+
+<!-- 	<set-property name="user.agent" value="gecko1_8" /> -->
+</module>

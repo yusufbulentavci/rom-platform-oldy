@@ -1,0 +1,127 @@
+--@DEPENDS:.contents
+
+--@SEQUENCE
+create sequence questions_id_seq;
+--@END
+
+
+--@TABLE prefix=/_/questions net=intra cache=10m
+create table site.questions(
+	option_a text[],
+	option_b text[],
+	option_c text[],
+	option_d text[],
+	option_e text[],
+	option_count integer default 4,
+	correct_option integer,
+  	primary key(host_id,uri)
+  ) inherits (site.contents);
+--@END
+
+--@FUNCTION norom
+create function site.questions_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(a_host,'/_/questions',null,null,null,null,null,1835300,
+				'site','questions','/_/questions/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END 
+ 
+ --@FUNCTION roles=user audit=p_uri
+create function site.questions_new(	a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_title text)
+ returns text as $$
+declare 
+	v_cont rom.containers;
+	v_uri text:='/_/questions/'||nextval('questions_id_seq');
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+	insert into site.questions (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, title) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], array[p_title]);
+	return v_uri;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user ver=3
+create function site.questions_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_tags text[])
+ returns setof site.contents as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.questions
+					where host_id=a_host and container=a_self and (p_tags is null or rtags@>p_tags)
+			) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user audit ver=1
+create function site.questions_destroy(a_host integer,a_self text) returns text as $$
+	begin
+		delete from site.questions where host_id=a_host and uri=a_self;
+		return a_self;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=2
+create function site.questions_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns site.questions as $$
+declare 
+	v_one site.questions;
+begin
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,option_a,option_b,option_c,option_d,option_e,option_count,correct_option
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.questions 
+				where host_id=a_host and uri=a_self
+			) tbl;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=user ver=1
+create function site.questions_change(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_optiona text,p_optionb text,p_optionc text, p_optiond text, p_optione text,p_optioncount integer, p_correct integer)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.questions
+		where host_id=a_host and uri=a_self;
+	
+	update site.questions
+		set option_a[v_which]=p_optiona,
+			option_b[v_which]=p_optionb,
+			option_c[v_which]=p_optionc,
+			option_d[v_which]=p_optiond,
+			option_e[v_which]=p_optione,
+			option_count=p_optioncount,
+			correct_option=p_correct,
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END

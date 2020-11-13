@@ -1,0 +1,330 @@
+--@DEPENDS:.contents,.writings,.files,.links
+
+
+--@TABLE prefix=/_/lists net=all hsc cache=10m
+create table site.lists(
+	content_ids text[],
+  	primary key(host_id,uri)
+  ) inherits (site.contents);
+--@END
+  
+--@FUNCTION roles=user audit=p_uri ver=2
+create function site.lists_breed(a_host integer,a_contact text,p_uri text,p_mask bigint, p_parent text)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+			v_uri text:=pathfix(p_uri);
+		begin
+			--a_host integer, a_self text, p_html_file text,p_parent text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,
+			--p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]
+			select * into strict v_one 
+				from rom.containers_new(a_host,v_uri,null,p_parent,a_contact,null,null,p_mask,
+				'site','lists',v_uri||'/',null,null);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user audit=p_uri
+create function site.lists_new(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_title text,p_uri text)
+ returns text as $$
+declare 
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+	insert into site.lists (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, title) 
+		values (a_host,p_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], array[p_title]);
+	return p_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post
+create function site.lists_resource(a_host integer, a_self text, p_html_file text,p_delegated text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint)
+ returns text as $$
+begin
+	
+	update site.lists set 
+			html_file=p_html_file,  
+			modified_date=now(),
+			delegated=p_delegated,
+			ownercid=p_ownercid,
+			gid=p_gid,
+			relatedcids=p_relatedcids,
+			mask=p_mask
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=author,designer,admin ver=3
+create function site.lists_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_search text default null)
+ returns setof site.contents as $$
+begin
+			
+			
+			
+if p_search is null then
+
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.lists
+					where host_id=a_host and container=a_self
+			) tbl;
+			
+
+
+else
+
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.lists
+					where host_id=a_host and container=a_self
+					   and p_search = ANY (content_ids::text[])
+			) tbl;
+			
+
+
+end if;			
+			
+			
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function site.lists_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.lists where host_id=a_host+1;
+			insert into site.lists
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, content_ids 
+	  				from site.lists
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.lists_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.lists where host_id=a_host;
+			insert into site.lists
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, content_ids 
+	  				from site.lists
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=3
+create function site.lists_contains(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_uri text)
+ returns setof site.contents as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+				array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from (
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.lists
+					where host_id=a_host and content_ids @> ARRAY[p_uri]
+				) tbl;
+		
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=author,admin audit
+create function site.lists_extinct(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_one rom.containers;
+		begin
+			perform site.lists_extinct(a_host,uri) 
+				from rom.containers where host_id=a_host and container=a_self;
+			
+			delete from site.lists where host_id=a_host and container=a_self;
+    		delete from rom.containers where host_id=a_host and uri=a_self;
+			return a_self;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=author,admin
+create function site.lists_addtolist(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,	p_uri text) 
+	returns text as $$
+declare
+	v_which integer;
+begin
+	update site.lists 
+		set content_ids = array_prepend(p_uri, content_ids), modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,admin
+create function site.lists_removefromlist(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_uri text  default null) 
+	returns text as $$
+declare
+	v_arr text[];
+	v_outarr text[];
+	v_idx int;
+	v_which integer;
+begin
+
+	select content_ids into v_arr from site.lists where host_id=a_host and uri=a_self;
+	
+	if v_arr is not null then
+		for v_idx in array_lower(v_arr, 1)..array_upper(v_arr, 1) loop
+			if not v_arr[v_idx] = p_uri then
+				v_outarr = array_append(v_outarr, v_arr[v_idx]);
+			end if;
+		end loop;
+		update site.lists set content_ids = v_outarr, modified_date=now() where host_id=a_host and uri=a_self;
+	end if;
+	return a_self;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=author,admin audit
+create function site.lists_destroy(a_host integer,a_self text) returns text as $$
+	begin
+		delete from site.lists where host_id=a_host and uri=a_self;
+		return a_self;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=author,admin audit http=post
+create function site.lists_change(a_host integer,a_self text,p_content_ids text[])
+ returns text as $$
+begin
+	
+	update site.lists 
+		set content_ids=p_content_ids,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=3
+create function site.lists_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns site.lists as $$
+declare 
+	v_one site.lists;
+begin
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+, 
+			array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,content_ids
+		into v_one
+		from (
+			select *,rom.langs_which(langcodes,a_lang) wh  
+				from site.lists 
+				where host_id=a_host and uri=a_self
+			) tbl;
+		
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION http=get ver=9
+create function site.lists_content_list(a_host integer, a_self text, a_lang rom.langs, p_lng rom.langs)
+  returns setof site.contents as
+$$
+declare
+	v_text text;
+	v_rec site.contents;
+	v_table text;
+begin
+	for v_text in
+		select unnest(content_ids) as ci from site.lists l where l.host_id=a_host and l.uri=a_self
+	loop
+		select 	ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa,
+					array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+				into v_rec
+				from
+					(
+						select *,rom.langs_select(langcodes,a_lang) wh
+							from site.contents r
+							where r.host_id=a_host and r.uri = v_text
+					) tbl;
+			return next v_rec;
+	end loop;
+	return;
+end;
+$$
+  language plpgsql;
+--@END
+
+--@RUN utest
+	select check_null(site.lists_content_list(1,'/uri','en'::rom.langs,'en'::rom.langs));
+--@END
+
+--@FUNCTION http=post norom 
+create function site.lists_removefromlists(a_host integer, p_uri text) 
+returns void as $$
+declare
+
+v_arr text[];
+v_outarr text[];
+v_idx int;
+r site.lists%rowtype;
+
+begin
+
+for r in select * from site.lists where host_id=a_host
+loop
+	v_arr := r.content_ids;
+	v_outarr := '{}';
+	if v_arr is not null and array_lower(v_arr, 1) is not null then
+		for v_idx in array_lower(v_arr, 1)..array_upper(v_arr, 1) loop
+			if not v_arr[v_idx] = p_uri then
+				v_outarr = array_append(v_outarr, v_arr[v_idx]);
+			end if;
+		end loop;
+
+		update site.lists set content_ids = v_outarr, modified_date=now() where uri = r.uri and host_id=a_host;
+		
+	end if;
+	
+END LOOP;
+
+
+end;
+$$ language 'plpgsql';
+--@END
+

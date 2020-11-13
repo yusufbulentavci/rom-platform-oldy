@@ -1,0 +1,12 @@
+--@DEPENDS:tepeweb.base
+
+
+--@TABLE norom
+create table tepeweb.socialbot(
+	botid int,
+	botname text,
+	sni text,
+	pname text,
+	primary key(botid)
+) ;
+--@END

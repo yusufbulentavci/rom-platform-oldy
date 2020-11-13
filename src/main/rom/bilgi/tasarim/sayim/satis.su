@@ -1,0 +1,49 @@
+--@DEPENDS:.base
+
+--@TABLE nores clp ozellik ozellikler=urun,hizmet
+CREATE TABLE bilgi.satici
+(
+	id bigint,
+	vergino text
+);
+--@END
+
+--@TABLE nores clp ozellik ozellikler=urun,hizmet
+CREATE TABLE bilgi.musteri
+(
+	id bigint,
+	vergino text,
+	tckn text
+);
+--@END
+
+
+--@TABLE nores clp ozellik ozellikler=urun,hizmet
+CREATE TABLE bilgi.satilik
+(
+	id bigint,
+	birim bigint references bilgi.birim(id),
+	fiyat bigint,
+);
+--@END
+
+--@TABLE nores clp iliski=satici,musteri
+CREATE TABLE bilgi.siparis
+(
+	id bigint,
+	satici bigint,
+	musteri bigint
+);
+--@END
+
+--@TABLE nores clp iliski=siparis,satilik
+CREATE TABLE bilgi.siparis_listesi
+(
+	id bigint,
+	siparis bigint,
+	satilik bigint,
+	adet int
+);
+--@END
+
+

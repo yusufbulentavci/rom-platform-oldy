@@ -1,0 +1,80 @@
+--@DEPENDS:tepeweb.base
+
+--@SEQUENCE
+create sequence usersites_id_seq;
+--@END
+
+
+--@TABLE prefix=/_/usersites net=intra
+create table tepeweb.usersites(
+	title text,
+	remotehost int,
+	remotesite text,
+	remoteworld text,
+	lastip text,
+	lastcountry text,
+	lastactivity timestamp not null default now(),
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END
+
+
+
+--@FUNCTION norom
+create function tepeweb.usersites_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+				a_host,'/_/usersites',null,null,null,null,null,2032064,
+				'tepeweb','usersites','/_/usersites/',null,null);
+			return v_one;
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function tepeweb.usersites_list(a_host integer) returns setof tepeweb.usersites as $$
+begin
+	return query	select * from tepeweb.usersites
+						where host_id=a_host;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=contact before=com.bilgidoku.rom.web.db.usersites.createhost audit=p_title
+create function tepeweb.usersites_new(a_host int,a_contact text, a_remote_addr text, p_title text, p_lang text, p_remotehost int, p_email text, p_adminname text, p_password text, p_lastcountry text)
+ returns text as $$
+declare 
+	v_uri text;
+begin
+	insert into tepeweb.usersites (
+			host_id, 
+			mask,
+			uri,
+			container,
+			ownercid,
+			title,
+			remotehost,
+			lastip,
+			lastcountry
+			) 
+		values (
+			a_host,
+			2032064, 
+			'/_/usersites/'||nextval('usersites_id_seq'),
+			'/_/usersites',
+			a_contact,
+			p_title,
+			p_remotehost,
+			a_remote_addr,
+			p_lastcountry
+			) 
+		returning uri  
+		into v_uri;
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END

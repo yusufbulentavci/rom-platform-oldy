@@ -1,0 +1,77 @@
+--@DEPENDS:.tariff,.feature
+
+-- importance: 100->low,
+-- tperiod: 2->monthly
+
+-- Standart 
+-- 		Disk: up to 10 GB
+--		Net:  up to 5 GB
+--
+--	Monthly fee		Max: 10/fee + 10/disk + 5/net= 20 TL 			Yearly: 280
+--
+-- 					Min: 10/fee												120
+--
+-- Bronze
+-- 		Disk
+
+
+--@RUN
+delete from tepeweb.feature;
+insert into tepeweb.feature values ('cost.base',100,2,2,1,'{1}'::int[],'','Monthly base fee');
+insert into tepeweb.feature values ('usage.disk',100,2,2,1,'{1}'::int[],'gigabyte','Disk usage');
+insert into tepeweb.feature values ('usage.cpu',100,2,2,1,'{1}'::int[],'thousand hits','Cpu usage');
+insert into tepeweb.feature values ('usage.net',100,2,2,1,'{1}'::int[],'gigabyte','Network transfer');
+--@END
+
+
+--@RUN
+delete from tepeweb.tariff;
+insert into tepeweb.tariff values ('free','cost.base',100,false,0);
+insert into tepeweb.tariff values ('welcome','cost.base',30,false,0);
+insert into tepeweb.tariff values ('standart','cost.base',100,false,1000000);
+
+
+-- Maliyet
+-- Contabo vps 500 GB -> 8 euro/24 TL
+-- Bize maliyeti 
+-- 24 / 500 = 0.048 TL/GB -> 48000 CREDIT/GB 
+-- Standart bir kullanıcı 1 GB kullanacaktır
+
+insert into tepeweb.tariff values ('free','usage.disk',20,false,0);
+
+insert into tepeweb.tariff values ('welcome','usage.disk',5,false,0);
+insert into tepeweb.tariff values ('welcome','usage.disk',50000,true,0);
+
+-- max: 20
+insert into tepeweb.tariff values ('standart','usage.disk',20,false,1000000);
+-- max: 40
+insert into tepeweb.tariff values ('standart','usage.disk',50,false,800000);
+-- max: 
+insert into tepeweb.tariff values ('standart','usage.disk',5000,false,600000);
+
+
+insert into tepeweb.tariff values ('free','usage.cpu',100,false,0);
+insert into tepeweb.tariff values ('welcome','usage.cpu',20,false,0);
+insert into tepeweb.tariff values ('welcome','usage.cpu',50000,true,0);
+
+-- max: 20
+insert into tepeweb.tariff values ('standart','usage.cpu',20,false,1000000);
+-- max: 40
+insert into tepeweb.tariff values ('standart','usage.cpu',50,false,800000);
+-- max: 
+insert into tepeweb.tariff values ('standart','usage.cpu',5000,false,600000);
+
+
+insert into tepeweb.tariff values ('free','usage.net',100,false,0);
+insert into tepeweb.tariff values ('welcome','usage.net',30,false,0);
+insert into tepeweb.tariff values ('welcome','usage.net',50000,true,0);
+
+-- max: 20
+insert into tepeweb.tariff values ('standart','usage.net',20,false,1000000);
+-- max: 40
+insert into tepeweb.tariff values ('standart','usage.net',50,false,800000);
+-- max: 
+insert into tepeweb.tariff values ('standart','usage.net',5000,false,600000);
+
+
+--@END

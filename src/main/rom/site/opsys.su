@@ -1,0 +1,53 @@
+--@DEPENDS:.base
+
+--@ENUM
+create type site.opsys as enum(
+	'others','windows','linux','apple','symbian','sony','sun','blackberry','wii','roku','psp','samsung'
+);
+--@END
+
+--@ENUM
+create type site.browser as enum(
+	'others','chrome','ie','firefox','safari','opera','outlook','thunderbird','silk','omniweb','download','lynx','bot'
+);
+--@END
+
+--@FUNCTION norom
+create function rom.langs_which(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return 1;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return 1;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END
+  
+--@FUNCTION norom
+create function rom.langs_has(p_langs rom.langs[], p_which rom.langs)
+  RETURNS integer AS
+$BODY$
+	begin
+		if array_lower(p_langs,1)=null then
+			return null;
+		end if;
+		for i in array_lower(p_langs,1)..array_upper(p_langs,1) loop
+			if p_langs[i]=p_which then
+				return i;
+			end if;
+		end loop;
+		return null;
+	end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+--@END

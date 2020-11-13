@@ -1,0 +1,17 @@
+--@DEPENDS:ready
+
+
+--@SCHEMA
+create schema dict;
+--@END
+
+--@ENUM
+CREATE TYPE dict.http_methods AS ENUM('get',
+    'post',
+    'put',
+    'delete',
+    'head',
+    'options',
+    'trace',
+    'connect');
+--@END

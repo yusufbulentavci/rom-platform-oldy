@@ -1,0 +1,15 @@
+--@DEPENDS:central.ready,dict.ready
+
+--@SCHEMA
+create schema rom;
+--@END
+   
+--@TABLE norom
+CREATE TABLE rom.char_encodings
+(
+  char_encoding_id smallint NOT NULL,
+  title text,
+  CONSTRAINT char_encoding_pkey PRIMARY KEY (char_encoding_id)
+);
+--@END
+

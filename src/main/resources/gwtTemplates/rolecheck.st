@@ -1,0 +1,1 @@
+rolecheck(role)::=<<RoleMask.%role%>>

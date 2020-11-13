@@ -1,0 +1,471 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.bilgidoku</groupId>
+	<artifactId>rom</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>rom</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<junitVersion>4.11</junitVersion>
+		<nettyVersion>4.1.32.Final</nettyVersion>
+		<commonsHttpClientVersion>3.1</commonsHttpClientVersion>
+		<commonsCodecVersion>1.10</commonsCodecVersion>
+		<guavaVersion>19.0</guavaVersion>
+		<httpCoreVersion>4.4.5</httpCoreVersion>
+		<httpClientVersion>4.5.2</httpClientVersion>
+		<jnaVersion>4.1.0</jnaVersion>
+		<!-- string template rom.mail ve rom.code'ta kullaniliyor, stringTemplateVersion 
+			referans verilmeden -->
+		<stringTemplateVersion>4.0.2</stringTemplateVersion>
+		<owaspVersion>r239</owaspVersion>
+		<gsonVersion>2.7</gsonVersion>
+		<pgJdbcVersion>42.2.12</pgJdbcVersion>
+		<romvrange>[3.0.0,3.1.0)</romvrange>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+		<mavenWarPluginVersion>2.6</mavenWarPluginVersion>
+		<mavenCompilerPluginVersion>3.8.1</mavenCompilerPluginVersion>
+		<mavenEclipsePluginVersion>2.10</mavenEclipsePluginVersion>
+		<mavenSourcePluginVersion>3.2.0</mavenSourcePluginVersion>
+		<mavenDeployPluginVersion>2.8.2</mavenDeployPluginVersion>
+		<javaccMavenPlugin>2.6</javaccMavenPlugin>
+		<commonsIoVersion>2.5</commonsIoVersion>
+		<commonsLangVersion>2.6</commonsLangVersion>
+		<junitVersion>4.12</junitVersion>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<gwtVersion>2.8.2</gwtVersion>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>rom-repo</id>
+			<name>Rom repo</name>
+			<url>file:///home/rompg/maven/repo</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junitVersion}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commonsIoVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commonsLangVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gsonVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>${nettyVersion}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/dnsjava/dnsjava -->
+		<dependency>
+			<groupId>dnsjava</groupId>
+			<artifactId>dnsjava</artifactId>
+			<version>2.1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guavaVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>stringtemplate</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${pgJdbcVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcmail-jdk15on</artifactId>
+			<version>1.51</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.51</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.51</version>
+		</dependency>
+		<dependency>
+			<groupId>org.shredzone.acme4j</groupId>
+			<artifactId>acme4j-client</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.shredzone.acme4j</groupId>
+			<artifactId>acme4j-utils</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+			<artifactId>owasp-java-html-sanitizer</artifactId>
+			<version>${owaspVersion}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwtVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.gwt.google-apis</groupId>
+			<artifactId>gwt-visualization</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<directory>${project.basedir}/target</directory>
+		<outputDirectory>${project.build.directory}/classes</outputDirectory>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<testOutputDirectory>${project.build.directory}/test-classes</testOutputDirectory>
+		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+		<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/javacc</directory>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/rom</directory>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/webapp</directory>
+			</resource>
+
+		</resources>
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${mavenCompilerPluginVersion}</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<compilerArgument>-XDignore.symbol.file</compilerArgument>
+					<!-- The semantics of this option are reversed, see MCOMPILER-209. -->
+					<useIncrementalCompilation>false</useIncrementalCompilation>
+					<compilerArgs>
+						<!-- The output of Xlint is not shown by default, but we activate it 
+							for the QA bot to be able to get more warnings -->
+						<arg>-Xlint:all</arg>
+						<!-- Prevents recompilation due to missing package-info.class, see 
+							MCOMPILER-205 -->
+						<arg>-Xpkginfo:always</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>${mavenEclipsePluginVersion}</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<useProjectReferences>true</useProjectReferences>
+					<sourceExcludes>
+						<sourceExclude>**/.svn/**</sourceExclude>
+					</sourceExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${mavenDeployPluginVersion}</version>
+				<executions>
+					<execution>
+						<phase>deploy</phase>
+						<!-- also during install -->
+						<configuration>
+							<performRelease />
+							<!-- installs source JAR -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.github.johnpoth</groupId>
+				<artifactId>jshell-maven-plugin</artifactId>
+				<version>1.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>javacc-maven-plugin</artifactId>
+				<version>${javaccMavenPlugin}</version>
+				<executions>
+					<execution>
+						<id>javacc</id>
+						<goals>
+							<goal>javacc</goal>
+						</goals>
+						<!-- <configuration> -->
+						<!-- <includes> -->
+						<!-- <include>**/ExprRunner.jj</include> -->
+						<!-- </includes> -->
+						<!-- </configuration> -->
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwtVersion}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>generateAsync</goal>
+							<goal>i18n</goal>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+
+					<extraJvmArgs>-Xmx2G</extraJvmArgs>
+					<bindAddress>localhost.com</bindAddress>
+
+					<launcherDir>${project.basedir}/gecici</launcherDir>
+
+					<i18nMessagesBundles>
+						<i18nMessagesBundle>com.bilgidoku.rom.gwt.client.util.constants.ApplicationConstants</i18nMessagesBundle>
+
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.activate.client.constants.activatetext</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.changepass.client.constants.changepasstrans</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.register.client.constants.registertrans</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.pay.client.constants.paytrans</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.tutor.client.constants.tutortrans</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.tshirt.client.constants.tshirtrans</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.kamu.graph.client.constants.GraphConstants</i18nMessagesBundle>
+
+						<i18nMessagesBundle>com.bilgidoku.rom.site.yerel.constants.OneTrans</i18nMessagesBundle>
+						<i18nMessagesBundle>com.bilgidoku.rom.site.yerel.constants.InitialConstants</i18nMessagesBundle>
+					</i18nMessagesBundles>
+
+					<style>PRETTY</style>
+					<generateDirectory>${project.basedir}/src/main/java</generateDirectory>
+
+					<modules>
+						<module>com.bilgidoku.rom.site.one</module>
+						<module>com.bilgidoku.rom.site.kamu.login.login</module>
+						<module>com.bilgidoku.rom.site.boxer</module>
+						<module>com.bilgidoku.rom.site.kamu.pub.show</module>
+						<module>com.bilgidoku.rom.site.kamu.a.a</module>
+						<module>com.bilgidoku.rom.site.kamu.htmledit.htmledit</module>
+					</modules>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase> package</phase>
+						<configuration>
+							<tasks>
+								<mkdir dir="target/sonuc"></mkdir>
+								<copy todir="target/sonuc/classes">
+									<fileset dir="target/classes" includes="**" />
+								</copy>
+								<mkdir dir="target/site"></mkdir>
+								<copy todir="target/sonuc/site/kamu">
+									<fileset dir="target/classes/kamu" includes="**" />
+								</copy>
+								<copy todir="target/sonuc/site/yerel">
+									<fileset dir="target/classes/yerel" includes="**" />
+								</copy>
+
+								<copy todir="target/sonuc/site/yerel/one">
+									<fileset dir="target/rom-1.0-SNAPSHOT/one"
+										includes="**" />
+								</copy>
+								<copy todir="target/sonuc/site/kamu/login">
+									<fileset dir="target/rom-1.0-SNAPSHOT/login"
+										includes="**" />
+								</copy>
+								<copy todir="target/sonuc/site/kamu/">
+									<fileset dir="target/rom-1.0-SNAPSHOT/" includes="**" />
+								</copy>
+								<copy todir="target/sonuc/site/yerel/boxer">
+									<fileset dir="target/rom-1.0-SNAPSHOT/boxer"
+										includes="**" />
+								</copy>
+								<copy todir="target/sonuc/site/kamu/a">
+									<fileset dir="target/rom-1.0-SNAPSHOT/a" includes="**" />
+								</copy>
+								<copy todir="target/sonuc/site/kamu/show">
+									<fileset dir="target/rom-1.0-SNAPSHOT/show"
+										includes="**" />
+								</copy>
+
+<!-- 								<copy todir="target/sonuc/site/kamu/activate"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/activate" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/browse"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/browse" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/changepass"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/changepass" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/exam"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/exam" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/htmledit"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/htmledit" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/image"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/image" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/pay"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/pay" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+<!-- 								<copy todir="target/sonuc/site/kamu/svgedit"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/svgedit" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+<!-- 								<copy todir="target/sonuc/site/kamu/register"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/register" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+<!-- 								<copy todir="target/sonuc/site/kamu/textedit"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/textedit" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+<!-- 								<copy todir="target/sonuc/site/kamu/tshirt"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/tshirt" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+<!-- 								<copy todir="target/sonuc/site/kamu/tutor"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/tutor" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+<!-- 								<copy todir="target/sonuc/site/kamu/usermedia"> -->
+<!-- 									<fileset dir="target/rom-1.0-SNAPSHOT/usermedia" -->
+<!-- 										includes="**" /> -->
+<!-- 								</copy> -->
+
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-file</artifactId>
+				<version>3.3.3</version>
+			</extension>
+		</extensions>
+	</build>
+	<distributionManagement>
+		<repository>
+			<id>rom-repo</id>
+			<url>file:///home/rompg/maven/repo</url>
+		</repository>
+	</distributionManagement>
+	<developers>
+		<developer>
+			<id>inci</id>
+			<name>inci Avci</name>
+			<email>inci.avci@bilgidoku.com</email>
+			<url>http://www.bilgidoku.com</url>
+			<organization>Bilgi doku</organization>
+			<organizationUrl>http://www.bilgidoku.com</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+3</timezone>
+			<properties>
+				<picUrl />
+			</properties>
+		</developer>
+		<developer>
+			<id>bilo</id>
+			<name>Bulent Avci</name>
+			<email>bulent.avci@bilgidoku.com</email>
+			<url>http://www.bilgidoku.com</url>
+			<organization>Bilgi doku</organization>
+			<organizationUrl>http://www.bilgidoku.com</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+3</timezone>
+			<properties>
+				<picUrl />
+			</properties>
+		</developer>
+	</developers>
+</project>

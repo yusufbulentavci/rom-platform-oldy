@@ -1,0 +1,54 @@
+--@DEPENDS:tepeweb.base
+
+--@TABLE norom prefix=/_/mediastore
+create table tepeweb.mediastore(
+	pr int,
+	pid text,
+	tags text[],
+	uses int,
+	weight int,
+	format text,
+	primary key(pr,pid)
+);
+--@END
+
+--@INDEX
+create index idx_mediastore_tags on tepeweb.mediastore using gin(tags);
+--@END
+
+--@INDEX
+create index idx_mediastore_uses on tepeweb.mediastore(uses);
+--@END
+
+--@INDEX
+create index idx_mediastore_weight on tepeweb.mediastore(weight);
+--@END
+
+--@FUNCTION norom
+create function tepeweb.mediastore_byprovider(p_pr int, p_pid text)
+	returns setof tepeweb.mediastore as $$
+	
+	select * from tepeweb.mediastore where pr=p_pr and pid=p_pid;
+$$ language sql;
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.mediastore_new(p_pr int, p_pid text, p_tags text[], p_uses int, p_weight int, p_format text) 
+	returns int as $$
+	begin
+		insert into tepeweb.mediastore values (p_pr, p_pid, p_tags, p_uses, p_weight, p_format);
+		return 0;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom
+create function tepeweb.mediastore_listpublic(p_use int)
+	returns setof text as $$
+	
+	select pr||'_'||pid||'_'||format from tepeweb.mediastore where uses=p_use order by weight limit 10000;
+$$ language sql;
+--@END

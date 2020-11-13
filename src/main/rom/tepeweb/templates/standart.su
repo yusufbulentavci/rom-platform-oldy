@@ -1,0 +1,29 @@
+--@DEPENDS:.base
+
+--@DATA createfunc ver=11 name=createinfo table=site.info cols=?host_id,uri,?langcodes,+style,+default_app,+<palette,+<text_font,+<site_footer,+<headertext,+<summary,+<logo_img,?address,+<browser_title,mask
+hostid	/_/siteinfo	lang	/_/styles/amorium	/_/apps/layout/standart	rom/dosya/db/info/palette.json	rom/dosya/db/info/text_font.json	rom/dosya/db/info/foottext.sql	rom/dosya/db/info/headtext.sql	rom/dosya/db/info/summary.sql	rom/dosya/db/info/logo_img.json	address	rom/dosya/db/info/browser_title.sql	14549028
+--@END
+
+
+--ver 6 => 7: amorium, hubushkia, miletus background stillerinde düzeltme yapıldı.
+
+--@DATA createfunc updatedata ver=32 name=createstyles table=rom.styles cols=?host_id,uri,container,title,<codes,mask
+hid	/_/styles/common	/_/styles	Common	rom/dosya/db/style/common.json	16515108
+hid	/_/styles/selybria	/_/styles	Selybria	rom/dosya/db/style/selybria.json	16515108
+hid	/_/styles/miletus	/_/styles	Miletus	rom/dosya/db/style/miletus.json	16515108
+hid	/_/styles/amorium	/_/styles	Amorium	rom/dosya/db/style/amorium.json	16515108
+hid	/_/styles/gambrion	/_/styles	Gambrion	rom/dosya/db/style/gambrion.json	16515108
+hid	/_/styles/hubushkia	/_/styles	Hubushkia	rom/dosya/db/style/hubushkia.json	16515108
+--@END
+
+--@DATA createfunc updatedata ver=42 name=createwidgets table=rom.widgets cols=?host_id,uri,title,<codes,mask
+hid	/_/widgets	defwidget	rom/dosya/db/widget.json	16515108
+--@END
+
+--@DATA createfunc updatedata ver=17 name=createtrans table=rom.trans cols=?host_id,uri,container,langcodes,+<title,mask,<constants
+hostid	/_/_trans	no	{"en","tr"}	rom/dosya/db/trans.sql	16515108	rom/dosya/db/constants.json
+--@END
+
+
+
+

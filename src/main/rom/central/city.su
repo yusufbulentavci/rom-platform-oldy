@@ -1,0 +1,13 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.city(
+	city serial,
+	named text,
+	state int,
+	judge int,
+  	primary key(city)
+  );
+--@END

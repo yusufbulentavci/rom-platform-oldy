@@ -1,0 +1,534 @@
+--@DEPENDS:.base
+
+
+--@SEQUENCE
+create sequence dates_id_seq;
+--@END
+
+-- cron: modified
+-- http://search.cpan.org/~roland/Schedule-Cron-0.9/Cron.pm
+-- split first text is duration
+
+
+--@TABLE prefix=/_/_dates net=intra
+create table rom.dates(
+	nexttime timestamp,
+	cron text,
+	vacation int,
+	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END
+
+
+
+
+
+
+
+
+
+
+
+--@FUNCTION ver=1
+create function rom.dates_list(a_host int)
+ returns setof rom.dates as $$
+ begin
+		return query 
+			select * from rom.dates where host_id=a_host and virtualsparent is null;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1
+create function rom.dates_virtualslist(a_host int, a_self text)
+ returns setof rom.dates as $$
+ begin
+		return query 
+			select * from rom.dates where host_id=a_host 
+	and virtualsparent = a_self 
+	and ownercid in (select contact from dict.users where host_id = a_host)
+	and title is not null;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function rom.dates_listalternatives(a_host int, p_first text)
+ returns setof rom.dates as $$
+ begin
+		return query 
+			select * from rom.dates where host_id=a_host and firststock=p_first;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin ver=3
+create function rom.dates_new(
+	a_host integer,
+	p_writing text,
+	p_tariff json,
+	p_physical json,
+	p_amount integer,
+	p_alertonleft integer
+)
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	insert into rom.dates (
+			host_id, 
+			uri,
+			container,
+			mask,
+			writing,
+			tariff,
+			physical,
+			amount,
+			alertonleft
+			) 
+		values (
+			a_host, 
+			'/_/_dates/'||nextval('stock_id_seq'), 
+			'/_/_dates',
+			1835300,
+			p_writing,
+			(case p_tariff is null when true then '{"price":[0,"TRY"]}'::json else p_tariff end),
+			p_physical,
+			p_amount,
+			p_alertonleft
+			) 
+		returning uri  
+		into v_uri;
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2 roles=contact
+create function rom.dates_virtualstock(
+	a_host integer,
+	a_contact text,
+	p_stock text
+)
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	insert into rom.dates (
+			host_id, 
+			uri,
+			container,
+			mask,
+			ownercid,
+			virtualsparent
+			) 
+		values (
+			a_host, 
+			'/_/_dates/'||nextval('stock_id_seq'), 
+			'/_/_dates',
+			2059748,
+			a_contact,
+			p_stock
+			) 
+		returning uri  
+		into v_uri;
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@RUN utest
+ select rom.dates_new(1,'/dd','{"elini":"opem"}'::json,null,0,null);
+--@END
+
+--@FUNCTION
+create function rom.dates_get(a_host integer,a_self text)
+ returns rom.dates as $$
+declare 
+  v_one rom.dates;
+begin
+	
+	select *
+		into v_one 
+		from rom.dates 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.dates_available(a_host integer,a_self text,p_amount integer)
+ returns boolean as $$
+declare 
+  v_cnt integer;
+  v_stock rom.dates;
+begin
+	
+	select * 
+			into strict v_stock
+		from rom.dates 
+		where host_id=a_host and uri=a_self and onsale;
+	
+	if v_stock.virtualsparent is not null then
+		a_self:=v_stock.virtualsparent;
+		select * 
+				into strict v_stock
+			from rom.dates 
+			where host_id=a_host and uri=a_self and onsale;
+	
+	end if;
+
+	return v_stock.amount is not null and v_stock.amount>=p_amount;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.dates_settariff(a_host integer,a_self text,p_tariff json)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set tariff=p_tariff,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin ver=1
+create function rom.dates_settm(a_host integer,a_self text,p_tm text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set tariffmodel=p_tm,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	perform rom.dates_applytariffmodel(a_host,a_self);
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+ select rom.dates_settariff(1,'/dd','{"elini":"opem"}'::json);
+--@END
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.dates_setphysical(a_host integer,a_self text,p_physical json)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set physical=p_physical,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post=ver=1
+create function rom.dates_setamount(a_host integer,a_self text,p_amount int)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set amount=p_amount,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.dates_setonsale(a_host integer,a_self text,p_onsale boolean)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set onsale=p_onsale,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function rom.dates_addamount(a_host integer,a_self text,p_diff int)
+ returns int as $$
+declare 
+	v_ret int;
+	v_alertonleft boolean;
+begin
+	
+	update rom.dates
+		set amount=amount+p_diff
+		where host_id=a_host and uri=a_self and (amount+p_diff)>=0
+		returning amount into v_ret;
+
+-- Check price
+	
+	return v_ret;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+ select rom.dates_new(1,'/dd','{"elini":"opem"}'::json,null,0,null);
+ 
+ select rom.dates_addamount(host_id,uri,3) from rom.dates;
+ 
+ 
+ select assert_true(rom.dates_available(host_id,uri,3)) from rom.dates;
+ 
+--@END
+
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.dates_setalertonleft(a_host integer,a_self text,p_alertonleft int)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set alertonleft=p_alertonleft,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post ver=1
+create function rom.dates_setoptions(a_host integer,a_self text,p_options json)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set options=p_options,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	perform rom.dates_applytariffmodel(a_host,a_self);
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post
+create function rom.dates_setfirststock(a_host integer,a_self text,p_firststock text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set firststock=p_firststock,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post
+create function rom.dates_settitle(a_host integer,a_self text,p_title text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set title=p_title,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post
+create function rom.dates_setsummary(a_host integer,a_self text,p_summary text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set summary=p_summary,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin http=post
+create function rom.dates_setalternatives(a_host integer,a_self text,p_alternatives text[])
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set alternatives=p_alternatives,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post
+create function rom.dates_setvirtualsparent(a_host integer,a_self text,p_virtualsparent text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set virtualsparent=p_virtualsparent,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin
+create function rom.dates_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.dates where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function rom.dates_updatewriting(a_host int, p_writing text, p_oldstock text, p_newstock text)
+ returns text as $$
+ begin
+ 
+ 	if p_oldstock is not null and p_newstock is not null and p_oldstock=p_newstock then
+ 		return p_newstock;
+ 	end if;
+ 
+	if p_oldstock is not null then
+		update rom.dates 
+				set writing=null 
+				where host_id=a_host and uri=p_oldstock;
+	end if;
+
+	if p_newstock is not null then
+		update rom.dates 
+			set writing=p_writing
+			where host_id=a_host and uri=p_newstock;
+	end if;	
+	
+	
+	 
+ 	return p_newstock;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.dates_applytariffmodel(a_host integer,a_self text)
+ returns boolean as $$
+declare
+	v_stock rom.dates;
+	v_ret json;
+	
+	v_baseprice text;
+	v_coef text;
+	v_vatpercentage int;
+	v_price rom.money;
+	v_vat rom.money;
+	
+	v_co rom.money;
+	v_code text;
+	
+	
+begin
+	select * into strict v_stock
+		from rom.dates
+		where host_id=a_host and uri=a_self;
+	
+	if v_stock.tariffmodel is null then
+		return false;
+	end if;
+		
+	select code,baseprice,vatpercentage,coefficient 
+			into strict v_code,v_baseprice,v_vatpercentage,v_coef
+		from rom.tariffmodel
+		where host_id=a_host and uri=v_stock.tariffmodel;
+	
+	if v_code='coef' then
+		v_price:=rom.money_add(rom.money_fromtext(v_baseprice), rom.money_mul(rom.money_fromtext(v_coef),(v_stock.options->'coef')::text::int));
+		v_vat:=rom.money_percentage(v_price,v_vatpercentage);
+		v_ret:=json_set(v_ret,'price',rom.money_tojsonarray(v_price));
+		v_ret:=json_set(v_ret,'vat',rom.money_tojsonarray(v_vat));
+		v_ret:=json_set(v_ret,'vatperc',v_vatpercentage);
+	end if;
+
+	update rom.dates
+		set tariff=v_ret,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin http=post
+create function rom.dates_seticon(a_host integer,a_self text,p_icon text)
+ returns boolean as $$
+declare 
+begin
+	
+	update rom.dates
+		set icon=p_icon,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END

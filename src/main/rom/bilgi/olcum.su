@@ -1,0 +1,55 @@
+--@DEPENDS:.base
+
+
+--@TABLE nores clp
+CREATE TABLE bilgi.buyukluk
+(
+	id integer primary key,
+	boolean sonradan not null
+);
+--@END
+
+--@DATA name=buyukluk table=bilgi.buyukluk cols=id,sonradan 
+$-uzunluk-	false
+$-kutle-	false
+$-zaman-	false
+--@END
+
+
+--@TABLE nores clp
+CREATE TABLE bilgi.birim
+(
+	id integer primary key,
+	buyukluk integer references bilgi.buyukluk(id),
+	kisaltma integer,
+	carpan	bigint,
+	bolen	bigint
+);
+--@END
+
+--@DATA name=birim table=bilgi.birim cols=id,buyukluk,kisaltma,carpan,bolen 
+$-metre-	$-uzunluk-	$-m-	1	1
+$-santimetre-	$-uzunluk-	$-cm-	1	100
+$-kilometre-	$-uzunluk-	$-km-	1000	1
+$-milimetre-	$-uzunluk-	$-mm-	1	1000
+$-kilogram-	$-kutle-	$-kg-	1	1
+$-gram-	$-kutle-	$-g-	1	1000
+$-ton-	$-kutle-	$-ton-	1000	1
+$-saniye-	$-zaman-	$-san-	1	1
+$-dakika-	$-zaman-	$-dak-	60	1
+$-saat-	$-zaman-	$-saat-	3600	1
+$-gun-	$-zaman-	$-gun-	86400	1
+$-hafta-	$-zaman-	$-hafta-	604800	1
+--@END
+
+
+--@TABLE nores clp ozellik
+CREATE TABLE bilgi.olcum
+(
+	id bigint,
+	zaman timestamp,
+	birim bigint references bilgi.birim(id),
+	okunan bigint
+);
+--@END
+

@@ -1,0 +1,201 @@
+--@DEPENDS:.contacts
+
+-- Waiting apps and codes
+--     mail
+--        incoming
+--    
+--     issue
+--        assigned
+--        resolved
+--
+--     dialogs
+--        comment
+
+
+
+--@TABLE prefix=/_/waiting net=intra ver=1
+create table rom.waiting(
+	app text,
+	code text,
+	inref text[],
+	valid_after timestamp without time zone,
+	valid_before timestamp without time zone,
+	times int default 1,
+	title text[],
+	username text[],
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.waiting add column title text[];
+--@UPGRADE: 1 alter table rom.waiting add username text[];
+--@END
+
+--@FUNCTION norom
+create function rom.waiting_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/waiting',null,null,null,null,null,null,
+							'rom','waiting','/_/waiting/',null,null);
+			return v_one;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user ver=5 http=post
+create function rom.waiting_new(a_host integer,a_contact text,p_app text, p_code text, p_inref text, p_title text, p_username text)
+ returns text as $$
+declare 
+	a_self text:='/_/waiting';
+	v_cont rom.containers;
+	v_uri text:='/_/waiting' || a_contact || '/' || p_app || '/' || p_code;
+	v_al text;
+	v_found text;
+	v_inref text[]=array[p_inref];
+	v_title text[]=array[p_title];
+	v_username text[]=array[p_username];
+	v_times int;
+	v_hasinref boolean;
+	
+begin
+
+	select uri into v_found from rom.waiting where host_id=a_host and uri=v_uri;
+	
+	if found then
+		
+		select inref @> array[p_inref] into v_hasinref
+			from rom.waiting 
+			where host_id=a_host and uri=v_uri;
+			
+		if v_hasinref then
+			update rom.waiting
+				set times=times+1,
+					modified_date=now()
+				where host_id=a_host and uri=v_uri
+				returning times,inref,title,username into v_times,v_inref,v_title,v_username;
+		
+		else
+			update rom.waiting
+				set inref=inref||p_inref,
+					title=title||p_title,
+					username=username||p_username,
+					times=times+1,
+					modified_date=now()
+				where host_id=a_host and uri=v_uri
+				returning times,inref,title,username into v_times,v_inref,v_title,v_username;
+		end if;
+			
+		perform rompg_sendudp('{"c":"s.m","ani":true,"d":['||a_host||',"'||a_contact||'","'||p_app||'","'||p_code||'",'||array_to_json(v_inref)::text||','||v_times||','||array_to_json(v_title)::text||','||array_to_json(v_username)::text||']}');
+		return v_uri;
+	end if;
+
+
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	
+		
+		--host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask
+		--a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask
+		
+	insert into rom.waiting (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, app, code, inref, title, username) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, p_app, p_code, v_inref, v_title, v_username);
+		
+	perform rompg_sendudp('{"c":"s.m","ani":true,"d":['||a_host||',"'||a_contact||'","'||p_app||'","'||p_code||'",'||array_to_json(v_inref)::text||',1,'||array_to_json(v_title)::text||','||array_to_json(v_username)::text||']}');
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 1 DROP FUNCTION rom.waiting_new(integer, text, text, text, text);
+--@END
+
+--@FUNCTION http=post roles=owner
+create function rom.waiting_setvalidperiod(a_host integer,a_self text, p_valid_after timestamp, p_valid_before timestamp)
+ returns text as $$
+declare
+	v_d text;
+begin
+	update rom.waiting set 
+				valid_after=p_valid_after,
+				valid_before=p_valid_before,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=owner,admin ver=2 http=post
+create function rom.waiting_gotit(
+	a_host integer,a_self text
+) returns text as $$
+begin
+	
+	update rom.waiting set 
+				times=0,
+				inref=array[]::text[],
+				title=array[]::text[],
+				username=array[]::text[],
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return '';
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,admin
+create function rom.waiting_destroy(
+	a_host integer,a_self text
+) returns text as $$
+declare
+	v_dlg text;
+begin
+	
+	perform rom.waiting_deletedialog(a_host, a_self);
+
+	delete from rom.waiting where host_id=a_host and uri=a_self;
+	
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+	
+-- Owner contact use this method to manage its waiting
+--@FUNCTION roles=contact ver=4
+create function rom.waiting_list(a_host integer, a_contact text)
+ returns setof rom.waiting as $$
+begin
+	return query
+		select *
+			from rom.waiting
+			where host_id=a_host and ownercid=a_contact and times>0;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.waiting_notifyall(a_host integer, p_contacts text[], p_app text, p_code text, p_inref text, p_title text, p_username text)
+ returns void as $$
+declare
+	x text;
+begin
+	if p_contacts is null then
+		return;
+	end if;
+	
+	foreach x in array p_contacts loop
+		perform rom.waiting_new(a_host,x,p_app, p_code, p_inref, p_title, p_username);
+	end loop;	
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 1 DROP FUNCTION rom.waiting_notifyall(integer, text[], text, text, text);
+--@END
+
+
+
+
+
+
+

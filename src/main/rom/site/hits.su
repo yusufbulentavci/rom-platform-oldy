@@ -1,0 +1,153 @@
+--@DEPENDS:.base
+
+--@SEQUENCE
+create sequence hit_id_seq;
+--@END
+
+--@TABLE prefix=/_/_hits roles=admin net=intra
+create table site.hits(
+	timebegin bigint,
+	timeend bigint,
+	ops json,
+	browsers json,
+	referrers json,
+	inhits json,
+	countries json,
+	langs json,
+	pageperiods json,
+	bringingwords json,
+	cpu bigint,
+	netread bigint,
+	netwrite bigint,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@END  
+
+
+--@FUNCTION norom
+create function site.hits_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+		--a_host,a_self,p_html_file,p_delegated,p_ownercid,p_gid,p_relatedcids,p_mask
+		--p_schema_name,p_type_name,p_uri_prefix,p_defaulthtml,p_tags
+			select * into strict v_one from rom.containers_new(a_host,'/_/_hits',null,null,null,null,null,1966080,
+				'site','hits','/_/_hits/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin
+create function site.hits_list(a_host int, p_since bigint, p_timeend bigint)
+ returns setof site.hits as $$
+ begin
+	
+	if p_since is null then
+		return query 
+			select * from site.hits where host_id=a_host;
+	end if;
+	
+	
+	return query 
+			select * from site.hits where host_id=a_host and
+			p_since<=timebegin and p_timeend>=timeend;
+--			(p_since,p_timeend) overlaps (timebegin,timeend);
+
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.hits_new(
+	a_host integer,
+	p_timebegin bigint,
+	p_timeend bigint,
+	p_ops json,
+	p_browsers json,
+	p_referrers json,
+	p_inhits json,
+	p_countries json,
+	p_langs json,
+	p_pageperiods json,
+	p_bringingwords json,
+	p_cpu bigint,
+	p_netread bigint,
+	p_netwrite bigint
+)
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	insert into site.hits (
+			host_id, 
+			uri,
+			timebegin,
+			timeend,
+			ops,
+			browsers,
+			referrers,
+			inhits,
+			countries,
+			langs,
+			pageperiods,
+			bringingwords,
+			cpu,
+			netread,
+			netwrite
+			) 
+		values (
+			a_host, 
+			'/_/_hits/'||nextval('hit_id_seq'), 
+			p_timebegin,
+			p_timeend,
+			p_ops,
+			p_browsers,
+			p_referrers,
+			p_inhits,
+			p_countries,
+			p_langs,
+			p_pageperiods,
+			p_bringingwords,
+			p_cpu,
+			p_netread,
+			p_netwrite
+			) 
+		returning uri  
+		into v_uri;
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function site.hits_get(a_host integer,a_self text)
+ returns site.hits as $$
+declare 
+  v_one site.hits;
+begin
+	
+	select *
+		into v_one 
+		from site.hits 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin
+create function site.hits_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from site.hits where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

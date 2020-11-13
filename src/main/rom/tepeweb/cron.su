@@ -1,0 +1,50 @@
+--@DEPENDS:.base,.textsearch
+
+
+
+--@FUNCTION norom
+create function tepeweb.cron_hourly(p_year integer, p_month integer, p_day integer, p_hour integer) 
+	returns boolean as $$
+declare
+begin
+	perform tepeweb.textsearch_indexwritings();
+	perform rom.comments_maintain();
+	perform site.files_maintain();
+
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.cron_daily(p_year integer, p_month integer, p_day integer) 
+	returns boolean as $$
+declare
+begin
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function tepeweb.cron_monthly(p_year integer, p_month integer) 
+	returns boolean as $$
+declare
+begin
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.cron_yearly(p_year integer) 
+	returns boolean as $$
+declare
+begin
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+

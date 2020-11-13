@@ -1,0 +1,191 @@
+--@DEPENDS:rom.base
+
+
+--@TYPE
+create type rom.money as(
+	amount bigint,
+	currency text
+);
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.money_add(p_first rom.money, p_second rom.money)
+ returns rom.money as $$
+declare
+	v_m rom.money;
+begin
+
+	if p_first is null and p_second is null then
+		return null;
+	end if;
+	
+	if p_first is null then
+		return p_second;
+	end if;
+	
+	if p_second is null then
+		return p_first;
+	end if;
+	
+	if p_first.currency<>p_second.currency then
+		raise exception 'Money add failed; currencies not matched:%<>%',p_first,p_second;
+	end if;
+	
+	return row(p_first.amount+p_second.amount, p_first.currency)::rom.money;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.money_addarr(p_items rom.money[])
+ returns rom.money as $$
+declare
+	v_ret rom.money;
+	v_i rom.money;
+begin
+
+	if p_items is null then
+		return null;
+	end if;
+	
+	foreach v_i in array p_items loop
+		v_ret:=rom.money_add(v_ret+v_i);
+	end loop;
+	
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=2
+create function rom.money_sub(p_first rom.money, p_second rom.money)
+ returns rom.money as $$
+declare
+	v_m rom.money;
+begin
+
+	if p_first is null and p_second is null then
+		return null;
+	end if;
+	
+	if p_first is null then
+		return row(-p_second.amount, p_second.currency)::rom.money;
+	end if;
+	
+	if p_second is null then
+		return p_first;
+	end if;
+	
+	if p_first.currency<>p_second.currency then
+		raise exception 'Money add failed; currencies not matched:%<>%',p_first,p_second;
+	end if;
+	
+	return row(p_first.amount-p_second.amount, p_first.currency)::rom.money;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+ select assert_equals('(345,USD)',rom.money_add(row(340,'USD')::rom.money,row(5,'USD')::rom.money)::text);
+--@END
+
+
+--@FUNCTION norom 
+create function rom.money_percentage(p_first rom.money, p_fac integer)
+ returns rom.money as $$
+declare
+	v_m rom.money;
+begin
+	if p_first is null then
+		return null;
+	end if;
+	
+	if p_fac is null then
+		return p_first;
+	end if;
+	
+	v_m:=row(p_first.amount*100/p_fac, p_first.currency)::rom.money;
+	return v_m;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.money_mul(p_first rom.money, p_fac integer)
+ returns rom.money as $$
+declare
+	v_m rom.money;
+begin
+	if p_first is null or p_fac is null then
+		return null;
+	end if;
+	v_m:=row(p_first.amount*p_fac, p_first.currency)::rom.money;
+	return v_m;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.money_div(p_first rom.money, p_fac int)
+ returns rom.money as $$
+declare
+	v_m rom.money;
+begin
+
+	if p_first is null or p_fac is null then
+		return null;
+	end if;
+	
+	if p_fac=0 then
+		raise exception 'Divide by zero';
+	end if;
+	
+	return row(p_first.amount/p_fac, p_first.currency)::rom.money;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.money_fromjsonarray(p_arr json)
+ returns rom.money as $$
+	select row((p_arr->0)::text::bigint,(p_arr->>1)::text)::rom.money;
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function rom.money_fromtext(p_text text)
+ returns rom.money as $$
+ 	select row(a[1]::bigint,a[2])::rom.money from regexp_split_to_array(p_text, E'\\s+') a;
+$$ language sql;
+--@END
+
+--@RUN utest
+ select assert_equals('(345,$)',rom.money_fromjsonarray('[345,"$"]'::json)::text);
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.money_tojsonarray(p_money rom.money)
+ returns json as $$
+	select ('['||p_money.amount||',"'|| p_money.currency ||'"]')::json;
+$$ language sql;
+--@END
+
+
+--@RUN utest
+ select assert_equals('[345,"$"]',rom.money_tojsonarray('(345,$)'::rom.money)::text);
+--@END
+
+
+--@AGGREGATE ver=1
+create aggregate rom.sum (rom.money)
+(
+    sfunc = rom.money_add,
+    stype = rom.money
+);
+--@END
+
+--@RUN utest
+ select assert_equals('(645,$)',rom.sum(foo)::text) from unnest(array['(345,$)'::rom.money, '(300,$)'::rom.money]) as foo;
+--@END
+

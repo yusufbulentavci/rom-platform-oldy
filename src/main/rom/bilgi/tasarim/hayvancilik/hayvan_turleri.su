@@ -1,0 +1,16 @@
+--@DEPENDS:.base
+
+
+--@TABLE nores clp tur=4 ozellikler=evcil_hayvan
+CREATE TABLE bilgi.koyun
+(
+	id smallint,
+	alan text,
+	adi text
+);
+--@END
+
+--@DATA name=hayvan_turleri table=bilgi.tur cols=id,atalar,ozellikler 
+--koyun	--{memeli_evcil_hayvan,}
+--
+--@END

@@ -1,0 +1,179 @@
+--@DEPENDS:.base,.hostfeature
+
+
+--@FUNCTION norom ver=21
+create function tepeweb.newhost(p_hostname text, p_lang rom.langs, p_contact json, p_payerid text,
+		p_admin text, p_credential text, p_remotetid text, p_money bigint, p_fid text, p_twitter text) returns int as $$
+	declare
+		v_host integer;
+		v_curi text;
+		
+		v_basepath text;
+
+	begin
+	
+		-- create host
+		insert into dict.hosts (host_name, mainlang, servable, contact, payer_id, domainalias) 
+				values (p_hostname, p_lang, true, p_contact, p_payerid, array[p_hostname])
+				returning host_id into v_host;	
+
+		-- rom breeding
+				--a_host integer, a_self text, p_html_file text,p_delegated text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,
+				--p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]
+		perform rom.containers_new(
+				v_host,'/_/c',null,null,v_curi,null,null,0,
+				'rom','containers','/_/c/',null,null);
+	
+		perform rom.contacts_breed(v_host);
+
+		select tepeweb.initials_adduser(v_host, p_lang, p_lang, (p_contact->>'cc')::rom.countrycode, p_admin, p_credential,
+			(p_contact->>'email')::text, p_hostname, p_hostname, '', p_fid, p_twitter, '127.0.0.1') into strict v_curi; 
+
+		update dict.users set roles=(1<<6)|(1<<11)|(1<<8) where host_id=v_host and user_name=p_admin;
+
+		-- create contact
+		--select rom.contacts_new(v_host,	p_lang,	p_lang,	(p_contact->>'email')::text, 
+		--		p_credential, (p_contact->>'firstname')::text, (p_contact->>'lastname')::text
+		--	) into strict v_curi;
+		
+		-- create user
+		--perform dict.users_new(v_host, p_admin, p_credential, (1<<6)|(1<<11)|(1<<8), v_curi);
+		
+		perform rom.styles_breed(v_host);
+		
+		perform rom.apps_breed(v_host,v_curi,'/_/apps/layout',16515108,null);
+		
+		perform rom.apps_breed(v_host,v_curi,'/_/apps',16515108,null);
+
+		-- site breeding
+		perform rom.tags_breed(v_host);
+		perform rom.comments_breed(v_host);
+		perform site.hits_breed(v_host);
+		perform rom.waiting_breed(v_host);
+		perform rom.org_new(v_host);
+		perform rom.issues_breed(v_host);
+		perform rom.tariffmodel_breed(v_host);
+		
+		perform rom.stocks_breed(v_host);
+		perform site.cart_breed(v_host);
+		perform site.questions_breed(v_host);
+		perform site.exams_breed(v_host);
+		
+		
+		perform site.files_breed(v_host,v_curi,'/f/images',2059748,array['gal'],'/_/apps/layout/gallery',null);
+		perform site.files_breed(v_host,v_curi,'/f/docs',2059748,array['doc'],'/_/apps/layout/files',null);
+		perform site.files_breed(v_host,v_curi,'/f/videos',2059748,array['gal'],'/_/apps/layout/files',null);
+		
+		perform site.files_breed(v_host,v_curi,'/f/local',2059744,null,'/_/apps/layout/files',null);
+		
+		perform site.files_breed(v_host,v_curi,'/f/local/images',2059744,null,'/_/apps/layout/files','/f/local');
+		perform site.files_breed(v_host,v_curi,'/f/local/docs',2059744,null,'/_/apps/layout/files','/f/local');
+		perform site.files_breed(v_host,v_curi,'/f/local/videos',2059744,null,'/_/apps/layout/files','/f/local');
+		perform site.files_breed(v_host,v_curi,'/f/local/backups',2059744,null,'/_/apps/layout/files','/f/local');
+		
+		perform site.files_breed(v_host,v_curi,'/f/users',2059748,null,'/_/apps/layout/files',null);
+		
+		perform site.lists_breed(v_host,v_curi,'/_/lists/public',2059748,null::text);
+		perform site.lists_breed(v_host,v_curi,'/_/lists/local',2059744,null::text);
+
+		perform site.lists_new(v_host,'/_/lists/public',p_lang,p_lang,v_curi,'Vitrine','/_/lists/public/vitrine');
+		perform site.lists_new(v_host,'/_/lists/public',p_lang,p_lang,v_curi,'Main','/_/lists/public/main');
+		perform site.lists_new(v_host,'/_/lists/public',p_lang,p_lang,v_curi,'Footer','/_/lists/public/footer');
+		
+		perform site.links_breed(v_host,v_curi,'/_/links/public',2059748,null::text);
+		perform site.links_breed(v_host,v_curi,'/_/links/local',2059744,null::text);
+		
+		perform site.households_breed(v_host,v_curi,'/_/households/public',2059748,null::text);
+		perform site.households_breed(v_host,v_curi,'/_/households/local',2059744,null::text);
+		
+		perform make_host_dir(v_host,'dbfs');
+		perform make_host_dir(v_host-1,'dbfs');
+
+		perform make_host_dir(v_host,'www');
+		perform make_host_dir(v_host-1,'www');
+
+		perform tepeweb.createstyles(v_host);
+		perform tepeweb.createwidgets(v_host);
+		
+		perform tepeweb.initials_new(v_host);
+		
+		
+		-- tepeweb breeding
+		perform tepeweb.medias_breed(v_host);
+
+		-- tepeweb ones		
+		perform tepeweb.account_new(v_host);
+		
+		perform tepeweb.hostfeature_min(v_host);
+		
+		
+		perform tepeweb.createinfo(v_host,array[p_lang]::rom.langs[],
+			p_contact
+			);
+		
+		perform tepeweb.createtrans(v_host);
+		
+		perform rom.containers_publish(v_host);
+		
+		return v_host;
+	end;
+$$ language plpgsql;
+--@END
+
+
+
+--@FUNCTION norom ver=2
+create function tepeweb.rmhost(p_hostname text) returns int as $$
+	declare
+		v_host integer;
+		v_hostintra integer;
+
+	begin
+	
+		
+		select host_id into strict v_host from dict.hosts where host_name=p_hostname;
+		select host_intra(v_host) into v_hostintra;
+		
+		delete from dict.hosts where host_id=v_host;
+		
+		delete from dict.users where host_id=v_host;
+		
+		delete from rom.resources where host_id=v_host;
+		delete from rom.resources where host_id=v_hostintra;
+
+		perform rm_host_alldir(v_host);
+		perform rm_host_alldir(v_hostintra);
+		
+		return v_host;
+	end;
+$$ language plpgsql;
+--@END
+
+
+
+--@FUNCTION norom
+create function tepeweb.mergecids(a_host text, p_cidtodel text, p_maincid text) returns boolean as $$
+	declare
+	begin
+		-- invalidate cidtodel
+		-- change owner of carts
+		-- change owner of stocks
+	
+		update rom.contacts 
+			set first_name = null,
+				nesting=null 
+			where host_id=a_host and ownercid=p_ciddel;
+			
+		update rom.carts 
+			set ownercid = p_maincid 
+			where host_id=a_host and ownercid=p_ciddel;
+			
+		update rom.stocks 
+			set ownercid = p_maincid 
+			where host_id=a_host and ownercid=p_ciddel;
+	
+	
+		return true;
+	end;
+$$ language plpgsql;
+--@END

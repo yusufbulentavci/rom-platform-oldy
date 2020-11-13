@@ -1,0 +1,272 @@
+--@DEPENDS:.resources
+
+
+
+--@TABLE prefix=/_/c net=all
+create table rom.containers(
+  schema_name text,
+	type_name text,
+	uri_prefix text,
+	defaulthtml text,
+	tags text[],
+  primary key(host_id,uri)
+) inherits (rom.resources);
+--@END
+
+
+--@INDEX
+create index idx_containers_schematype on rom.containers(schema_name,type_name);
+--@END
+
+--@FUNCTION norom ver=2
+create function rom.containers_new(a_host integer, a_self text, p_html_file text,p_parent text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint,
+	p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]) 
+returns rom.containers as $$
+declare 
+  v_one rom.containers;
+  v_uri text;
+  v_type text;
+begin
+	if a_self is null  then
+		raise exception 'Uri  should be given';
+	end if;
+	
+	v_uri:=pathfix(a_self);
+	
+	if p_uri_prefix is null  then
+		p_uri_prefix:=v_uri||'/';
+	end if;
+	
+	p_uri_prefix:=pathfix(p_uri_prefix);
+	
+	select * into v_one from rom.containers where host_id=a_host and uri=a_self;
+	
+	if FOUND then
+		return v_one;
+	end if;
+	
+	insert into rom.containers (
+			host_id,uri,html_file,delegated,container,ownercid,gid,relatedcids,mask,
+			schema_name,type_name,uri_prefix,defaulthtml,tags) 
+		values (
+			a_host,v_uri,p_html_file,null,p_parent,p_ownercid,p_gid,p_relatedcids,p_mask,
+			p_schema_name,p_type_name,p_uri_prefix,p_defaulthtml,p_tags) 
+			returning * into v_one;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function rom.containers_change(a_host integer,a_self text,p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]) 
+returns text as $$
+declare 
+  v_type integer;
+begin
+	update rom.containers 
+		set 
+			schema_name=p_schema_name,
+			type_name=p_type_name,
+			uri_prefix=p_uri_prefix,
+			defaulthtml=p_defaulthtml,
+			rtags=p_tags,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.containers_addtag(a_host integer,a_self text, p_tag text) 
+returns void as $$
+begin
+	update rom.containers 
+		set rtags=array_append(rtags, p_tag), modified_date=now()
+		where host_id=a_host and uri=a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.containers_setnesting(a_host integer,a_self text, p_store hstore) 
+returns void as $$
+begin
+	update rom.containers 
+		set nesting=p_store, modified_date=now()
+		where host_id=a_host and uri=a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION
+create function rom.containers_listing(a_host integer, a_contact text, a_roles int, p_space text default null, p_name text default null)
+ returns setof rom.containers as $$
+begin
+	if p_space is null then
+		return query 
+			select *
+				from rom.containers 
+				where host_id=a_host
+					and container is null and dict.users_canread(a_contact, a_roles, ownercid, mask,relatedcids);
+	end if;
+	
+	if p_name is null then
+		return query 
+			select *
+				from rom.containers 
+				where schema_name=p_space and host_id=a_host
+					and container is null and dict.users_canread(a_contact, a_roles, ownercid, mask,relatedcids);
+	end if;
+	
+	return query
+		select *
+				from rom.containers 
+				where schema_name=p_space and type_name=p_name 
+					and container is null and host_id=a_host
+					and dict.users_canread(a_contact, a_roles, ownercid, mask,relatedcids);
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION
+create function rom.containers_listsub(a_host integer, a_contact text, a_roles int, p_container text)
+ returns setof rom.containers as $$
+begin
+	return query
+		select *
+				from rom.containers 
+				where container=p_container and host_id=a_host
+					and dict.users_canread(a_contact, a_roles, ownercid, mask,relatedcids);
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+--@FUNCTION norom
+create function rom.containers_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.containers where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom  ver=2
+create function rom.containers_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.containers where host_id=a_host+1;
+			insert into rom.containers
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,schema_name,type_name,uri_prefix,defaulthtml,tags 
+	  				from rom.containers
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.containers_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from rom.containers where host_id=a_host;
+			insert into rom.containers
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,schema_name,type_name,uri_prefix,defaulthtml,tags 
+	  				from rom.containers
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post  roles=owner,author,admin ver=3
+create function rom.resources_changecontainer(a_host integer,a_self text,  p_to text)
+ returns text as $$
+declare
+	v_old rom.containers;
+	v_new rom.containers;
+	v_urisuffix text;
+	v_ret text;
+begin
+		select c.* into strict v_old from rom.containers c,rom.resources r 
+			where r.host_id=a_host and r.uri=a_self and c.host_id=a_host and c.uri=r.container;
+	
+		select * into strict v_new from rom.containers where host_id=a_host and uri=p_to;
+		update rom.resources set 
+			container=v_new.uri,
+			uri=replaceprefix(uri,v_old.uri_prefix,v_new.uri_prefix),
+			modified_date=now()
+			where host_id=a_host and uri=a_self returning uri into strict v_ret;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post audit=p_uri ver=2
+create function rom.containers_reuri(a_host integer,a_self text,p_uri text,p_uriprefix text)
+	returns text as $$
+	declare
+		v_one rom.containers;
+	begin
+		-- take old one	
+		select * into strict v_one where host_id=a_host and uri=a_self;
+		
+		-- recall for sub containers
+		perform rom.containers_reuri(a_host,uri,replaceprefix(uri,v_one.uri,p_uri),replaceprefix(uri,v_one.uri_prefix,p_uriprefix)) 
+			from rom.containers 
+			where host_id=a_host and container=a_self;
+		
+		-- update resources of container 
+		perform rom.resources_recontaineruri(a_host,v_one.uri_prefix,false,v_one.uri,v_one.uri_prefix,p_uri,p_uriprefix);
+		
+		-- update container
+		update rom.containers 
+			set uri = p_uri, 
+				uri_prefix = p_uriprefix,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@MACRO containerfields
+	schema_name text,
+	type_name text,
+	uri_prefix text,
+	defaulthtml text,
+	tags text[]
+--@END
+
+
+--@MACRO containerfieldnames
+	schema_name,type_name,uri_prefix,defaulthtml,tags
+--END
+
+
+--@MACRO containerparams
+p_schema_name text,p_type_name text,p_uri_prefix text,p_defaulthtml text,p_tags text[]
+--@END
+
+
+--@MACRO containerparamnames
+p_schema_name,p_type_name,p_uri_prefix,p_defaulthtml,p_tags
+--@END
+
+--@MACRO containercond
+host_id=a_host and container=a_self
+--@END

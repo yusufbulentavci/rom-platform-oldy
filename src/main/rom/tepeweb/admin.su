@@ -1,0 +1,30 @@
+
+-- back up db to file
+FOR r IN SELECT * 
+		FROM information_schema.columns 
+		WHERE column_name='host_id' and table_name<>'resources' and table_name<>'contents'
+
+    LOOP
+    		EXECUTE format('
+		   COPY (
+		   select * from %I.%I where host_id=%L
+		   )
+		   TO %L;
+		', r.table_schema,r.table_name,1,'/tmp/back/'||r.table_name||'.csv');
+
+        
+    END LOOP;
+-- back up dir to file
+
+
+-- move backup to target machine
+
+-- restore dir
+-- restore db
+
+-- delete db from source
+-- delete file from source
+
+
+-- Notes:
+-- Backups are in Golbasi, which means take backup from server and restore to another

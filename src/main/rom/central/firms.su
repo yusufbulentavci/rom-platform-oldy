@@ -1,0 +1,13 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.firms(
+	firm serial,
+	named text,
+	fg int,
+	judge int,
+  	primary key(rng)
+  );
+--@END

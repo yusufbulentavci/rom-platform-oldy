@@ -1,0 +1,40 @@
+--@DEPENDS:.base,.users,.hosts
+
+--@FUNCTION norom
+create function dict.appserver_load_user(a_host integer, p_user_name text) 
+returns setof dict.users
+as
+$$
+begin
+	return query select * from dict.users where host_id=a_host and user_name=p_user_name;		
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom
+create function dict.appserver_load_hosts() 
+returns setof dict.hosts
+as
+$$
+begin
+	return query select * from dict.hosts;		
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom
+create function dict.appserver_usernamebycid(a_host integer, p_cid text) 
+returns setof text
+as
+$$
+begin
+	return query 
+		select user_name 
+			from dict.users
+				where host_id=a_host and contact=p_cid limit 1;		
+end;
+$$ language 'plpgsql';
+--@END

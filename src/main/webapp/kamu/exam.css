@@ -1,0 +1,53 @@
+body, table td, select, button {
+	font-family: Cutive-Regular, Tahoma, Bitstream Vera Sans, sans-serif !important;
+	font-size: 13px !important;
+	line-height: 17px;
+}
+
+.site-holder {
+	margin: 0 auto;
+	padding: 30px 0;
+	position: relative !important;
+}
+
+.hili {
+	color: red;
+	font-weight: bold;
+	background-color: yellow;	
+}
+
+input[type="radio"]:checked+label {
+	color: black;
+	font-weight: bold;
+}
+
+.site-title {
+	font-weight: bold;
+	font-size: 30px !important;
+	color:  #633b77;	
+	padding-right: 10px;
+}
+
+.site-titlesml {
+	font-weight: bold;
+	font-size: 24px !important;
+	color:  #633b77;	
+	padding: 10px;
+}
+
+.site-header {
+	background-color: #d3d7cf;
+	border-bottom: 1px solid #888a85;
+	padding: 20px 15px;
+	margin-bottom: 15px;
+}
+
+.site-result {
+	font-size: 20px;
+	font-weight: bold;
+	padding: 5px 10px;
+	background-color: #d3d7cf;
+	
+}
+
+

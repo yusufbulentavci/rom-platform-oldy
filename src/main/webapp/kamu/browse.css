@@ -1,0 +1,554 @@
+/* body,table td,select,button { */
+/* 	font-family: Tahoma, Verdana, Bitstream Vera Sans, sans-serif !important; */
+/* 	font-size: 12px !important; */
+/* } */
+
+/* table { */
+/* 	border-spacing: 0px; */
+/* } */
+
+/* h1,h2,h3,h4 { */
+/*   margin: 15px 0 3px; */
+/* } */
+
+.gwt-MenuBar-vertical {
+	border:1px outset #CCCCCC;
+}
+
+
+/* background pattern and image selected view*/
+.GPBYFDEAB {
+	display: inline-block;
+}
+.GPBYFDECB {
+	display: inline-block;
+}
+
+.com-google-gwt-user-cellview-client-CellList-Style-cellListEvenItem {
+	display: inline-block;
+}
+
+.com-google-gwt-user-cellview-client-CellList-Style-cellListOddItem {
+	display: inline-block;
+}
+
+.com-google-gwt-user-cellview-client-CellList-Style-cellListKeyboardSelectedItem {
+	display: inline-block;
+	border-color: transparent;
+	border-width: 3px 0;
+	border-style:solid;	
+}
+
+.GPBYFDEDB {
+	display: inline-block;
+	border-color: transparent;
+	border-width: 3px 0;
+	border-style:solid;
+}
+
+.gwt-TabPanelBottom {
+	border-width: 2px 0 0 !important;
+	height: 90% !important;
+	/* 	width: 98% !important; */
+}
+
+.gwt-Tree {
+	min-width: 200px;
+}
+
+.site-closebutton {
+	position: absolute;
+	top: 2px;
+	right: 7px;
+	width: 24px;
+	height: 23px;
+	display: block;
+	text-indent: -9999px;
+	border-width: 0;
+	background: transparent url(/_local/images/close.png) no-repeat
+		center center;
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+	border-color: transparent !important;
+}
+
+.site-statusbar {
+	background-color: #FFD76E;
+	border: 1px solid #E1BA53;
+	padding: 4px;
+}
+
+.site-statuserror {
+	background-color: #87120F;
+	border: 1px solid #E1BA53;
+	padding: 4px;
+	color: white;
+}
+
+.site-message {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: white;
+}
+
+.site-error {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: white;
+}
+
+.site-warning {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: red;
+}
+
+.site-seperator {
+	padding: 2px;	
+}
+
+.gwt-Button > img {
+	vertical-align:top;
+}
+
+/*------------*/
+/** Add css rules here for your application. */
+.auto_suggest {
+	z-index: 20;
+	background-color: white;
+	padding: 10px;
+	width: 400px;
+	height: 230px;
+}
+
+.original-token-input {
+	width: 396px;
+	border: 1px solid #8496ba;
+	padding: 4px 8px;
+}
+
+/* Example tokeninput style #2: Facebook style */
+ul.token-input-list-facebook {
+	overflow: hidden;
+	height: auto !important;
+	height: 1%;
+	width: 400px;
+	cursor: text;
+	min-height: 1px;
+	z-index: 999;
+	margin: 0;
+	padding: 0;
+	background-color: #fff;
+}
+
+ul.token-input-list-facebook {
+	list-style-type: none;
+}
+
+ul.token-input-list-facebook li input {
+	border: 0;
+	width: 100px;
+	height: 19px;
+	padding: 1px 4px;
+	background-color: white;
+	margin: 2px 0; 
+}
+
+li.token-input-token-facebook {
+	overflow: hidden;
+	height: auto !important;
+	height: 1%;
+	margin: 3px;
+	padding: 1px 3px;
+	background-color: #eff2f7;
+	color: #000;
+	cursor: default;
+	border: 1px solid #ccd5e4;
+	/*font-size: 11px;*/
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	float: left;
+}
+
+li.token-input-token-facebook p {
+	display: inline;
+	padding: 0;
+	margin: 0;
+}
+
+li.token-input-token-facebook span {
+	color: #a6b3cf;
+	margin-left: 5px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+li.token-input-selected-token-facebook {
+	background-color: #5670a6;
+	border: 1px solid #3b5998;
+	color: #fff;
+}
+
+li.token-input-input-token-facebook {
+	float: left;
+}
+
+a {
+	outline: 0;
+}
+
+.gwt-Label {
+/* 	padding: 0 5px 0 3px; */
+/* 	color: #666; */
+/* 	display:inline; */
+}
+
+/* button */
+.gwt-Button {
+	padding: 2px !important;
+/* 	line-height: 16px; */
+/* 	vertical-align: bottom; */
+}
+.gwt-Button[disabled] {
+	opacity: 0.2;
+}
+
+.gwt-Button:hover {
+	border: 1px outset #666666 !important;
+	border-color: none !important;
+}
+
+.site-toolbarbutton > img {
+	height: 16px !important;
+    width: 16px !important;
+}
+
+.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent {
+	border: 1px solid #BBBBBB !important;
+	width: 100%;
+	height: 100%;
+}
+
+/* tab */
+.site-closeButton {
+	float: right
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+	margin-left: 2px !important;
+	padding: 2px 2px 0 2px !important;
+}
+
+.gwt-TabLayoutPanelContentContainer {
+	border-width: 2px 0 0 0 !important;
+}
+/*if we want another line for tabs*/
+div.gwt-TabLayoutPanelTabs[style] {
+	width: auto !important;
+	min-width: 0 !important;
+	display: div !important;
+}
+
+.gwt-TextBox {
+	border: 1px solid #999999;
+	height: 19px;
+	padding: 2px 0 !important;
+}
+
+.gwt-PasswordTextBox {
+	border: 1px solid #999999;
+}
+
+.gwt-HTML {
+	display: inline;
+}
+
+.gwt-RichTextToolbar .gwt-PushButton-up {
+	margin-bottom: 0px !important;
+}
+
+/* rich text */
+.gwt-RichTextToolbar .gwt-PushButton-up {
+	margin-bottom: 0 !important;
+	margin-right: 0 !important;
+}
+
+.gwt-RichTextToolbar .gwt-PushButton-up-hovering {
+	margin-bottom: 0 !important;
+	margin-right: 0 !important;
+	border: 1px outset #CCCCCC !important;
+}
+
+.gwt-RichTextToolbar .gwt-PushButton-down {
+	margin-bottom: 0 !important;
+	margin-right: 0 !important;
+}
+
+.gwt-RichTextToolbar .gwt-PushButton-down-hovering {
+	margin-bottom: 0 !important;
+	margin-right: 0 !important;
+	border: 1px outset #CCCCCC !important;
+}
+
+/*site panels*/
+.site-panel {
+	background: none no-repeat scroll center center #FFFFFF !important;
+}
+
+.site-padding {
+	padding: 6px !important;
+}
+
+.site-preview {
+	background: none no-repeat scroll center center #FFFFFF !important;
+	margin-top: 27px;
+	width: 100%;
+	height: 100%;
+	border: 1px solid #999999;
+	cursor: default !important;
+}
+
+.site-holder {
+	background: none no-repeat scroll center center #F4F4F4;
+	padding-left: 10px;
+}
+
+.site-overfield {
+	background-color: #FF9147;
+}
+
+.site-tag {
+	background-color: #EDECEB;
+	border: 1px solid #CCCCCC;
+	margin: 0;
+	padding: 3px 3px;
+	text-align: center;
+}
+
+.site-innerform {
+/* 	border: 1px solid #c2c2c2; */
+	background-color: #f7f7f7;
+	/*margin: 5px;*/
+}
+
+.site-panelheader {
+	background-color: #E9EDF0;
+	border: 1px solid #D0D6DB;
+	font-weight: bold;
+	margin: 0;
+	padding: 3px 5px;
+	color: #234365;
+}
+
+.site-toolbarbutton {
+}
+
+.site-toolbar {
+/* 	background: url("/sysadmin/com.coreks.site.Main/gwt/chrome/images/hborder.png") */
+/* 		repeat-x scroll 0 -2003px #EBEBEB; */
+	border-bottom: 1px solid #BBBBBB;
+	margin: 0;
+	padding: 3px;
+}
+
+.gwt-Tree .gwt-TreeItem-selected {
+	background: none repeat scroll 0 0 #D9EE7B !important;
+	display: inline-block !important;
+}
+
+.site-treeitem-bottom {
+	border-bottom: 2px dotted #5884BB;
+}
+
+.site-treeitem-top {
+	border-top: 2px dotted #5884BB;
+}
+
+.site-treeitem-over {
+	border: 2px dotted #5884BB;
+}
+
+.site-treeitem-left {
+	border: 2px groove red;
+}
+
+.site-img-cell {
+	display: inline-block;
+/* 	float: left; */
+	min-width: 160px;
+}
+
+.site-img-pad {
+	padding: 10px 0 10px 0;
+/* 	height: 192px; */
+}
+
+.site-img-desc {
+	color: #696969;
+	text-decoration: none;
+	width: 188px;
+	text-align: center;
+/* 	height: 6em; */
+	overflow: hidden;
+}
+
+a:visited.site-img-desc {
+	color: #696969;
+	text-decoration: none;
+}
+
+
+.site-ucgen {
+	background-image: url("images/ucgen.png") !important;
+	background-position: center top;
+	background-repeat: no-repeat;
+}
+
+.site-bold {
+	font-weight: bold !important;
+	padding: 2px 0 6px;	
+}
+
+.site-normal {
+	font-weight: normal;
+}
+
+.site-chat-history {
+	overflow-y: scroll;
+	border: 1px outset #CCCCCC;
+}
+
+.header {
+	color: rgb(247, 124, 11) !important;
+}
+
+.gwt-DisclosurePanel .header td {
+	font-size: 1.2em !important;
+}
+
+
+.gwt-ListBox {
+    background: none repeat scroll 0 0 #F7F7F7;
+    border: 1px outset #CCCCCC;
+    padding: 3px;
+}
+
+.gwt-DisclosurePanel .content {
+	padding: 5px 0 5px 30px !important;
+	
+}
+
+.gwt-TextArea {
+	border:1px solid #DADADA !important;
+}
+
+.gwt-MenuBar-vertical {
+	background: none repeat scroll 0 0 #EDEDED;
+	padding: 0 4px;
+}
+
+.gwt-MenuBarPopup {
+	margin: 0 !important;
+}
+
+/* wikitext */
+
+.wiki-textarea {
+	list-style-type: none;
+	background-color: #FFFFFF;
+    cursor: text;
+    height: auto !important;
+    margin: 0;
+    min-height: 1px;
+    overflow: hidden;
+    padding: 0;
+    z-index: 999;
+    border: 1px solid #999999;	
+}
+
+.wiki-item {
+	border-radius: 5px 5px 5px 5px;
+    cursor: default;
+    float: left;
+    height: auto !important;
+    margin: 3px;
+    overflow: hidden;
+    padding: 1px 3px;
+}
+
+.wiki-textbox {
+	 background-color: white;
+    border: 0 none;
+    height: 19px;
+    margin: 2px 0;
+    padding: 1px 4px;
+    outline: medium none;
+    width: 100%;
+}
+
+.Caption {
+	background: #2182ED !important;
+	color: white;
+	font-weight: bold;
+}
+
+.gwt-DialogBox {
+  opacity: .9;
+}
+
+.gwt-RichTextToolbar .gwt-ToggleButton-up {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+.gwt-RichTextToolbar .gwt-ToggleButton-up-hovering {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+.gwt-RichTextToolbar .gwt-ToggleButton-down {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+.gwt-RichTextToolbar .gwt-ToggleButton-down-hovering {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+
+.gwt-RichTextToolbar .gwt-PushButton-up {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+.gwt-RichTextToolbar .gwt-PushButton-up-hovering {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+.gwt-RichTextToolbar .gwt-PushButton-down {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+.gwt-RichTextToolbar .gwt-PushButton-down-hovering {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding: 3px !important;
+}
+
+#loading {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    text-align: center;
+    margin-left: -200px;
+    margin-top: -200px;
+}

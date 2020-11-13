@@ -1,0 +1,77 @@
+--@DEPENDS:.base
+
+--@CLIPS
+
+(deftemplate soyledi
+	(slot host)
+	(slot cint)
+	(slot eylem)
+	(slot soru)
+	(slot yazi_)
+	)
+
+(deftemplate istek
+	(slot host)
+	(slot cint)
+	(slot komut)
+	)
+
+(deftemplate lazim
+	(slot cint)
+	(slot soru)
+	)
+
+(deftemplate yanit
+	(slot host)
+	(slot cint)
+	(slot soru)
+	(slot yazi_)
+	)
+
+(defrule istek_geldi
+	?s<-(soyledi
+			(host ?host)
+			(cint ?cint)
+			(eylem ?eylem&~yanit)
+			)
+	=>
+		(printout t "istek geldi")
+		(retract ?s)
+		(assert (istek (host ?host) (cint ?cint) (komut ?eylem))
+			)
+	)
+(defrule yanit_geldi
+	?i<-(istek (host ?host)
+			(cint ?cint)
+			)
+	?l<-(lazim (cint ?cint)
+			(soru ?soru)
+			)
+	?s<-(soyledi
+			(host ?host)
+			(cint ?cint)
+			(eylem yanit)
+			(soru ?soru)
+			(yazi_ ?yazi)
+			)
+	=>
+	(retract ?s ?l)
+	(assert 
+		(yanit (host ?host) (cint ?cint) (soru ?soru) (yazi_ ?yazi))
+		)
+	)
+
+
+(defrule merhaba
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut merhaba)
+			)
+	=>
+		(retract ?s)
+		(printout t "Merhaba!!!")
+		(soyle menu ?host ?cint olasi (create$ merhaba hayvancilik))
+	)
+
+--@END

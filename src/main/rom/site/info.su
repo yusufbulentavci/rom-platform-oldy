@@ -1,0 +1,491 @@
+--@DEPENDS:.contents,.writings,.lists,.files,.links
+
+--@MACRO infofields
+	style text not null,
+	headertext json[] not null,
+	default_app text not null,
+	palette json not null,
+	text_font json not null,
+	site_footer json[] not null,
+	address json,
+	browser_title text[] not null,
+	banner_img text,
+	logo_img json,
+	browser_icon text,
+	text1 text[],
+	text2 text[],
+	menu1 text,
+	menu2 text,
+	list1 text,
+	list2 text,
+	ecommerce boolean default false,
+	login boolean default true
+--@END
+
+--@MACRO infofieldnames
+	style,headertext,default_app,palette,text_font,site_footer,address,browser_title,
+	banner_img,logo_img,browser_icon,text1,text2,menu1,menu2,list1,list2
+--@END	
+
+--@MACRO infoparams
+p_style text,p_headertext json,p_default_app text,p_palette json,p_text_font json,	p_site_footer json,	
+p_address json,	p_browser_title text, p_banner_img text, p_logo_img json,p_browser_icon text,
+p_text1 text,p_text2 text,p_menu1 text,p_menu2 text,
+p_list1 text,p_list2 text
+--@END
+
+--@MACRO infoparamnames
+p_style,p_headertext,p_default_app,p_palette,p_text_font,p_site_footer,	
+p_address,	p_browser_title, p_banner_img, p_logo_img,p_browser_icon,
+p_text1,p_text2,p_menu1,p_menu2,p_list1,p_list2
+--@END
+
+
+
+--@TABLE ver=1 prefix=/_/siteinfo one net=all cache=10m
+create table site.info(
+	>!{infofields}!<,
+	primary key(host_id,uri)
+) inherits (site.contents);
+--@UPGRADE: 1 alter table site.info add column ecommerce boolean default false;
+--@UPGRADE: 1 alter table site.info add column login boolean default true;
+--@END
+
+--@FUNCTION norom ver=3
+create function site.info_publishinfo(a_host integer)
+	returns boolean as $$
+		begin
+		
+			delete from site.info where host_id=a_host+1;
+			insert into site.info
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, >!{infofieldnames}!< 
+	  				from site.info
+	  				where host_id=a_host;
+	  		return true;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.info_restoreinfo(a_host integer)
+	returns boolean as $$
+		begin
+		
+			delete from site.info where host_id=a_host;
+			insert into site.info
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, >!{infofieldnames}!< 
+	  				from site.info
+	  				where host_id=a_host+1;
+	  		return true;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@RUN utest
+INSERT INTO site.info VALUES (2, '/_/siteinfo', NULL, NULL, '2014-12-10 11:14:22.174426', '2014-12-10 11:14:22.174426', NULL, NULL, NULL, NULL, 16515108, NULL, NULL, 100, NULL,NULL,NULL, '{""}', '{""}', '{NULL}', NULL, NULL, NULL, '{NULL}', NULL, '{en}', NULL, '/_/styles/amorium', '{[]}', '/_/apps/layout/standart', '{"color3_text_color":"#FFFFFF","back_ptn":null,"back":"#464E5C","foremost":"#FF9933","fore_text_color":"#3F4041","text_color":"#FFFFFF","back_img":"/_rm/3_64255.jpeg","backmost":"#464E5C","fore":"#FFFFFF","color3":"#E3771D","foremost_text_color":"#3F4041"}', '{"textfont": "Open Sans, sans-serif", "headerfont": "Open Sans, sans-serif"}', '{[]}', '{"firstName":"Firstname","lastName":"Lastname","address":"Address","city":"City","countryCode":"TR","organization":"Organization","email":"inciavci@gmali.com"}', '{"The Company"}', NULL, '{"fontfamily": "Open Sans, sans-serif", "fontsize": "46px", "fontweight":"normal", "fontstyle": "normal", "color":"black", "text": "company", "icon": "/_rm/3_8647_s.png","image": null}', NULL, NULL, NULL, NULL,NULL, NULL, NULL);
+select site.info_publishinfo(2);
+select assert_equals(a.text_font::text,b.text_font::text) from site.info a, site.info b where a.host_id=2 and b.host_id=3;
+
+--@END
+
+
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_style(a_host integer,p_style text)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	
+	update site.info
+		set
+			style=p_style,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin audit ver=1
+create function site.info_setecommerce(a_host integer,p_ecommerce boolean)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	
+	update site.info
+		set
+			ecommerce=p_ecommerce,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=admin audit ver=1
+create function site.info_setlogin(a_host integer,p_login boolean)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	
+	update site.info
+		set
+			login=p_login,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=author,designer,admin audit http=post ver=1
+create function site.info_change(a_host integer,a_lang rom.langs,p_lng rom.langs,>!{infoparams}!<)
+ returns text as $$
+declare 
+  v_which integer;
+  a_self text:='/_/siteinfo';
+begin
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.info
+		where host_id=a_host and uri=a_self;
+	
+	update site.info
+		set
+			style=p_style,
+			headertext[v_which]=p_headertext,
+			default_app=p_default_app,
+			text1[v_which]=p_text1,
+			text2[v_which]=p_text2,
+			site_footer[v_which]=p_site_footer,
+			browser_title[v_which]=p_browser_title,
+			address=p_address,
+			menu1=p_menu1,
+			menu2=p_menu2,  
+			list1=p_list1,
+			list2=p_list2,
+			palette=p_palette,
+			text_font=p_text_font,
+			browser_icon=p_browser_icon,
+			banner_img=p_banner_img,
+			logo_img=p_logo_img,
+			langcodes[v_which]=a_lang,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_bannerimg(a_host integer,p_bannerimg text)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	update site.info
+		set
+			banner_img=p_bannerimg,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_logo(a_host integer,p_logoimg json)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	update site.info
+		set
+			logo_img=p_logoimg,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_browsericon(a_host integer,p_browsericon text)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	
+	update site.info
+		set
+			browser_icon=p_browsericon,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_browsertitle(a_host integer,a_lang rom.langs,p_lng rom.langs,p_browsertitle text)
+ returns text as $$
+declare 
+  v_which integer;
+  a_self text:='/_/siteinfo';
+begin
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.info
+		where host_id=a_host and uri=a_self;
+	
+	update site.info
+		set
+			browser_title[v_which]=p_browsertitle,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_address(a_host integer,p_address json)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	
+	update site.info
+		set address=p_address,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post  roles=author,designer,admin audit ver=1
+create function site.info_palette(a_host integer,p_palette json)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	update site.info
+		set
+			palette=p_palette,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post  roles=author,designer,admin audit ver=1
+create function site.info_textfont(a_host integer,p_textfont json)
+ returns text as $$
+declare 
+  a_self text:='/_/siteinfo';
+begin
+	update site.info
+		set
+			text_font=p_textfont,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=author,admin,designer audit ver=1
+create function site.info_newlang(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.info
+		where host_id=a_host and uri=a_self;
+	
+	update site.info
+		set title[v_which]=title[1],
+	summary[v_which]=summary[1], 
+	multilang_icon[v_which]=multilang_icon[1], 
+	langcodes[v_which]=a_lang,
+			headertext[v_which]=headertext[1],
+			text1[v_which]=text1[1],
+			text2[v_which]=text2[1],
+			site_footer[v_which]=site_footer[1],
+			browser_title[v_which]=browser_title[1],
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_headertext(a_host integer,a_lang rom.langs,p_lng rom.langs,p_headertext json)
+ returns text as $$
+declare 
+  v_which integer;
+  a_self text:='/_/siteinfo';
+begin
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.info
+		where host_id=a_host and uri=a_self;
+	
+	update site.info
+		set
+			headertext[v_which]=p_headertext,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=author,designer,admin audit ver=1
+create function site.info_sitefooter(a_host integer,a_lang rom.langs,p_lng rom.langs,p_sitefooter json)
+ returns text as $$
+declare 
+  v_which integer;
+  a_self text:='/_/siteinfo';
+begin
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.info
+		where host_id=a_host and uri=a_self;
+	
+	update site.info
+		set
+			site_footer[v_which]=p_sitefooter,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=4
+create function site.info_get(a_host integer,a_lang rom.langs,p_lng rom.langs)
+ returns site.info as $$
+declare 
+	v_one site.info;
+	a_self text:='/_/siteinfo';
+begin
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+	style,array[headertext[tbl.wh]],default_app,palette,text_font,array[site_footer[tbl.wh]],address,array[browser_title[tbl.wh]],banner_img,
+logo_img,browser_icon,array[text1[tbl.wh]],array[text2[tbl.wh]],menu1,menu2,list1,list2,ecommerce,login
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.info 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post before=com.bilgidoku.rom.web.db.files.publish roles=author,designer,admin audit
+create function site.info_publish(
+	a_host integer
+)
+ returns text as $$
+declare 
+begin
+
+  	perform rom.containers_publish(a_host);
+	perform rom.apps_publish(a_host);
+  	perform rom.styles_publish(a_host);
+  	perform rom.widgets_publish(a_host);
+  	perform rom.trans_publish(a_host);
+  	
+	
+	perform site.writings_publish(a_host);
+	perform site.lists_publish(a_host);
+  	perform site.links_publish(a_host);
+  	perform site.files_publish(a_host);
+  	perform site.info_publishinfo(a_host);
+	
+	return 'ok';	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post before=com.bilgidoku.rom.web.db.files.restore roles=author,designer,admin audit
+create function site.info_restore(
+	a_host integer
+)
+ returns text as $$
+declare 
+begin
+
+  	perform rom.containers_restore(a_host);
+	perform rom.apps_restore(a_host);
+  	perform rom.styles_restore(a_host);
+  	perform rom.widgets_restore(a_host);
+  	perform rom.trans_restore(a_host);
+  	
+	
+	perform site.writings_restore(a_host);
+	perform site.lists_restore(a_host);
+  	perform site.links_restore(a_host);
+  	perform site.files_restore(a_host);
+  	perform site.info_restoreinfo(a_host);
+	
+	return 'ok';	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=admin audit http=post
+create function site.info_dellang(a_host integer, p_dellang rom.langs)
+ returns boolean as $$
+declare 
+  v_which integer;
+begin
+	select rom.langs_has(langcodes,p_dellang) into v_which
+			from site.info
+			where host_id=a_host;
+	if v_which is null then
+		return false;
+	end if;
+	update site.info
+		set 
+			langcodes=array_remove_index(langcodes,v_which),
+			title=array_remove_index(title,v_which),
+			summary=array_remove_index(summary,v_which),
+			multilang_icon=array_remove_index(multilang_icon,v_which),
+			browser_title=array_remove_index(browser_title,v_which),
+			headertext=array_remove_index(headertext,v_which),
+			site_footer=array_remove_index(site_footer,v_which),
+			modified_date=now()
+		where host_id=a_host;
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END

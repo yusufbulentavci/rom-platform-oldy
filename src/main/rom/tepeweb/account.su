@@ -1,0 +1,56 @@
+--@DEPENDS:.base,.tariff
+
+
+-- 1$=1 000 000
+
+-- credits: 
+--			halihazirda kullanabilecegi kredi miktari
+
+-- reserved:
+--			sahip olunan ancak surmekte olan bir is icin ayrilan kredi miktari
+-- 			is bittikten sonra reservasyondan silinir
+--			is iptal olursa credits alanina geri konur
+
+-- model:
+--			fiyatlandirma modeli, tarifeler bu alan ile bulunur
+
+-- model_expire:
+--			halihazirda kullanilan model bu tarihten sonra iptal olunacak
+
+-- model_next:
+--			iptal olunan modelin yerine bu model kullanilacak
+
+
+--@TABLE norom
+create table tepeweb.account(
+	host_id int not null,
+	credits bigint not null default 0,
+	reserved bigint not null default 0,
+	model text not null default 'welcome',
+	model_expire date,
+	model_next text,
+	limitfeatures text[],
+	primary key(host_id)
+);
+--@END
+
+
+--@FUNCTION norom
+create function tepeweb.account_new(a_host integer) returns void as $$
+		insert into tepeweb.account(host_id) values (a_host);
+$$ language sql;
+--@END
+
+--@FUNCTION norom ver=1
+create function tepeweb.account_get(a_host integer) returns setof tepeweb.account as $$
+		select * from tepeweb.account where a_host=host_id;
+$$ language sql;
+--@END
+
+--@FUNCTION norom
+create function tepeweb.account_listtariff(a_host integer)
+ returns setof tepeweb.tariff as $$
+	select t.* from tepeweb.tariff t, tepeweb.account a
+		where a.host_id=a_host and a.model=t.model;
+$$ language sql;
+--@END

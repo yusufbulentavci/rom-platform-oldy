@@ -1,0 +1,410 @@
+--@DEPENDS:.base,.countrycode,.langs
+
+
+
+--@TABLE norom
+create table rom.cidrels(
+	host_id int,
+	uri text,
+	email text,
+	tone int,
+  	primary key(host_id,uri,email)
+);
+--@END
+
+
+
+--@MACRO contactfields
+	lang_id rom.langs,
+	cipher text,
+  	first_name text,
+	last_name text,
+	icon text,
+	email text,
+	fb_id text,
+	twitter text,
+	web text,
+	confirmed boolean not null default true,
+	address text,
+	state text,
+	city text,
+	country_code rom.countrycode,
+	postal_code text,
+	organization text,
+	phone text,
+	mobile text,
+	fax text,
+	tags text[],
+	gids text[],
+	works json[]
+--@END
+
+--@MACRO contactfieldnames
+	lang_id,cipher,first_name,last_name,icon,email,fb_id,twitter,web,confirmed,
+	address,state,city,country_code,postal_code,organization,
+	phone,mobile,fax,tags,gids,works
+--@END
+
+	
+--@MACRO contactparams
+	p_cipher text,
+  	p_first_name text,
+	p_last_name text,
+	p_icon text,
+	p_email text,
+	p_fb_id text,
+	p_twitter text,
+	p_web text,
+	p_confirmed boolean,
+	p_address text,
+	p_state text,
+	p_city text,
+	p_country_code rom.countrycode,
+	p_postal_code text,
+	p_organization text,
+	p_phone text,
+	p_mobile text,
+	p_fax text,
+	p_tags text[],
+	p_gids text[]
+--@END
+
+--@MACRO contactparamnames
+	p_cipher,p_first_name,p_last_name,p_icon,p_email,p_fb_id,p_twitter,p_web,
+	p_confirmed,p_address,p_state,p_city,p_country_code,p_postal_code,
+	p_organization,p_phone,p_mobile,p_fax,p_tags,p_gids
+--@END
+
+
+--@SEQUENCE
+create sequence contact_id_seq;
+--@END
+
+--@TABLE ver=2 prefix=/_/co cache=10m net=intra
+create table rom.contacts(
+	>!{contactfields}!<,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 2 alter table rom.contacts add column works json[];
+--@END  
+
+
+--@FUNCTION norom ver=1
+create function rom.contacts_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+							a_host,'/_/co',null,null,null,null,null,null,
+							'rom','contacts','/_/co/',null,null);
+			return v_one;		
+		end;	
+	$$ language 'plpgsql';
+--@UPGRADE: 1 update rom.containers set mask=2059748 where uri ='/_/co';
+--@END
+
+--@FUNCTION audit=p_email roles=user http=post ver=1
+create function rom.contacts_new(a_host integer,a_lang rom.langs,p_lng rom.langs,p_cc rom.countrycode, p_email text,p_cipher text,p_firstname text, p_lastname text, p_fid text, p_twitter text, p_mobile text, a_remote_addr text)
+ returns text as $$
+declare 
+  v_uri text;
+begin
+	
+	if p_email is null and p_fid is null and p_twitter is null and p_mobile is null then
+		-- Automatic contact creation, reuse previous ones if you can
+		select uri into v_uri 
+			from rom.contacts
+			where host_id=a_host and first_name is null and email is null and fid is null and twitter is null and mobile is null 
+			limit 1;
+		if found then
+			update rom.contacts
+				set
+					first_name=a_remote_addr,
+					modified_date=now(),
+					creation_date=now()
+				where a_host=host_id and uri=v_uri;
+			return v_uri;			
+		end if; 
+		p_firstname:=a_remote_addr;
+	end if;
+	
+	
+	v_uri:='/_/co/'||nextval('contact_id_seq');
+	
+	insert into rom.contacts (
+			host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask,
+			lang_id,email,cipher,first_name,last_name,fb_id,twitter,mobile) 
+		values (
+			a_host,v_uri,'/_/co',null,null,v_uri,null,null,2032064,
+			a_lang,p_email,p_cipher,p_firstname,p_lastname,p_fid,p_twitter,p_mobile);
+	
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@UPGRADE: 1 DROP FUNCTION rom.contacts_new(integer, rom.langs, rom.langs, rom.countrycode, text, text, text, text, text, text);
+--@END
+
+
+
+--@FUNCTION roles=user ver=4
+create function rom.contacts_list(a_host integer, p_search text)
+ returns setof rom.contacts as $$
+begin
+	
+	if p_search is null then
+		return query 
+			select >!{resourcefieldnamess}!<,>!{contactfieldnames cipher	null::text	works	null::json[]}!< from rom.contacts where host_id=a_host;
+	end if;
+	
+	return query 
+			select >!{resourcefieldnamess}!<,>!{contactfieldnames cipher	null::text	works	null::json[]}!< 
+				from rom.contacts where host_id=a_host and
+					(lower(first_name) like '%'||lower(p_search) 
+						or lower(last_name) like '%'||lower(p_search) 
+						or lower(organization) like '%'||lower(p_search)
+					);
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,user ver=2 http=post
+create function rom.contacts_change(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,>!{contactparams}!<)
+ returns text as $$
+begin
+	
+	update rom.contacts set 
+			first_name=p_first_name,
+			last_name=p_last_name,
+			icon=p_icon,
+			email=p_email,
+			fb_id=p_fb_id,
+			twitter=p_twitter,
+			web=p_web,
+			address=p_address,
+			state=p_state,
+			city=p_city,
+			country_code=p_country_code,
+			lang_id=a_lang,
+			postal_code=p_postal_code,
+			organization=p_organization,
+			fax=p_fax,
+			rtags=p_tags,
+			gids=p_gids,
+			phone=p_phone,
+			mobile=p_mobile,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION audit roles=owner,admin ver=1 http=post
+create function rom.contacts_changepwd(
+	a_host integer,
+	a_contact text,
+	p_cipher text
+)
+ returns text as $$
+begin
+	update rom.contacts set 
+			cipher=p_cipher,
+			modified_date=now()
+		where host_id=a_host and uri=a_contact;
+	return a_contact;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=admin audit http=post ver=1
+create function rom.contacts_adminchangepwd(
+	a_host integer,
+	p_cid text,
+	p_cipher text
+)
+ returns text as $$
+begin
+	update rom.contacts set 
+			cipher=p_cipher,
+			modified_date=now()
+		where host_id=a_host and uri=p_cid;
+	return p_cid;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=2 roles=owner,user
+create function rom.contacts_get(a_host integer,a_self text)
+ returns rom.contacts as $$
+declare 
+  v_one rom.contacts;
+begin
+	
+	select >!{resourcefieldnamess}!<,>!{contactfieldnames cipher	null	works	null::json[]}!<
+		into v_one 
+		from rom.contacts 
+		where host_id=a_host and uri=a_self;
+	
+	return v_one;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user audit
+create function rom.contacts_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from rom.contacts where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user
+create function rom.contacts_useremail(
+	a_host integer,a_self text
+)
+ returns text as $$
+declare
+	v_ret text;
+begin
+	select user_name||'@'||host_name into strict v_ret
+		from dict.users u,dict.hosts h, rom.contacts c 
+		where u.host_id=a_host and h.host_id=a_host and c.host_id=a_host 
+			and u.contact=a_self limit 1;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user
+create function rom.contacts_username(
+	a_host integer,a_self text
+)
+ returns text as $$
+declare
+	v_ret text;
+begin
+	select user_name into strict v_ret
+		from dict.users u,dict.hosts h, rom.contacts c 
+		where u.host_id=a_host and h.host_id=a_host and c.host_id=a_host 
+			and u.contact=a_self limit 1;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function rom.contacts_cidbyemail(
+	a_host int, p_email text
+)
+ returns text as $$
+declare
+	v_ret text;
+begin
+	select uri into v_ret
+		from rom.contacts 
+		where host_id=a_host and email=p_email limit 1;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION roles=user
+create function rom.contacts_relset(
+	a_host integer,a_self text, p_email text, p_tone int
+)
+ returns int as $$
+begin
+	update rom.cidrels set
+		tone=p_tone
+		where host_id=a_host and uri=a_self and email=p_email;
+	if not found then
+		insert into rom.cidrels (host_id,uri,email,tone) values (a_host,a_self,p_email,p_tone); 
+	end if;
+	return 0;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user
+create function rom.contacts_relget(
+	a_host integer,a_self text, p_email text
+)
+ returns int as $$
+declare
+	v_ret int;
+begin
+	select tone into v_ret 
+		from rom.cidrels 
+		where host_id=a_host and uri=a_self and email=p_email; 
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 roles=owner,user http=post
+create function rom.contacts_setnestingvalue(a_host integer,a_self text,p_key text, p_value text)
+	returns boolean as $$
+	declare
+	begin
+			update rom.contacts 
+				set nesting = case when nesting is null then hstore(p_key, p_value)  else nesting || hstore(p_key, p_value) end,
+					modified_date=now() 
+				where host_id=a_host and uri=a_self;
+
+		return true;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,user
+create function rom.contacts_getnestingvalue(a_host integer,a_self text,p_key text)
+	returns text as $$
+	declare
+		v_ret text; 
+	begin
+		select nesting->p_key into v_ret 
+			from rom.contacts 
+			where host_id=a_host and uri=a_self;
+
+		return v_ret;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,admin http=post
+create function rom.contacts_setworks(a_host integer,a_self text,p_works json[])
+	returns boolean as $$
+	declare
+	begin
+			update rom.contacts 
+				set works = p_works,
+					modified_date=now() 
+				where host_id=a_host and uri=a_self;
+
+		return true;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,admin
+create function rom.contacts_getworks(a_host integer,a_self text)
+	returns json[] as $$
+	declare
+		v_ret json[]; 
+	begin
+		select works into v_ret 
+			from rom.contacts 
+			where host_id=a_host and uri=a_self;
+
+		return v_ret;
+	end;
+$$ language 'plpgsql';
+--@END

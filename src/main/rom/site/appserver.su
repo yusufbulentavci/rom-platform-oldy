@@ -1,0 +1,45 @@
+--@DEPENDS:.base,.files
+
+
+--@FUNCTION norom
+create function site.appserver_files_new(a_host integer, p_uri text, p_metas text) 
+returns void
+as
+$$
+begin
+	perform site.files_new(a_host,	p_uri, p_metas, null);		
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.appserver_files_destroy(a_host integer, p_uri text) 
+returns void
+as
+$$
+begin
+	perform site.files_destroy(a_host, p_uri);		
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.appserver_contact_chkpwd(a_host integer, p_email text, p_credential text) 
+returns text[] as $$
+declare
+	v_ok boolean;
+	v_first text;
+	v_last text;
+	v_uri text;
+begin
+	select (p_credential=cipher),first_name,last_name,uri into v_ok,v_first,v_last,v_uri from rom.contacts where host_id=a_host and email=p_email;
+	
+	if v_ok is null or not v_ok then
+		return null;
+	end if;
+	
+	return Array[v_uri,v_first,v_last];
+end;
+$$ language 'plpgsql';
+--@END
+

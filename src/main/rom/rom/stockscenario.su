@@ -1,0 +1,17 @@
+--@DEPENDS:.stocks,.tariffmodel
+
+--@RUN utest
+ select rom.tariffmodel_breed(1);
+ select rom.stocks_breed(1);
+ select assert_equals('/_/tariffmodel/icinde',rom.tariffmodel_new(1, 'a_contact', 'icinde'));
+ select rom.tariffmodel_setcode(1,'/_/tariffmodel/icinde','coef');
+ select rom.tariffmodel_setbaseprice(1,'/_/tariffmodel/icinde','(0,TRY)');
+ select rom.tariffmodel_setvatpercentage(1,'/_/tariffmodel/icinde',0);
+-- select rom.tariffmodel_setcoef(1,'/_/tariffmodel/icinde','coef');
+ 
+
+ 
+-- select rom.stocks_new(1,'/dd','{"elini":"opem"}'::json,null,0,null);
+--@END
+
+

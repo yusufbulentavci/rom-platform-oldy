@@ -1,0 +1,748 @@
+--@DEPENDS:.contents
+
+--@MACRO writingfields
+  spot json[],
+  body json[],
+  menu1 text,
+  dialog_uri text,
+  carray text[],
+  tags text[],
+  stock_uri text
+--@END
+
+--@MACRO writingfieldnames
+  spot,body,menu1,dialog_uri,carray,tags,stock_uri
+--@END
+
+--@MACRO writingparams
+	p_spot json, 
+	p_body json, 
+	p_menu1 text, 
+	p_carray text[], 
+	p_tags text[], 
+	p_stock_uri text
+--@END
+
+	
+--@MACRO writingparamnames
+	p_spot,p_body,p_menu1,p_carray,p_tags,p_stock_uri
+--@END
+	
+
+
+--@TABLE prefix=/_/writings hsc net=all cache=10m
+create table site.writings(
+	>!{writingfields}!<,
+	primary key(host_id,uri)
+  ) inherits (site.contents);
+--@END
+
+
+--@INDEX
+create index idx_writings_md on site.writings(modified_date);
+--@END
+
+--@FUNCTION roles=user audit=p_uri ver=2
+create function site.writings_breed(a_host integer,p_uri text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_mask bigint,
+		p_uri_prefix text,p_defaulthtml text,p_title text, p_parent text)
+	returns rom.containers as $$
+		declare
+			v_uri text;
+			v_title text;
+			v_one rom.containers;
+			v_wone text;
+		begin
+			
+		--a_host,a_self,p_html_file,p_parent,p_ownercid,p_gid,p_relatedcids,p_mask
+		--p_schema_name,p_type_name,p_uri_prefix,p_defaulthtml,p_tags
+			select * 
+				into strict v_one 
+				from rom.containers_new(a_host, pathfix(p_uri), null,p_parent,a_contact,null,null,p_mask,
+					'site', 'writings',	p_uri_prefix, p_defaulthtml, null);
+			
+			if p_title is not null then
+				v_title:=p_title;
+			end if;
+			
+			if v_one.uri_prefix='/' then
+				v_uri:='/';
+				if p_title is null then
+					v_title:='Main page';
+				end if;
+			else
+				v_uri:=substring(v_one.uri_prefix,1,length(v_one.uri_prefix)-1);
+				
+				if p_title is null then
+					v_title:=initcap(substring(v_uri,2));
+				end if;
+			end if;
+			
+			v_wone:=case when v_one.container is null then v_one.uri else v_one.container end; 
+
+			perform site.writings_newinternal(a_host,v_wone,
+				a_lang,null,a_contact,
+				v_title,v_uri);
+				
+			return v_one;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+	
+--@FUNCTION norom
+create function site.writings_newinternal(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, a_contact text, p_title text, p_uri text)
+ returns text as $$
+declare
+	v_cont rom.containers;
+	v_temp text;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+
+	if p_title is null or p_title='' then
+   		raise exception 'title parameter should have value';
+	end if;
+
+	select uri into v_temp from site.writings where host_id = a_host and uri = p_uri;
+
+	if found then
+  		return p_uri;
+	end if;
+
+	insert into site.writings (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask,
+			langcodes, title, summary, spot, body, tip, multilang_icon)
+		values (a_host,p_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask,
+			array[a_lang], array[p_title], array[''], array[null::json], array[null::json], array[''], array['']);
+	return p_uri;
+	
+end;
+$$ language 'plpgsql';
+--@END
+	
+--@FUNCTION roles=author,admin  audit=p_uri
+create function site.writings_new(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, a_contact text, p_title text, p_uri text)
+ returns text as $$
+declare 
+	v_uri text;
+begin
+	select site.writings_newinternal(a_host,a_self,
+					a_lang,a_lang,a_contact,p_title,p_uri) into v_uri;
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION audit
+create function site.writings_extinct(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_one rom.containers;
+			v_wuri text;
+		begin
+			perform site.writings_extinct(a_host,uri) from rom.containers where host_id=a_host and container=a_self;
+			
+			select removeuriprefix(a_self,'/_/writings') into v_wuri;
+			
+			delete from site.writings where host_id=a_host and uri=v_wuri;
+			
+			perform site.lists_removefromlists(a_host, v_wuri);
+			
+			delete from site.writings where host_id=a_host and container=a_self;
+			
+			delete from rom.containers where host_id=a_host and uri=a_self;
+    		
+			return a_self;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom ver=2
+create function site.writings_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.writings where host_id=a_host+1;
+			insert into site.writings
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, >!{writingfieldnames}!< 
+	  				from site.writings 
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.writings_restore(a_host integer)
+	returns void as $$
+		begin
+			delete from site.writings where host_id=a_host;
+			insert into site.writings
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, >!{writingfieldnames}!< 
+	  				from site.writings 
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=2
+create function site.writings_extendnesting(a_host integer, p_nesting hstore, p_stockuri text) 
+	returns hstore as $$
+	select ((case p_nesting is null when true then ''::hstore else p_nesting end) 
+				|| hstore('stockuri',p_stockuri)
+				|| hstore('stockprice', (tariff->'price')::text)
+				|| hstore('stockonsale', onsale::text)
+				|| hstore('stockamount', amount::text)
+				) 
+		from rom.stocks 
+		where host_id=a_host and uri=p_stockuri;
+$$ language sql;
+--@END
+
+--@FUNCTION ver=3
+create function site.writings_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_search text default null)
+ returns setof site.contents as $$
+declare  
+	v_container rom.containers;
+	v_uri_prefix text;
+begin
+		
+	--select uri_prefix into strict v_uri_prefix  from rom.containers where host_id=a_host and uri=a_self;
+	--if v_uri_prefix is null then
+	--	v_uri_prefix:=a_self||'/';
+	--end if;
+		
+	--end if;
+	return query
+		select >!{resourcefieldnames lexemes	null::tsvector	nesting	(case stock_uri when null then nesting else site.writings_extendnesting(a_host,nesting,stock_uri) end)}!<,array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy
+			from 
+			(
+				select *,rom.langs_select(langcodes,a_lang) wh  
+					from site.writings
+					where host_id=a_host and container=a_self and concat('/_/writings', uri) != container
+			) tbl  order by host_id, creation_date;
+	
+	--TODO: UYGUN INDEX KONMALI
+	
+	--return query 
+	--		select  uri, container, title[c_lang], tip[c_lang], icon, medium_icon, large_icon, 
+	--				multilang_icon[c_lang],sound,'writings'::text,null,langcodes::text 
+	--			from site.writings 
+	--			where host_id=a_host and uri like v_uri_prefix||'%';
+					--and title[c_lang] like p_search||'%'
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=author,admin audit ver=3 http=post
+create function site.writings_change(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,>!{writingparams}!<)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.writings
+		where host_id=a_host and uri=a_self;
+	
+	update site.writings
+		set spot[v_which]=p_spot, 
+			body[v_which]=p_body, 
+			menu1=p_menu1, 
+			carray=p_carray, 
+			rtags=p_tags,
+			stock_uri=rom.stocks_updatewriting(host_id, a_self, stock_uri, p_stock_uri),
+			langcodes[v_which]=a_lang,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,admin audit ver=1
+create function site.writings_newlang(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.writings
+		where host_id=a_host and uri=a_self;
+	
+	update site.writings
+		set title[v_which]=title[1],
+	summary[v_which]=summary[1], 
+	multilang_icon[v_which]=multilang_icon[1], 
+	langcodes[v_which]=a_lang,
+			spot[v_which]=spot[1], 
+			body[v_which]=body[1],
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=3 http=post roles=author,admin audit
+create function site.writings_copylangcontent(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_fromlang rom.langs, p_spot boolean, p_body boolean, p_header boolean, p_footer boolean)
+ returns text as $$
+declare 
+  v_which integer;
+  v_from integer;
+  
+  v_whichinfo integer;
+  v_frominfo integer;
+  
+  
+begin
+		
+	if p_spot or p_body then
+		select rom.langs_which(langcodes,a_lang) into v_which
+			from site.writings
+			where host_id=a_host and uri=a_self;
+		
+		select rom.langs_which(langcodes,p_fromlang) into v_from
+			from site.writings
+			where host_id=a_host and uri=a_self;
+		
+		update site.writings
+			set title[v_which]=title[1],
+	summary[v_which]=summary[1], 
+	multilang_icon[v_which]=multilang_icon[1], 
+	langcodes[v_which]=a_lang,
+				spot[v_which]=spot[v_from], 
+				body[v_which]=body[v_from],
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	end if;
+	
+	
+	if p_header or p_footer then
+		select rom.langs_which(langcodes,a_lang) into v_whichinfo
+			from site.info
+			where host_id=a_host;
+		select rom.langs_which(langcodes,p_fromlang) into v_frominfo
+			from site.info
+			where host_id=a_host;
+		
+		
+		update site.info
+			set   	langcodes[v_whichinfo]=a_lang,
+				headertext[v_whichinfo]=headertext[v_frominfo],
+				site_footer[v_whichinfo]=site_footer[v_frominfo],
+				modified_date=now()
+			where host_id=a_host;
+	end if;
+	
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION http=post roles=author,admin audit
+create function site.writings_spot(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_spot json)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.writings
+		where host_id=a_host and uri=a_self;
+	
+	update site.writings
+		set spot[v_which]=p_spot,
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,admin audit
+create function site.writings_body(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_body json)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.writings
+		where host_id=a_host and uri=a_self;
+	
+	update site.writings
+		set body[v_which]=p_body,
+			modified_date=now()  
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post roles=author,admin audit ver=1
+create function site.writings_menu(a_host integer,a_self text, p_menu1 text)
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	update site.writings
+		set menu1=p_menu1,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post roles=author,admin audit ver=2
+create function site.writings_tags(a_host integer,a_self text, p_tags text[])
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	update site.writings
+		set rtags=p_tags,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION ver=3
+create function site.writings_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns site.writings as $$
+declare 
+  v_one site.writings;
+begin
+	select 
+			ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,null::hstore,dbfs,weight,null::tsvector,null::text[],aa,
+			array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+			array[spot[tbl.wh]], array[body[tbl.wh]],menu1,dialog_uri,carray,tags,stock_uri
+		into v_one 
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from site.writings 
+				where host_id=a_host and uri=a_self  
+			) tbl;	
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=3
+create function site.writings_getbystockuri(a_host integer,p_stock text,a_lang rom.langs,p_lng rom.langs)
+ returns site.writings as $$
+declare 
+  v_one site.writings;
+begin
+	select 
+			ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,null::hstore,dbfs,weight,null::tsvector,null::text[],aa,
+			array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+			array[spot[tbl.wh]], array[body[tbl.wh]],menu1,dialog_uri,carray,tags,stock_uri
+		into v_one 
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from site.writings 
+				where host_id=a_host  and stock_uri=p_stock
+			) tbl;	
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=3
+create function site.writings_getbydialog(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, p_dialogid text)
+ returns site.writings as $$
+declare 
+  v_one site.writings;
+begin
+
+	select 
+			ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,null::hstore,dbfs,weight,null::tsvector,null::text[],aa,
+			array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+			array[spot[tbl.wh]], array[body[tbl.wh]],menu1,dialog_uri,carray,tags,stock_uri
+		into v_one 
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from site.writings 
+				where host_id=a_host and dialog_uri = p_dialogid
+			) tbl;	
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION roles=author,admin ver=1 audit
+create function site.writings_destroy(
+	a_host integer,a_self text
+) returns text as $$
+begin
+	
+	perform site.writings_deletedialog(a_host, a_self);
+					
+	perform site.lists_removefromlists(a_host, a_self);
+
+	delete from site.writings where host_id=a_host and uri=a_self;
+	
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,author,admin audit http=post
+create function site.writings_dellang(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns boolean as $$
+declare 
+  v_which integer;
+begin
+	select rom.langs_has(langcodes,a_lang) into v_which
+		from site.writings
+		where host_id=a_host and uri=a_self;
+	if v_which is null then
+		return false;
+	end if;
+	update site.writings
+		set langcodes=array_remove_index(langcodes,v_which),
+			title=array_remove_index(title,v_which),
+			summary=array_remove_index(summary,v_which),
+			multilang_icon=array_remove_index(multilang_icon,v_which),
+			spot=array_remove_index(spot,v_which),
+			body=array_remove_index(body,v_which),
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+		
+	return true;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+--@FUNCTION audit ver=3 http=post
+create function site.writings_createdialog(a_host integer,a_self text,>!{dialogparams}!<)
+	returns text as $$
+		declare
+			v_dlg text;
+			v_ownercid text;
+			v_gid text;
+			v_relatedcids text[];
+			v_mask bigint;
+		begin
+			select ownercid,gid,relatedcids,mask into v_ownercid,v_gid,v_relatedcids,v_mask 
+					from site.writings 
+					where host_id=a_host and uri=a_self; 
+			select * 
+				into strict v_dlg 
+				from rom.dialogs_new(a_host,a_self,
+				v_ownercid,v_gid,v_relatedcids,v_mask,
+				>!{dialogparamnames}!<);
+    		update site.writings 
+    			set dialog_uri=v_dlg,
+					modified_date=now() 
+    			where host_id=a_host and uri=a_self; 
+			return v_dlg;
+		end;
+	$$ language 'plpgsql';
+--@UPGRADE: 2 drop function if exists site.writings_createdialog(integer,text,boolean,boolean,boolean,boolean,boolean,boolean,boolean,boolean,text[]);
+--@END
+	
+--@FUNCTION audit http=post ver=1
+create function site.writings_deletedialog(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_dlg text;
+		begin
+			select * into strict v_dlg from site.writings where host_id=a_host and uri=a_self;
+			if v_dlg is null then
+				return null;
+			end if;
+			
+			perform rom.dialogs_destroy(a_host,v_dlg);
+			
+    		update site.writings 
+    			set dialog_uri=null,
+					modified_date=now() 
+    			where host_id=a_host and uri=a_self; 
+			return v_dlg;
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION audit ver=5
+create function site.writings_breadcrumbs(a_host integer, a_self text,a_lang rom.langs,p_lng rom.langs)
+	returns setof site.contents as $$
+		declare
+begin
+return query
+select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,
+nesting, dbfs,weight,null::tsvector as lexemes,rtags,aa,array[title[tbl.wh]] as title,array[summary[tbl.wh]] as summary,tip,icon,medium_icon,
+large_icon,array[multilang_icon[tbl.wh]] as multilang_icon,sound, rom.makefirst(langcodes,tbl.wh), viewy
+from
+(select *
+from
+(select (a::site.contents).*
+from site.writings a, (with recursive included_parts(uri, container) as (select uri, container from site.writings where uri = a_self and host_id = a_host
+union all
+select p.uri, p.container from included_parts pr, site.writings p where p.uri = replace(pr.container, '/_/writings','') and p.host_id = a_host)
+select uri, container from included_parts) b
+where
+a.uri = b.uri
+and a.host_id = a_host
+order by a.uri) as tbl1, rom.langs_select(langcodes,a_lang) wh) as tbl;
+end;
+
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION http=post ver=1
+create function site.writings_setmask(a_host integer,a_self text, p_mask bigint)
+ returns text as $$
+declare
+	v_d text;
+begin
+	update site.writings set 
+				mask=p_mask,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	update rom.containers set 
+				mask=p_mask,
+				modified_date=now()
+		where host_id=a_host and uri='/_/writings'||a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=1
+create function site.writings_setcarray(a_host integer,a_self text, p_carray text[])
+ returns text as $$
+declare
+	v_d text;
+begin
+	update site.writings set 
+				carray=p_carray,
+				modified_date=now()
+		where host_id=a_host and uri=a_self;
+
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=3
+create function site.writings_setmaskrecursive(a_host integer,a_self text, p_mask bigint)
+ returns text as $$
+declare
+	v_d text;
+begin
+	update rom.containers 
+		set mask=p_mask,
+			modified_date=now()	
+		where 
+			host_id = a_host 
+			and uri~('^/_/writings'||a_self||'($|/)');
+
+	update site.writings 
+		set mask=p_mask,
+			modified_date=now()
+		where 
+			host_id = a_host 
+			and uri~('^'||a_self||'($|/)');
+	
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION  audit=p_uri ver=6
+create function site.writings_containerreuri(a_host integer,a_self text,p_uri text,p_uriprefix text)
+	returns text as $$
+	begin
+		update rom.containers 
+			set uri = regexp_replace(uri, a_self, p_uri),
+				container = regexp_replace(container, a_self, p_uri),
+				uri_prefix = regexp_replace(uri_prefix, a_self, p_uri),
+				modified_date=now()
+			where 
+				host_id = a_host 
+				and uri~('^/_/writings'||a_self||'($|/)');
+		update site.writings 
+			set uri =  regexp_replace(uri, a_self, p_uri),
+				container =  regexp_replace(container, a_self, p_uri),
+				modified_date=now()
+			where 
+				host_id = a_host 
+				and uri~('^'||a_self||'($|/)');
+		
+		return '';
+	end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION  audit=a_self http=post ver=1
+create function site.writings_nostock(a_host integer,a_self text, p_del boolean)
+	returns text as $$
+	declare
+		v_stock text;
+	begin
+		select stock_uri into v_stock from site.writings where host_id=a_host and uri=a_self;
+		
+		if v_stock is null then
+			return '';
+		end if;
+		
+		if p_del then
+			delete from rom.stocks where host_id=a_host and uri=v_stock;
+		end if;
+	
+		update site.writings 
+			set stock_uri = null,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+		return v_stock;
+	end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=author,admin audit http=post
+create function site.writings_setstock(a_host integer,a_self text,p_stock text)
+ returns text as $$
+declare 
+begin
+	update site.writings
+		set
+			stock_uri=rom.stocks_updatewriting(host_id, a_self, stock_uri, p_stock),
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END

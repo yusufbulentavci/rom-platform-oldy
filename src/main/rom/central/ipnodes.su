@@ -1,0 +1,18 @@
+--@DEPENDS:.base
+
+
+
+--@TABLE norom
+create table central.ipnodes(
+	nd serial,
+	ipt boolean,
+	sta bigint,
+	sto bigint,
+	geo point,
+	firm int,
+	isp int,
+	city int,
+	rng int,
+  	primary key(nd)
+  );
+--@END

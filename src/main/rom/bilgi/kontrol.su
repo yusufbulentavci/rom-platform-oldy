@@ -1,0 +1,81 @@
+--@DEPENDS:.base
+
+--@CLIPS
+
+-- En basit test merhaba komutunu calistiriyoruz
+-- disaridan soyledi geliyor, eylem kisminda yanit yazmamali
+-- istek_geldi kurali calisiyor, istek uretiliyor, soyledi siliniyor
+-- istek'te kontrol_merhaba yaziyor asagidaki kural calisiyor
+-- istek siliniyor
+-- echo '{"from":"", "c":"akil.console","ani":true, "template":"merhaba", "inner":{"hi":"HHEEEEY"}}' > /dev/udp/127.0.0.1/9876
+(defrule kontrol_merhaba
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut kontrol_merhaba)
+			)
+	=>
+		(retract ?s)
+		(printout t "Merhaba!!!")
+		(soyle yanit ?host ?cint yazi "Merhaba!!!")
+	)
+
+
+-- Karmasik test
+-- Basit testteki gibi istek geldi
+-- echo '{"from":"", "c":"akil.console","ani":true, "template":"soyledi", "inner":{"host":1,"cint":8,"eylem":"kontrol_yanit_testi","yazi_":hey}}' > /dev/udp/127.0.0.1/9876
+-- ancak bu sefer parametreye ihiyac oldugu icin hazirlasi calisiyor
+-- hazirla lazim olan sorulari belirliyor
+-- her soru ayri kural olarak calisiyor, kullaniciya eylemi soru olan *akil.soyledi mesaji gonderiyor
+-- kullanicidan yanit eylem'i yanit olan soyleme seklinde geliyor
+-- echo '{"from":"", "c":"akil.console","ani":true, "template":"soyledi", "inner":{"host":1,"cint":8,"eylem":"yanit","soru":abc,"yazi_":xxx}}' > /dev/udp/127.0.0.1/9876
+-- eylemi yanit olunca istek degil de yanit template'i konuyor
+-- istek,lazim ve yanitlar yeterli olunca
+-- kontrol_yanit_testi kurali calisiyor, istek yerine getirilmis oluyor
+-- Burada kullaniciya eylemi yanit olan bir soyleme yapilabilir
+(defrule kontrol_yanit_testi_hazirla
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut kontrol_yanit_testi)
+			)
+	=>
+		(assert (lazim (cint ?cint) (soru abc))
+			(lazim (cint ?cint) (soru efg))
+			)
+		(printout t "Yaniti bekliyoruz")
+	)
+
+(defrule kontrol_lazim_abc
+	?i<-(istek (host ?host) (cint ?cint))
+	?l<-(lazim (cint ?cint) (soru abc))
+	=>
+		(soyle soru ?host ?cint soru abc olasi (create$ a b c) tipi symbol yazi "abc'den seciniz?")
+	)
+	
+(defrule kontrol_lazim_efg
+	?i<-(istek (host ?host) (cint ?cint))
+	?l<-(lazim (cint ?cint) (soru efg))
+	=>
+		(soyle soru ?host ?cint soru efg tipi int yazi "efg toplami kac?")
+	)
+
+(defrule kontrol_yanit_testi
+	?s<-(istek
+			(host ?host)
+			(cint ?cint)
+			(komut kontrol_yanit_testi)
+			)
+	?abc<-(yanit (cint ?cint) (soru abc) (yazi_ ?yanitabc) )
+	?efg<-(yanit (cint ?cint) (soru efg) (yazi_ ?yanitefg) )
+	=>
+		(retract ?s ?abc ?efg)
+		(printout t "kontrol_yanit_testi_tamam:" ?yanitabc "  " ?yanitefg)
+	)
+
+
+
+--@END
+
+
+

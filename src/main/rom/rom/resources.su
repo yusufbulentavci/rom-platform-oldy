@@ -1,0 +1,485 @@
+--@DEPENDS:.base
+
+-- upgrade rom.resources
+-- update resourcepublish
+-- romshutdown.sh
+-- /opt/bilgidoku/packs/pg/bin/pg_dump --create --column-inserts tepeweb > databasename.pgdump.sql
+-- /opt/bilgidoku/packs/pg/bin/dropdb tepeweb
+-- vi databasename.pgdump.sql  
+-- dropdb --if-exists tepeweb; createdb -E UTF8 tepeweb; psql -c 'create language plperlu; create extension hstore;' tepeweb
+-- psql --single-transaction -f databasename.pgdump.sql tepeweb
+
+-- now upgrade resourcefields and increase version of using it 
+-- SqlUnitManager.createGetResourceScript update
+
+
+--@TYPE
+create type rom.worlduri as(
+	hid int,
+	wuri text
+);
+--@END
+
+
+---Delegation applies to ownercid,gid,relatedcids,mask
+
+
+--@TABLE prefix=/_/_resources
+CREATE TABLE rom.resources
+(
+    ri	bigserial,
+	host_id integer not null,
+	uri text not null,
+	container text,
+	html_file text,
+	modified_date timestamp without time zone default now(),
+	creation_date timestamp without time zone default now(),
+	delegated text,
+	ownercid text,
+	gid text,
+	relatedcids text[],
+	mask bigint,
+	nesting hstore,
+	dbfs text[],
+	weight integer default 100,
+	lexemes tsvector,
+	rtags text[],
+	aa text
+);
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,author,admin
+create function rom.resources_sethtmlfile(a_host integer,a_self text, p_htmlfile text)
+ returns text as $$
+declare
+begin
+	
+		update rom.resources set 
+				html_file=p_htmlfile,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,author,admin
+create function rom.resources_setcontainer(a_host integer,a_self text, a_iscont boolean)
+ returns text as $$
+declare
+begin
+	
+		update rom.resources set 
+				container=p_container,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,admin
+create function rom.resources_setmask(a_host integer,a_self text, p_mask bigint)
+ returns text as $$
+declare
+begin
+	
+		update rom.resources set 
+				mask=p_mask,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,admin
+create function rom.resources_setdelegated(a_host integer,a_self text, p_delegated text)
+ returns text as $$
+declare
+begin
+		update rom.resources set 
+				delegated=p_delegated,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,admin
+create function rom.resources_setownercid(a_host integer,a_self text, p_ownercid text)
+ returns text as $$
+declare
+begin
+		update rom.resources set 
+				ownercid=p_ownercid,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,author,admin
+create function rom.resources_setrtag(a_host integer,a_self text, p_rtag text[])
+ returns text as $$
+declare
+begin
+		update rom.resources set 
+				rtags=p_rtag,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,author,admin
+create function rom.resources_setgid(a_host integer,a_self text, p_gid text)
+ returns text as $$
+declare
+begin
+		update rom.resources set 
+				gid=p_gid,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,author,admin
+create function rom.resources_setrelatedcids(a_host integer,a_self text, p_relatedcids text)
+ returns text as $$
+declare
+begin
+		update rom.resources set 
+				relatedcids=p_relatedcids,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post before=com.bilgidoku.rom.web.db.files.dbfsdownload roles=owner,author,admin ver=2
+create function rom.resources_downloadfile(a_host integer,a_self text, p_download_uri text,  p_fn text)
+ returns text as $$
+declare
+begin
+		update rom.resources 
+			set 
+				dbfs=dbfs||p_fn,
+				modified_date=now()
+			where host_id=a_host and uri=a_self and (dbfs is null or not(p_fn=any(dbfs)));
+	return p_fn;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post before=com.bilgidoku.rom.web.db.files.dbfsadd ver=3 roles=owner,author,admin
+create function rom.resources_addfile(a_host integer,a_self text, f_fn text)
+ returns text as $$
+declare
+begin
+		update rom.resources 
+			set 
+				dbfs=dbfs||f_fn,
+				modified_date=now()
+			where host_id=a_host and uri=a_self and (dbfs is null or not(f_fn=any(dbfs)));
+	return f_fn;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post before=com.bilgidoku.rom.web.db.files.dbfsdel ver=4 roles=owner,author,admin
+create function rom.resources_removefile(a_host integer,a_self text,  p_fn text)
+ returns text as $$
+declare
+begin
+		update rom.resources 
+			set 
+				dbfs=array_remove(dbfs,p_fn),
+				modified_date=now()
+			where host_id=a_host and uri=a_self and (dbfs is not null);
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=post ver=4 roles=owner,author,admin
+create function rom.resources_setweight(a_host integer,a_self text, p_weight integer)
+ returns integer as $$
+declare
+	v_d text;
+begin
+		update rom.resources
+			set weight=p_weight,
+				modified_date=now()
+			where host_id=a_host and uri=a_self;
+	return p_weight;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION  ver=5 roles=owner,author,admin,contact
+create function rom.resources_exists(a_host integer,a_self text)
+ returns boolean as $$
+declare
+	v_dret boolean:=false;
+begin
+		select true into v_dret
+			from rom.resources
+			where host_id=a_host and uri=a_self;
+	return v_dret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=8 roles=owner,author,admin http=post
+create function rom.resources_setnestingvalue(a_host integer,a_self text,p_key text, p_value text)
+	returns boolean as $$
+	declare
+	begin
+			update rom.resources 
+				set nesting = case when nesting is null then hstore(p_key, p_value)  else nesting || hstore(p_key, p_value) end
+						,
+					modified_date=now()
+				where host_id=a_host and uri=a_self;
+		return true;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,user ver=2
+create function rom.resources_getnestingvalue(a_host integer,a_self text,p_key text)
+	returns text as $$
+	declare
+		v_ret text;
+	begin
+				select nesting->p_key into v_ret 
+			from rom.resources 
+			where host_id=a_host and uri=a_self;
+		return v_ret;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION norom ver=5
+create function rom.resources_incnestingvalue(a_host integer,a_self text,p_key text, p_dif int)
+	returns void as $$
+	declare
+	begin
+			update rom.resources 
+				set nesting = nesting || hstore(p_key, ((nesting->p_key)::int+p_dif)::text)
+						,
+					modified_date=now() 
+				where host_id=a_host and uri=a_self;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+-- yalnizca resource.uri set eder
+--@FUNCTION audit=p_uri ver=4 roles=owner,author,admin http=post
+create function rom.resources_reuri(a_host integer,a_self text,p_uri text)
+	returns boolean as $$
+	declare
+	begin
+			update rom.resources 
+				set uri = p_uri,
+					modified_date=now()
+				where host_id=a_host and uri=a_self;
+		return true;
+	end;
+$$ language 'plpgsql';
+--@END
+
+-- resource/x tablosunda container'i p_contfrom olanlar icin
+-- yeni container set eder /p_cont
+-- uri'de prefix degisikligi yapar. prefixfrom kismini prefixto yapar
+--@FUNCTION norom ver=4
+create function rom.resources_recontaineruri(a_host integer,a_self text,p_contfrom text,p_uriprefixfrom text, p_cont text,p_uriprefix text)
+	returns void as $$
+	declare
+	begin
+			update rom.resources 
+				set container = p_cont,
+					uri=replaceprefix(uri,p_uriprefixfrom,p_uriprefix),
+					modified_date=now()
+				where host_id=a_host and container=p_contfrom;
+	end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION retfile ver=3
+create function rom.resources_getfile(a_host integer,a_self text,
+	p_fn text)
+ returns text as $$
+declare 
+	v_ret text;
+begin
+		select p_fn into v_ret from rom.resources
+				where host_id=a_host and uri=a_self and (p_fn=any(dbfs));
+	return v_ret;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=1
+create function rom.resources_realpath(p_wu rom.worlduri)
+ returns text as $$
+begin
+	return '/home/rompg/rom/data/onemli/Dbfs/local/hosts/'||p_wu.hid||'/www'||p_wu.wuri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,user http=post ver=2
+create function rom.resources_join(a_host integer,a_self text,p_contact text)
+ returns boolean as $$
+declare
+begin
+	update rom.resources 
+		set relatedcids=array_addif(relatedcids,p_contact),
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,user ver=3 http=post
+create function rom.resources_leave(a_host integer,a_self text,p_contact text)
+ returns boolean as $$
+declare
+begin
+	update rom.resources 
+		set contacts=array_remove(contacts,p_contact),
+			modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=owner,admin ver=3
+create function rom.resources_getaccess(a_host integer,a_self text)
+	returns json as $$
+	declare
+		v_ret json;
+	begin
+				select json_build_object('uri',uri,'container',container,'ownercid',ownercid,'mask',mask::text,'gid',gid,'relatedcids',relatedcids,'delegated',delegated) into v_ret 
+			from rom.resources 
+			where host_id=a_host and uri=a_self;
+		return v_ret;
+	end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=2
+create function rom.resources_effectivetags(a_host integer,a_self text)
+ returns text[] as $$
+declare
+	v_d text;
+	v_ret text[];
+begin
+	with recursive etags as (
+  		select container,coalesce(rtags,Array['']) as et from rom.resources where host_id=a_host and uri=a_self
+  		union
+  		select c.container,coalesce(c.rtags,Array['']) as et from rom.containers c,etags e where host_id=a_host and e.container is not null and c.uri=e.container
+	)
+	select array_remove(array_agg(distinct et), '') into v_ret from etags;
+	select array(select distinct unnest(v_ret) into v_ret order by 1);
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION 
+create function rom.resources_getrtags(a_host integer,a_self text)
+ returns text[] as $$
+declare
+	v_ret text[];
+begin
+	select rtags into v_ret from rom.resources where host_id=a_host and uri=a_self;
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION 
+create function rom.resources_parentaltags(a_host integer,a_self text)
+ returns text[] as $$
+declare
+	v_ret text[];
+	v_cont text;
+begin
+	select container into v_cont from rom.resources where host_id=a_host and uri=a_self;
+	if v_cont is null then
+		return null;
+	end if;
+
+	select rom.resources_effectivetags(a_host,v_cont) into v_ret;
+	
+	return v_ret;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+
+--@MACRO resourcegetparams
+a_host integer,a_self text
+--@END
+
+--@MACRO resourcecond
+host_id=a_host and uri=a_self
+--@END
+
+
+
+
+--@MACRO resourceinsertfields
+	host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask
+--@END
+
+
+--@MACRO resourcepublish
+uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+--@END
+
+
+--@MACRO resourceparamnames
+a_host,a_self,p_html_file,p_delegated,p_ownercid,p_gid,p_relatedcids,p_mask
+--@END
+
+
+--@MACRO resourceparams
+a_host integer, a_self text, p_html_file text,p_delegated text,p_ownercid text,p_gid text,p_relatedcids text[],p_mask bigint
+--@END
+
+
+--@MACRO resourcefieldnamess
+	ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,null::hstore,dbfs,weight,null::tsvector,null::text[],aa
+--@END
+
+--@MACRO resourcefieldnames
+	ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+--@END
+
+
+--@MACRO resourcelanggetparams
+a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs
+--@END

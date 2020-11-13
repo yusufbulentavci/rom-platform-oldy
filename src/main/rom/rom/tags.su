@@ -1,0 +1,136 @@
+--@DEPENDS:.base,.langs,.resources
+
+--@MACRO tagfields
+langcodes rom.langs[],
+title text[],
+summary text[],
+parenttags text[]
+--@END
+
+--@MACRO tagfieldnames
+langcodes,title,summary,parenttags
+--@END
+
+--@MACRO tagparams
+p_title text,p_summary text, p_parenttags text[]
+--@END
+
+--@MACRO tagparamnames
+p_title,p_summary,p_parenttags
+--@END
+
+	
+--@SEQUENCE
+create sequence tag_id_seq;
+--@END
+
+--@TABLE prefix=/_/tags roles=user cache=10m ver=1
+create table rom.tags(
+    >!{tagfields}!<,
+  	primary key(host_id,uri)
+  ) inherits (rom.resources);
+--@UPGRADE: 1 alter table rom.tags add column parenttags text[];
+--@END  
+
+--@FUNCTION norom
+create function rom.tags_breed(a_host integer)
+	returns rom.containers as $$
+		declare
+			v_one rom.containers;
+		begin
+			select * into strict v_one from rom.containers_new(
+				a_host,'/_/tags',null,null,null,null,null,229376,
+				'rom','tags','/_/tags/',null,null);
+			return v_one;
+		end;	
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=3
+create function rom.tags_list(a_host integer, a_lang rom.langs,p_lng rom.langs) returns setof rom.tags as $$
+begin
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[langcodes[wh]],array[title[wh]],null::text[],parenttags
+			from (
+				select *,rom.langs_select(langcodes,a_lang) wh
+					from rom.tags 
+					where host_id=a_host
+				) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION roles=user audit=p_title ver=1
+create function rom.tags_new(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,a_contact text,p_title text,p_parenttags text[])
+ returns text as $$
+declare 
+	v_uri text;
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	if p_title is null or p_title='' then
+			raise exception 'title parameter should have value';
+	end if;
+	v_uri:=v_cont.uri_prefix||name_encode(p_title);	
+	
+	insert into rom.tags (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask, langcodes, title, parenttags) 
+		values (a_host,v_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask, array[a_lang], array[p_title], p_parenttags);
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 http=post ver=1
+create function rom.tags_change(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,>!{tagparams}!<)
+ returns text as $$
+declare 
+	v_which integer;
+begin
+	
+	select rom.langs_which(langcodes,a_lang) into v_which
+			from rom.tags
+			where host_id=a_host and uri=a_self;
+		
+	update rom.tags 
+		set 
+			langcodes[v_which]=a_lang,
+			title[v_which]=p_title,
+			summary[v_which]=p_summary,
+			parenttags=p_parenttags,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=3
+create function rom.tags_get(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs)
+ returns rom.tags as $$
+declare
+	v_one rom.tags;
+begin
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,array[langcodes[wh]],array[title[wh]],array[summary[wh]],parenttags into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh
+				from rom.tags 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION audit
+create function rom.tags_destroy(a_host integer,a_self text) returns text as $$
+begin
+	delete from rom.tags where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END

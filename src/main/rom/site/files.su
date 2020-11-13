@@ -1,0 +1,480 @@
+--@DEPENDS:.contents
+
+
+--@TABLE prefix=/f hsc net=all
+create table site.files(
+	metas text[],
+  	primary key(host_id,uri)  	
+) inherits (site.contents);
+--@END
+
+--@INDEX
+create index idx_files_container on site.files(container);
+--@END
+
+--@INDEX ver=1
+create index idx_files_modified_date on site.files(modified_date);
+--@END
+
+--@FUNCTION audit=p_uri ver=5
+create function site.files_breed(a_host integer,a_contact text,p_uri text,p_mask bigint,p_tags text[],p_containerapp text,p_parent text)
+	returns rom.containers as $$
+declare
+	v_one rom.containers;
+	v_uri text:=pathfix(p_uri);
+	v_basepath text;
+begin
+	perform make_host_wwwdir(a_host, v_uri);
+		--a_host,a_self,p_html_file,p_delegated,p_ownercid,p_gid,p_relatedcids,p_mask
+		--p_schema_name,p_type_name,p_uri_prefix,p_defaulthtml,p_tags
+	select * into strict v_one 
+		from rom.containers_new(a_host,v_uri,p_containerapp,p_parent,a_contact,null,null,p_mask,
+			'site','files',v_uri||'/',null,p_tags);
+	
+	return v_one;		
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=1 before=com.bilgidoku.rom.web.db.files.delfile audit
+create function site.files_extinct(a_host integer,a_self text)
+	returns text as $$
+		declare
+			v_one rom.containers;
+		begin
+			perform site.files_extinct(a_host,uri) 
+					from rom.containers where host_id=a_host and container=a_self;
+		
+			delete from site.files where host_id=a_host and container=a_self;
+    		delete from rom.containers where host_id=a_host and uri=a_self;
+			return a_self;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=4
+create function site.files_userdir(a_host integer,a_contactno text)
+	returns text as $$
+		declare
+			v_one rom.containers;
+			v_uri text:='/f/users/'||a_contactno;
+		begin
+			select * into v_one from rom.containers where host_id=a_host and uri=v_uri;
+			
+			if found then
+				return v_uri;
+			end if;
+			
+			perform site.files_breed(a_host,'/_/co/'||a_contactno,v_uri,2059744,null,'/_/apps/layout/files','/f/users');
+		
+			return v_uri;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 before=com.bilgidoku.rom.web.db.files.move audit=p_uri
+create function site.files_containerreuri(a_host integer,a_self text,p_uri text,p_uriprefix text)
+	returns text as $$
+		declare
+			v_one rom.containers;
+		begin
+			perform rom.containers_reuri(a_host,a_self,p_uri,p_uriprefix);
+			return a_self;		
+		end;
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION norom ver=3
+create function site.files_publish(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.files where host_id=a_host+1;
+			insert into site.files
+	    		select ri, a_host+1, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, metas 
+	  				from site.files
+	  				where host_id=a_host;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom
+create function site.files_restore(a_host integer)
+	returns void as $$
+		begin
+		
+			delete from site.files where host_id=a_host;
+			insert into site.files
+	    		select a_host, >!{resourcepublish modified_date	now()}!<,title,summary,tip,icon,medium_icon,large_icon,multilang_icon,sound,langcodes,viewy, metas 
+	  				from site.files
+	  				where host_id=a_host+1;
+	  				
+		end;
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function site.files_pathfix(p_path text)
+	returns text as $$
+	begin
+	return regexp_replace(p_path,'([^a-z0-9\.\-\/])','_','g');
+	end
+	$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function site.files_namefix(p_name text)
+	returns text as $$
+	begin
+	return regexp_replace(p_path,'([^a-z0-9\.\-])','_','g');
+	end
+	$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.files.newfile roles=author,designer,admin,contact audit=p_uri ver=5
+create function site.files_new(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,p_uri text, a_contact text, p_metas text[] default null, p_download_uri text default null, p_mulfn text[] default null, p_filename text default null, p_textcontent text default null
+) returns text as $$
+declare 
+	v_one text;
+	--v_title text[];
+	v_app text:='file';
+	v_x text;
+	v_cont rom.containers;
+begin
+	select * into strict v_cont from rom.containers where host_id=a_host and uri=a_self;
+	--v_title[1]:=p_uri;
+	
+	
+	if p_mulfn is null then
+	
+		if (p_uri ~ '\.jpg$') or (p_uri ~ '\.jpeg$') or 
+			(p_uri ~ '\.png$') or (p_uri ~ '\.gif$') or (p_uri ~ '\.svg$') then
+			v_app:='/_/apps/image';
+		elsif (p_uri ~ '\.avi$') then
+			v_app:='/_/apps/video';
+		end if;
+		
+		
+		
+		insert into site.files (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask,
+				title,multilang_icon,langcodes,
+				metas,icon,medium_icon,large_icon) 
+			values (a_host,p_uri,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask,  
+				array[p_uri],array[p_uri], array[a_lang],
+				p_metas,p_uri,p_uri,p_uri
+				) 
+			returning uri  
+			into v_one;
+	else
+	
+		foreach v_x in array p_mulfn loop
+		
+			if (v_x ~ '\.jpg$') or (v_x ~ '\.jpeg$') or 
+				(v_x ~ '\.png$') or (v_x ~ '\.gif$') or (v_x ~ '\.svg$') then
+				v_app:='/_/apps/image';
+			elsif (v_x ~ '\.avi$') then
+				v_app:='/_/apps/video';
+			end if;
+			
+			
+			insert into site.files (host_id,uri,container,html_file,delegated,ownercid,gid,relatedcids,mask,
+					title,multilang_icon,langcodes,
+					metas,icon,medium_icon,large_icon) 
+				values (a_host,v_x,a_self,v_cont.defaulthtml,v_cont.delegated,a_contact,v_cont.gid,v_cont.relatedcids,v_cont.mask,  
+					array[v_x],array[v_x], array[a_lang],
+					p_metas,v_x,v_x,v_x
+					) 
+				returning uri  
+				into v_one;
+		
+		end loop;
+	
+	end if;
+	
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.files.changetext http=post roles=user,contact
+create function site.files_changetext(	a_host integer,a_self text, p_text text)
+ returns boolean as $$
+declare 
+begin
+	update site.files set modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.files.pngtojpeg http=post roles=user,contact
+create function site.files_pngtojpeg(	a_host integer,a_self text, p_text text)
+ returns boolean as $$
+declare 
+begin
+	update site.files set modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION before=com.bilgidoku.rom.web.db.files.changecoded http=post roles=user,contact
+create function site.files_changecoded(	a_host integer,a_self text, p_text text)
+ returns boolean as $$
+declare 
+begin
+	update site.files set modified_date=now() 
+		where host_id=a_host and uri=a_self;
+	return true;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=1 before=com.bilgidoku.rom.web.db.files.move http=post roles=author,designer,admin
+create function site.files_rename(	a_host integer,a_self text, p_uri text)
+ returns text as $$
+declare 
+
+	v_newcontind int;
+	v_newcont text;
+
+begin
+
+	v_newcontind := 2 + LENGTH(p_uri)- LENGTH('/') - strpos(REVERSE(p_uri), REVERSE('/'));
+	v_newcont := substring(p_uri, 0, v_newcontind);
+	
+	update site.files set uri=p_uri, modified_date=now(), container = v_newcont, icon = p_uri, 
+		medium_icon = p_uri, large_icon = p_uri, multilang_icon = array_replace(multilang_icon, a_self, p_uri), 
+		title = array_replace(title, a_self, p_uri)
+	where host_id=a_host and uri=a_self;
+	
+	return p_uri;
+	
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 before=com.bilgidoku.rom.web.db.files.delfile roles=author,designer,admin audit
+create function site.files_destroy(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	delete from site.files where host_id=a_host and uri=a_self;
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=1 before=com.bilgidoku.rom.web.db.files.undo http=post roles=author,designer,admin
+create function site.files_undo(
+	a_host integer,a_self text
+)
+ returns text as $$
+begin
+	return '';
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION ver=7
+create function site.files_list(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs, 
+	p_offset integer default 0, p_limit integer default 21)
+ returns setof site.files as $$
+begin
+	
+	--return query 
+	--		select * 
+	--			from site.files 
+	--			where host_id=a_host and container=a_self
+	--			order by modified_date desc limit p_limit offset p_offset;
+				
+	return query
+		select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+,
+					array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,metas
+				from 
+				(
+					select *,rom.langs_select(langcodes,a_lang) wh  
+						from site.files
+						where host_id=a_host and container=a_self
+						order by modified_date desc limit p_limit offset p_offset
+				) tbl;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=get ver=5
+create function site.files_get(
+	a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs
+)
+ returns site.files as $$
+declare 
+	v_one site.files;
+begin
+
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+, 
+			array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+			metas
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.files 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION http=get ver=5
+create function site.files_getdetail(
+	a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs
+)
+ returns site.files as $$
+declare 
+	v_one site.files;
+begin
+	select ri,host_id,uri,container,html_file,modified_date,creation_date,delegated,ownercid,gid,relatedcids,mask,nesting,dbfs,weight,lexemes,rtags,aa
+, 
+			array[title[tbl.wh]],array[summary[tbl.wh]],tip,icon,medium_icon,large_icon,array[multilang_icon[tbl.wh]],sound, rom.makefirst(langcodes,tbl.wh), viewy,
+			metas 
+		into v_one
+		from (
+			select *,rom.langs_select(langcodes,a_lang) wh  
+				from site.files 
+				where host_id=a_host and uri=a_self
+			) tbl;
+	return v_one;
+end;
+$$ language 'plpgsql';
+--@END
+
+
+--@FUNCTION ver=1 http=post roles=author,designer,admin audit
+create function site.files_setdetail(a_host integer,a_self text,a_lang rom.langs,p_lng rom.langs,	p_title text,	
+	p_summary text, 
+	p_tip text, 
+	p_icon text, 
+	p_medium_icon text,
+	p_large_icon text, 
+	p_multilang_icon text,
+	p_sound text,
+	p_viewy json,p_metas text[])
+ returns text as $$
+declare 
+  v_which integer;
+begin
+	select rom.langs_which(langcodes,a_lang) into v_which
+		from site.files
+		where host_id=a_host and uri=a_self;
+
+	update site.files 
+		set html_file=p_html_file,  
+				modified_date=now(),
+				delegated=p_delegated,
+				ownercid=p_ownercid,
+				gid=p_gid,
+				relatedcids=p_relatedcids,
+				mask=p_mask,
+			  	title[v_which]=p_title,
+	summary[v_which]=p_summary, 
+	tip[v_which]=p_tip, 
+	icon=p_icon, 
+	medium_icon=p_medium_icon, 
+	large_icon=p_large_icon, 
+	multilang_icon[v_which]=p_multilang_icon, 
+	sound=p_sound,
+	langcodes[v_which]=a_lang, 
+			metas=p_metas
+		where host_id=a_host and uri=a_self;
+	
+	return a_self;
+end;
+$$ language 'plpgsql';
+--@END
+
+--@FUNCTION norom ver=1
+create function site.files_newfotolia(a_host integer, a_lang rom.langs, p_name text) returns text as $$
+declare 
+	v_uri text:='/f/img/'||p_name;
+begin
+	insert into site.files (host_id, uri,container,metas, title, langcodes, medium_icon, large_icon) 
+		values (a_host, v_uri,'/f/img',array['nodownload'], array['Image'], array[a_lang], v_uri, v_uri) 
+		returning uri  
+		into v_uri;
+	return v_uri;	
+end;
+$$ language 'plpgsql';
+--@END
+
+
+
+--@FUNCTION ver=3 http=post
+create function site.files_setmaskrecursive(a_host integer,a_self text, p_mask bigint)
+ returns text as $$
+declare
+	v_d text;
+begin
+	update rom.containers 
+		set mask=p_mask,
+			modified_date=now()				
+		where 
+			host_id = a_host 
+			and uri~('^'||a_self||'($|/)');
+
+	update site.files 
+		set mask=p_mask,
+			modified_date=now()
+		where 
+			host_id = a_host 
+			and uri~('^'||a_self||'($|/)');
+	
+		
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
+
+-----@FUNCTION norom ver=1
+---create function site.files_findbrokenfiles()
+---  returns setof rom.worlduri as $BODY$
+---	my $fileroot="$ENV{'HOME'}/rom/onemli";
+---	
+---	my $sth = spi_query("SELECT host_id,uri FROM site.files,dict.envo where modified_date>lastfilecheck");
+---	while (defined ($row = spi_fetchrow($sth))) {
+---		$hostid=$row->{host_id};
+---		$uri=$row->{uri};
+---
+---		$pat=substr($uri,2);
+---	
+---		$pat="$fileroot/rom.db/Dbfs/local/hosts/$hostid/www/$pat";
+---
+---		unless(-e $pat){
+---			return_next({ hid => $hostid, wuri => $uri});
+---		}
+---		
+---	}
+---	return undef;
+---   $BODY$  language '';
+-----@END
+
+
+--@FUNCTION norom ver=1
+create function site.files_maintain()
+ returns void as $$
+begin
+	--select site.files_destroy(hid,wuri) from site.files_findbrokenfiles();
+	
+	update dict.envo set lastfilecheck=now();
+end;
+$$ language 'plpgsql';
+--@END

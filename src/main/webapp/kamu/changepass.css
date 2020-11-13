@@ -1,0 +1,39 @@
+body,table td,select,button {
+	font-family: Tahoma, Verdana, Bitstream Vera Sans, sans-serif !important;
+	font-size: 12px !important;
+}
+
+.site-message {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: white;
+}
+
+.site-error {
+	padding: 5px 0;
+	font-weight: bold;
+	font-size: 11px;
+	color: white;
+}
+
+.site-passform {
+	background-color: #BD1E47;
+	padding: 21px 21px 10px;
+	color: white;
+	font-weight: bold;
+}
+
+#site-loginbutton {
+	font-size: larger !important;
+}
+
+.gwt-TextBox {
+	border: 1px solid #999999;
+	height: 19px;
+}
+
+.gwt-PasswordTextBox {
+	border: 1px solid #999999;
+	height: 19px;
+}

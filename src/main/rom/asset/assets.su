@@ -1,0 +1,26 @@
+--@DEPENDS:.base
+
+
+--@TABLE prefix=/_/assets net=intra
+create table asset.assets(
+	simple_id integer,
+  	primary key(host_id,uri)
+  ) inherits (rom.stocks);
+--@END
+
+
+
+--@FUNCTION http=post ver=1 
+create function asset.assets_set_simple_id(
+	a_host integer,a_self text,p_val integer
+)
+ returns text as $$
+begin
+	update asset.assets set
+			simple_id=p_val,
+			modified_date=now()
+		where host_id=a_host and uri=a_self;
+	return a_self;	
+end;
+$$ language 'plpgsql';
+--@END
