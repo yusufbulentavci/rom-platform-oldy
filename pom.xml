@@ -13,7 +13,7 @@
 
 	<properties>
 		<junitVersion>4.11</junitVersion>
-		<nettyVersion>4.1.32.Final</nettyVersion>
+		<nettyVersion>4.1.42.Final</nettyVersion>
 		<commonsHttpClientVersion>3.1</commonsHttpClientVersion>
 		<commonsCodecVersion>1.10</commonsCodecVersion>
 		<guavaVersion>19.0</guavaVersion>
