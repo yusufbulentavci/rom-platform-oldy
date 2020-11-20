@@ -1,3 +1,7 @@
+![Logo](https://github.com/yusufbulentavci/rom-platform/blob/master/src/main/resources/gelemgelem.png)
+
+
+
 What is rom-platform?
 
 It is web,mail hosting platform and more with minimal dependency.
