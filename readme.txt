@@ -1,3 +1,16 @@
+What is rom-platform?
+
+It is web,mail hosting platform and more with minimal dependency.
+Can host multiple web-mail domains.
+Has web based web builder to generate web sites.
+Postgresql server embedded inside.
+
+Can I use it?
+
+I dont think so, right now. But I am planning to write easy startup scripts and manual in the future 
+
+
+....
 
 sembol kavrami sqlunit icerisinde ozel bir yer alacak
 iliskiler ozellikler arasinda olur. Ikili,uclu,n'li iliski olabilir.
