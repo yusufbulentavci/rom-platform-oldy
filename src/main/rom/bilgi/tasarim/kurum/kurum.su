@@ -1,9 +1,0 @@
---@DEPENDS:.base
-
---@TABLE nores clp ozellik
-CREATE TABLE bilgi.kurum
-(
-	id bigint,
-	vergino text
-);
---@END

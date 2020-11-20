@@ -1,5 +1,0 @@
---@DEPENDS:
-
---@SCHEMA
-create schema yurt;
---@END

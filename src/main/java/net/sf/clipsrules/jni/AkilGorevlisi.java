@@ -1,13 +1,17 @@
 package net.sf.clipsrules.jni;
 
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.bilgidoku.rom.haber.NodeTalkMethod;
 import com.bilgidoku.rom.haber.TalkResult;
+import com.bilgidoku.rom.ilk.file.FromResource;
 import com.bilgidoku.rom.ilk.gorevli.GorevliDir;
 import com.bilgidoku.rom.ilk.json.JSONException;
 import com.bilgidoku.rom.ilk.json.JSONObject;
@@ -20,6 +24,7 @@ public class AkilGorevlisi extends GorevliDir {
 
 	static {
 		try {
+//			loadDirect("libclips.so");
 			loadDirect("/home/rompg/rom/phase8/java/rom/src/main/clips/build/cmake.debug.linux.x86_64/libclips.so");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -47,6 +52,7 @@ public class AkilGorevlisi extends GorevliDir {
 
 	static AkilGorevlisi tek;
 	private final AkilErisim clips;
+	private Set<String> modules=new HashSet<String>();
 	
 	private AkilGorevlisi() {
 		super("Akill", NO);
@@ -61,6 +67,26 @@ public class AkilGorevlisi extends GorevliDir {
 	
 	protected void kur() throws KnownError {
 	};
+	
+	public static void main(String[] args) throws KnownError {
+		AkilGorevlisi.tek().reset();
+		AkilGorevlisi.tek().loadModule("hello");
+		AkilGorevlisi.tek().run();
+	}
+	
+	public synchronized void loadModule(String module) throws KnownError {
+		if(modules.contains(module)) {
+			return;
+		}
+		try {
+			String buf = FromResource.loadString("clips/"+module+".clp");
+			add(buf);
+			modules.add(module);
+		} catch (IOException e) {
+			throw new KnownError("AkilGorevlisi can not load module:", e);
+		}
+	}
+	
 
 	public void add(String cmd) throws KnownError {
 		try {
@@ -138,23 +164,30 @@ public class AkilGorevlisi extends GorevliDir {
 	}
 
 	public void run() throws KnownError {
-		KosuGorevlisi.tek().exec(new Runnable() {
-			public void run() {
-				while (true) {
-					try {
-						System.out.println("!!!!!!!!!!!!!!!!!! CLIPS RUN");
-						clips.run();
-					} catch (CLIPSException e) {
-						e.printStackTrace();
-//					throw new KnownError("Error in clips run:", e);
-					}
-					try {
-						Thread.sleep(4000);
-					} catch (Exception e) {
-					}
-				}
-			}
-		});
+		try {
+			System.out.println("!!!!!!!!!!!!!!!!!! CLIPS RUN");
+			clips.run();
+		} catch (CLIPSException e) {
+			e.printStackTrace();
+		}
+			
+//		KosuGorevlisi.tek().exec(new Runnable() {
+//			public void run() {
+//				while (true) {
+//					try {
+//						System.out.println("!!!!!!!!!!!!!!!!!! CLIPS RUN");
+//						clips.run();
+//					} catch (CLIPSException e) {
+//						e.printStackTrace();
+////					throw new KnownError("Error in clips run:", e);
+//					}
+//					try {
+//						Thread.sleep(4000);
+//					} catch (Exception e) {
+//					}
+//				}
+//			}
+//		});
 
 	}
 

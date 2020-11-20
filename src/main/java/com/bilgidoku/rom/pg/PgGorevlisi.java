@@ -16,8 +16,8 @@ import com.bilgidoku.rom.ilk.gorevli.GorevliDir;
 import com.bilgidoku.rom.ilk.util.Assert;
 import com.bilgidoku.rom.ilk.util.Shell;
 import com.bilgidoku.rom.izle.MC;
-import com.bilgidoku.rom.kabuk.KabukGorevlisi;
 import com.bilgidoku.rom.min.Sistem;
+import com.bilgidoku.rom.os.KabukGorevlisi;
 import com.bilgidoku.rom.run.KosuGorevlisi;
 
 public class PgGorevlisi extends GorevliDir {

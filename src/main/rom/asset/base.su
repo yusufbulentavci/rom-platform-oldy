@@ -1,7 +1,0 @@
---@DEPENDS:rom.ready
-
---@SCHEMA
-create schema asset;
---@END
-
-

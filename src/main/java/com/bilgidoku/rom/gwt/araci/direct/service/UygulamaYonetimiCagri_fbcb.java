@@ -46,7 +46,7 @@ public class UygulamaYonetimiCagri_fbcb extends ServiceDaoBase{
 
 	private final Method method;
 	public UygulamaYonetimiCagri_fbcb(){
-		method=getMethod(com.bilgidoku.rom.web.uygulamayonetim.UygulamaYonetimiCagriGorevlisi.class,"fbcb");
+		method=getMethod(com.bilgidoku.rom.web.directweb.UygulamaYonetimiCagriGorevlisi.class,"fbcb");
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class UygulamaYonetimiCagri_fbcb extends ServiceDaoBase{
 		args[ind++]=error_messagesqlType.decode(val);
 
 
-		Object obj=method.invoke(com.bilgidoku.rom.web.uygulamayonetim.UygulamaYonetimiCagriGorevlisi.tek(),args);
+		Object obj=method.invoke(com.bilgidoku.rom.web.directweb.UygulamaYonetimiCagriGorevlisi.tek(),args);
 				JSONObject ret=new JSONObject();
 				Object json=coder.encode(obj);
 				ret.put("def",json);

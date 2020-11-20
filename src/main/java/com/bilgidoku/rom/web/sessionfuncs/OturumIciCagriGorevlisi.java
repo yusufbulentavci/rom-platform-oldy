@@ -24,6 +24,10 @@ import com.bilgidoku.rom.web.sessionfuncs.rtcmds.RtSay;
 
 import net.sf.clipsrules.jni.AkilGorevlisi;
 
+
+
+
+
 @HttpCallServiceDeclare(uri = "/_sesfuncs", name = "OturumIciCagri", paket="com.bilgidoku.rom.web.sessionfuncs")
 public class OturumIciCagriGorevlisi extends GorevliDir implements HttpCallHandler {
 	public static final int NO=39;
