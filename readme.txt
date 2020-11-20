@@ -1,4 +1,4 @@
-![Roman Bayragi](https://github.com/yusufbulentavci/rom-platform/blob/master/src/main/resources/gelemgelem.png)
+![Roman Bayragi](https://en.wikipedia.org/wiki/Flag_of_the_Romani_people#/media/File:Flag_of_the_Romani_people.svg)
 
 
 
