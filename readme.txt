@@ -1,4 +1,4 @@
-![Logo](https://github.com/yusufbulentavci/rom-platform/blob/master/src/main/resources/gelemgelem.png)
+![Roman Bayragi](https://github.com/yusufbulentavci/rom-platform/blob/master/src/main/resources/gelemgelem.png)
 
 
 
