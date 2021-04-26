@@ -35,7 +35,7 @@
 		<mavenSourcePluginVersion>3.2.0</mavenSourcePluginVersion>
 		<mavenDeployPluginVersion>2.8.2</mavenDeployPluginVersion>
 		<javaccMavenPlugin>2.6</javaccMavenPlugin>
-		<commonsIoVersion>2.5</commonsIoVersion>
+		<commonsIoVersion>2.7</commonsIoVersion>
 		<commonsLangVersion>2.6</commonsLangVersion>
 		<junitVersion>4.12</junitVersion>
 		<maven.compiler.source>1.8</maven.compiler.source>
