@@ -24,7 +24,7 @@
 			referans verilmeden -->
 		<stringTemplateVersion>4.0.2</stringTemplateVersion>
 		<owaspVersion>r239</owaspVersion>
-		<gsonVersion>2.7</gsonVersion>
+		<gsonVersion>2.8.9</gsonVersion>
 		<pgJdbcVersion>42.2.12</pgJdbcVersion>
 		<romvrange>[3.0.0,3.1.0)</romvrange>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
